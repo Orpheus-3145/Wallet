@@ -1,0 +1,6 @@
+Utenza Wallet Qlik:
+
+	accesso: 1) fra | walletfra
+			 2) user | walletuser
+			 
+	pwd hiddenscript: wallet

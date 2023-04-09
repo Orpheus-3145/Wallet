@@ -1,0 +1,11 @@
+Section Access;
+
+[Utenze]:
+
+Load * INLINE [
+	ACCESS, USERID, 		PASSWORD, 			RUOLO
+	
+	ADMIN, 	FRA, 			WALLETfra, 			Creatore
+	USER	user,			WALLETuser,			Slave];
+	
+Section Application;

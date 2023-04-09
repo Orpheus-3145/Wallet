@@ -1,0 +1,378 @@
+#:set FONT_SIZE Config.getint("kivy_data", "font_size")
+#:set BLUE_RGBA             app.get_color("blue_rgba")
+
+<LayoutMainMov>:
+    GridLayout:
+        rows: 1
+        size_hint_y: 0.15
+
+        DefaultLabel:
+            text: "Importo"
+            halign: "right"
+            valign: "top"
+            font_size: FONT_SIZE * 0.8
+
+        DefaultTextInput:
+            id: input_importo
+            valign: "middle"
+            on_text:
+                if self.text != "": app.main_mov_dict["IMPORTO"] = self.text
+
+    GridLayout:
+        rows: 1
+        size_hint_y: 0.55
+
+        DefaultLabel:
+            text: "Tipo di pagamento"
+            size_hint_y: 0.7
+            halign: "right"
+            valign: "top"
+            font_size: FONT_SIZE * 0.8
+
+        ButtonDynamicInputLayout:  # popolato dinamicamente
+            id: input_payments
+            size_hint_y: 0.7
+            f_to_launch: root.set_payment
+            font_size_chars: FONT_SIZE * 0.6
+            selection_type: "single"
+
+    GridLayout:
+        rows: 1
+        size_hint_y: 0.15
+
+        DefaultLabel:
+            text: "Note"
+            halign: "right"
+            valign: "top"
+            size_hint_x: 0.25
+            font_size: FONT_SIZE * 0.8
+
+        DefaultTextInput:
+            id: input_note
+            font_size: FONT_SIZE * 0.8
+            size_hint_x: 0.5
+
+            on_text:
+                if self.text != "": app.main_mov_dict["NOTE"] = self.text
+
+
+<LayoutSpesaGenerica>:
+    ButtonDynamicInputLayout:  # popolato dinamicamente
+        id: input_tipo_spesa
+        size_hint_y: 0.8
+        f_to_launch: root.set_spec_movement
+        font_size_chars: FONT_SIZE * 0.8
+        selection_type: "single"
+
+    GridLayout:
+        rows: 1
+        size_hint_y: 0.2
+
+        DefaultLabel:
+            text: "Descrizione"
+            valign: "top"
+            halign: "right"
+            font_size: FONT_SIZE * 0.8
+
+
+        DefaultTextInput:
+            font_size: FONT_SIZE * 0.8
+            on_text:
+                if self.text != "": app.spec_mov_dict["DESCRIZIONE"] = self.text
+
+
+<LayoutSpesaFissa>:
+    GridLayout:
+        rows: 1
+
+        DefaultLabel:
+            text: "Descrizione"
+            halign: "right"
+            valign: "top"
+            font_size: FONT_SIZE * 0.8
+
+        DefaultTextInput:
+            font_size: FONT_SIZE * 0.8
+            on_text:
+                if self.text != "": app.spec_mov_dict["DESCRIZIONE"] = self.text
+
+
+<LayoutStipendio>:
+    GridLayout:
+        rows: 1
+        size_hint_y: 0.17
+
+        DefaultLabel:
+            text: "Totale"
+            size_hint_y: 0.18
+            halign: "right"
+            valign: "top"
+            font_size: FONT_SIZE * 0.8
+
+        DefaultTextInput:
+            valign: "middle"
+            size_hint_y: 0.18
+            on_text:
+                if self.text != "": app.spec_mov_dict["TOTALE"] = self.text
+
+    GridLayout:
+        rows: 1
+        size_hint_y: 0.17
+
+        DefaultLabel:
+            text: "Netto"
+            size_hint_y: 0.18
+            halign: "right"
+            valign: "top"
+            font_size: FONT_SIZE * 0.8
+
+        DefaultTextInput:
+            valign: "middle"
+            size_hint_y: 0.18
+            on_text:
+                if self.text != "": app.spec_mov_dict["NETTO"] = self.text
+
+    GridLayout:
+        rows: 1
+        size_hint_y: 0.17
+
+        DefaultLabel:
+            text: "Rimborso spese"
+            size_hint_y: 0.18
+            halign: "right"
+            valign: "top"
+            font_size: FONT_SIZE * 0.8
+
+        DefaultTextInput:
+            valign: "middle"
+            size_hint_y: 0.18
+            on_text:
+                if self.text != "": app.spec_mov_dict["RIMBORSO_SPESE"] = self.text
+
+    GridLayout:
+        rows: 1
+        size_hint_y: 0.17
+
+        DefaultLabel:
+            text: "Provenienza"
+            size_hint_y: 0.28
+            halign: "right"
+            valign: "top"
+            font_size: FONT_SIZE * 0.8
+
+        DefaultTextInput:
+            valign: "middle"
+            font_size: FONT_SIZE * 0.8
+            size_hint_y: 0.28
+            on_text:
+                if self.text != "": app.spec_mov_dict["PROVENIENZA"] = self.text
+
+    GridLayout:
+        rows: 1
+        size_hint_y: 0.17
+
+        DefaultLabel:
+            text: "Note"
+            size_hint_y: 0.28
+            halign: "right"
+            valign: "top"
+            font_size: FONT_SIZE * 0.8
+
+        DefaultTextInput:
+            valign: "middle"
+            font_size: FONT_SIZE * 0.8
+            size_hint_y: 0.28
+            on_text:
+                if self.text != "": app.spec_mov_dict["NOTE"] = self.text
+
+
+<LayoutEntrata>:
+    ButtonDynamicInputLayout:  # popolato dinamicamente
+        id: input_tipo_entrata
+        size_hint_y: 0.8
+        f_to_launch: root.set_tipo_entrata
+        font_size_chars: FONT_SIZE * 0.8
+        selection_type: "single"
+
+    GridLayout:
+        rows: 1
+        size_hint_y: 0.2
+
+        DefaultLabel:
+            text: "Descrizione"
+            valign: "top"
+            halign: "right"
+            font_size: FONT_SIZE * 0.8
+
+
+        DefaultTextInput:
+            font_size: FONT_SIZE * 0.8
+            on_text:
+                if self.text != "": app.spec_mov_dict["DESCRIZIONE"] = self.text
+
+
+<LayoutDebitoCredito>:
+    ButtonDynamicInputLayout:  # popolato dinamicamente
+        id: input_deb_cred
+        size_hint_y: 0.33
+        orientation: "horizontal"
+        selection_type: "single"
+        f_to_launch: root.set_deb_cred
+        font_size_chars: FONT_SIZE * 0.8
+
+    GridLayout:
+        rows: 1
+        size_hint_y: 0.33
+
+        DefaultLabel:
+            text: "Origine"
+            halign: "right"
+            valign: "top"
+            font_size: FONT_SIZE * 0.8
+
+        DefaultTextInput:
+            font_size: FONT_SIZE * 0.8
+            on_text:
+                if self.text != "": app.spec_mov_dict["ORIGINE"] = self.text
+
+    GridLayout:
+        rows: 1
+        size_hint_y: 0.33
+
+        DefaultLabel:
+            text: "Descrizione"
+            halign: "right"
+            valign: "top"
+            font_size: FONT_SIZE * 0.8
+
+        DefaultTextInput:
+            font_size: FONT_SIZE * 0.8
+            on_text:
+                if self.text != "": app.spec_mov_dict["DESCRIZIONE"] = self.text
+
+<LayoutSaldoDebitoCredito>:
+    GridLayout:
+        rows: 1
+        size_hint_y: 0.75
+
+        DefaultLabel:
+            text: "Tipo di pagamento"
+            halign: "right"
+            valign: "top"
+            font_size: FONT_SIZE * 0.8
+
+        ButtonDynamicInputLayout:  # popolato dinamicamente
+            id: input_payments
+            size_hint_y: 0.7
+            f_to_launch: root.set_payment
+            font_size_chars: FONT_SIZE * 0.6
+            selection_type: "single"
+
+    GridLayout:
+        rows: 1
+        size_hint_y: 0.25
+
+        DefaultLabel:
+            text: "Note"
+            halign: "right"
+            valign: "top"
+            font_size: FONT_SIZE * 0.8
+
+        DefaultTextInput:
+            font_size: FONT_SIZE * 0.8
+            on_text:
+                if self.text != "": app.spec_mov_dict["NOTE"] = self.text
+
+
+<LayoutSpesaMantenimento>:
+    GridLayout:
+        rows: 1
+
+        DefaultLabel:
+            text: "Descrizione"
+            halign: "right"
+            valign: "top"
+            font_size: FONT_SIZE * 0.8
+
+        DefaultTextInput:
+            font_size: FONT_SIZE * 0.8
+            on_text:
+                if self.text != "": app.spec_mov_dict["DESCRIZIONE"] = self.text
+
+
+<LayoutSpesaViaggio>:
+    GridLayout:
+        rows: 1
+        size_hint_y: 0.5
+
+        DefaultLabel:
+            text: "Viaggio"
+            halign: "right"
+            valign: "top"
+            font_size: FONT_SIZE * 0.8
+
+        DefaultTextInput:
+            font_size: FONT_SIZE * 0.8
+            on_text:
+                if self.text != "": app.spec_mov_dict["VIAGGIO"] = self.text
+
+    GridLayout:
+        rows: 1
+        size_hint_y: 0.5
+
+        DefaultLabel:
+            text: "Descrizione"
+            halign: "right"
+            valign: "top"
+            font_size: FONT_SIZE * 0.8
+
+        DefaultTextInput:
+            font_size: FONT_SIZE * 0.8
+            on_text:
+                if self.text != "": app.spec_mov_dict["DESCRIZIONE"] = self.text
+
+
+<LayoutData>:
+    GridLayout:
+        rows: 1
+        size_hint_y: 0.224
+
+        DefaultLabel:
+            text: "Giorno"
+            halign: "right"
+            valign: "middle"
+            font_size: FONT_SIZE * 0.8
+
+        DefaultTextInput:
+            on_focus:
+                if self.text != "": app.date_dict["day"] = self.text
+
+    GridLayout:
+        rows: 1
+        size_hint_y: 0.224
+
+        DefaultLabel:
+            text: "Mese"
+            halign: "right"
+            valign: "middle"
+            font_size: FONT_SIZE * 0.8
+
+        DefaultTextInput:
+            on_focus:
+                if self.text != "": app.date_dict["month"] = self.text
+
+    GridLayout:
+        rows: 1
+        size_hint_y: 0.224
+
+        DefaultLabel:
+            text: "Anno"
+            halign: "right"
+            valign: "middle"
+            font_size: FONT_SIZE * 0.8
+
+        DefaultTextInput:
+            on_focus:
+                if self.text != "": app.date_dict["year"] = self.text
+
+

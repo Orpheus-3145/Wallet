@@ -1,0 +1,259 @@
+#:set FONT_NAME Config["kivy_data"]["font"]
+#:set FONT_SIZE Config.getint("kivy_data", "font_size")
+
+#:set ORANGE_RGBA           app.get_color("orange_rgba")
+#:set RED_RGBA              app.get_color("red_rgba")
+#:set DARKGREY_RGBA         app.get_color("darkgrey_rgba")
+#:set BLUE_RGBA             app.get_color("blue_rgba")
+
+
+<DefaultLabel>:
+    bkg_color: ORANGE_RGBA
+    border_color: DARKGREY_RGBA
+    color: DARKGREY_RGBA
+    font_name: FONT_NAME
+    text_size: self.width - 20, self.height - 20
+    font_size: FONT_SIZE
+    valign: "center"
+    halign: "center"
+
+
+<DefaultButton>:
+    bkg_color: BLUE_RGBA
+    border_color: 1, 1, 1, 1
+    background_color: self.bkg_color
+    background_normal: ""
+    background_down: ""
+    color: 1, 1, 1, 1
+    font_size: FONT_SIZE
+    font_name: FONT_NAME
+    text_size: self.size
+    valign: "center"
+    halign: "center"
+
+
+<SelectionButton>:
+    bkg_color: BLUE_RGBA
+    border_color: 1, 1, 1, 1
+    background_color: self.bkg_color
+    background_normal: ""
+    background_down: ""
+    color: 1, 1, 1, 1
+    font_size: FONT_SIZE
+    font_name: FONT_NAME
+    text_size: self.size
+    valign: "center"
+    halign: "center"
+
+
+<DefaultTextInput>:
+    font_size: FONT_SIZE
+    multiline: True
+    write_tab: False
+    font_name: FONT_NAME
+    valign: "top"
+    halign: "left"
+
+
+<DefaultBoxLayout>:
+    border_color: DARKGREY_RGBA
+    orientation: "vertical"
+    spacing: 5
+    padding: 5
+
+
+<DefaultScrollView>:
+    do_scroll_x: False
+    do_scroll_y: True
+    bar_color: DARKGREY_RGBA
+    bar_width: 8
+    scroll_type: ["bars", "content"]
+
+
+<DynamicLayout>:
+    font_size_chars: FONT_SIZE
+    color_widgets: BLUE_RGBA
+
+
+<LabelDynamicLayout>:
+    orientation: "horizontal"
+
+
+<RowDynamicInputLayout>:
+    orientation: "horizontal"
+    padding: 4
+    spacing: 8
+    color_widgets: ORANGE_RGBA
+
+
+<TableDynamicInputLayout>:
+    spacing: 0
+    padding: 0
+    size_hint_y: None
+    size_records: 50
+
+
+<ErrorPopup>:
+    title: "ERRORE!"
+    title_size: FONT_SIZE
+    title_align: "center"
+    size_hint: 0.3, 0.5
+    auto_dismiss: False
+    title_color: RED_RGBA
+    separator_color: 1, 1, 1, 0
+
+    FloatLayout:
+        id: container_layout
+        size: root.size
+
+        DefaultLabel:
+            id: lbl_id
+            bkg_color: RED_RGBA
+            font_size: FONT_SIZE * 0.5
+            text: root.err_text
+            color: 1, 1, 1, 1
+            size_hint_y: 0.95
+            pos_hint: {"x": 0, "y": 0.4}
+
+        DefaultButton:
+            id: btn_id
+            text: "RIPROVA"
+            font_size: FONT_SIZE * 1.3
+            size_hint_y: 0.3
+            pos_hint: {"x": 0, "y": 0.05}
+            on_release:
+                root.dismiss()
+
+
+<InfoPopup>:
+    size_hint: 0.25, 0.5
+    auto_dismiss: False
+
+
+<SingleChoicePopup>:
+    FloatLayout:
+        DefaultLabel:
+            id: lbl_id
+            text: root.info
+            font_size: FONT_SIZE
+            size_hint: 0.9, 0.55
+            pos_hint: {"x": 0.05, "y": 0.4}
+
+        DefaultButton:
+            id: btn_id
+            text: "OK"
+            font_size: FONT_SIZE * 1.5
+            size_hint: 0.55, 0.25
+            pos_hint: {"x": 0.225, "y": 0.05}
+
+            on_release:
+                root.exec_function()
+
+
+<DoubleChoicePopup>:
+    FloatLayout:
+        DefaultLabel:
+            id: lbl_id
+            text: root.info
+            font_size: FONT_SIZE * 0.8
+            size_hint: 0.9, 0.65
+            pos_hint: {"x": 0.05, "y": 0.3}
+
+        DefaultBoxLayout:
+            orientation: "horizontal"
+            pos_hint: {"x": 0.05, "y": 0.05}
+            size_hint: 0.9, 0.25
+
+            DefaultButton:
+                text: "ANNULLA"
+                font_size: FONT_SIZE * 0.6
+                on_release:
+                    root.exec_second_function()
+
+            DefaultButton:
+                text: "OK"
+                font_size: FONT_SIZE * 0.6
+                on_release:
+                    root.exec_function()
+
+<BKGlabel>:
+    canvas.before:
+        Color:
+            rgba: self.border_color
+
+        Rectangle:
+            pos: self.x, self.y
+            size: self.width, self.height
+
+        Color:
+            rgba: self.bkg_color
+
+        Rectangle:
+            pos: self.x + 2, self.y + 2
+            size: self.width - 4, self.height - 4
+
+        Color:
+            rgba: self.border_color
+
+        Rectangle:
+            pos: self.x + 4, self.y + 4
+            size: self.width - 8, self.height - 8
+
+        Color:
+            rgba: self.bkg_color
+
+        Rectangle:
+            pos: self.x + 6, self.y + 6
+            size: self.width - 12, self.height - 12
+
+
+<BKGbutton>:
+    canvas.before:
+        Color:
+            rgba: self.bkg_color
+
+        Rectangle:
+            pos: self.x - 3, self.y - 3
+            size: self.width + 6, self.height + 6
+
+        Color:
+            rgba: self.border_color
+
+        Rectangle:
+            pos: self.x - 1, self.y - 1
+            size: self.width + 2, self.height + 2
+
+
+<BKGselectionButton>:
+    canvas.before:
+        Color:
+            rgba: self.bkg_color
+
+        Rectangle:
+            pos: self.x - 3, self.y - 3
+            size: self.width + 6, self.height + 6
+
+        Color:
+            rgba: self.border_color
+
+        Rectangle:
+            pos: self.x - 1, self.y - 1
+            size: self.width + 2, self.height + 2
+
+
+<BKGrowLayout>:
+    canvas.before:
+        Color:
+            rgba: self.border_color
+
+        Line:
+            width: 1.5
+            rectangle: [self.x, self.y, self.width, self.height]
+
+
+        Color:
+            rgba: [x if self.border_color.index(x) != len(self.border_color) - 1 else 0.6 for x in self.border_color]
+
+        Rectangle:
+            pos: self.x + 1.5, self.y + 1.5
+            size: self.width - 3, self.height - 3
