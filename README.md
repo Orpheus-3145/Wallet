@@ -13,5 +13,5 @@ Implementation of a desktop app that works as a wallet: it allows to save my exp
 ## Back-end:
   The back-end relies on SQL server and pyodbc module to communicate to front-end.
 
-## Business Intelligene:
+## Business Intelligence:
   All the data inside the database are representend inside a QlikView sheet, a Business Intelligence tool.
