@@ -1,6 +1,4 @@
-from datetime import datetime, date
-import logging
-import os
+from datetime import datetime
 from win32api import GetSystemMetrics
 
 
@@ -150,7 +148,7 @@ def validate_and_set_date(date):
         return datetime.now().strftime("%d-%m-%Y")
     else:
         count = 0  # se arriva a 3 alla fine del ciclo restituisce data odierna, vedi poi
-        time_dict = {"day": range(1, 32), "month": range(1, 13), "year": range(2000, 2024)}
+        time_dict = {"day": range(1, 32), "month": range(1, 13), "year": range(2000, 2026)}
         for time_period, time_range in time_dict.items():
             if time_period not in date.keys() or date[time_period].strip() == "":  # se manca l'elemento oppure è vuoto aumento count
                 count += 1
@@ -211,19 +209,6 @@ def list_to_str(container):
 def str_to_list(string_list):
     """Da una stringa nel formato '[a, b, c, ...]' restituisce una lista"""
     return [float(element.strip()) for element in string_list[1:len(string_list) - 1].split(",")]
-
-
-def create_logger(logger_name, log_level, log_name, log_path, fmt):
-    """Crea un file di log con livello, percorso, nome e formattazione dei record passati come parametri, richiamando
-    poi il modulo logging sarà possibile scrivere su di esso"""
-    logger = logging.getLogger(logger_name)
-    logging.root = logger
-    logger.setLevel(log_level)
-    file_handler = logging.FileHandler(filename=os.path.join(log_path, log_name.format(date.today().strftime("%d-%m-%Y"))))
-    log_formatter = logging.Formatter(fmt=fmt)
-    file_handler.setFormatter(log_formatter)
-    file_handler.setLevel(log_level)
-    logger.addHandler(file_handler)
 
 
 def set_center_app(config_obj):

@@ -3,12 +3,11 @@ import pywintypes                       # per gestire alcune eccezioni legate al
 import time
 import datetime
 import pyodbc                           # per la connessione al db SQL Server
-from hashlib import sha256              # per creare l'hash di una pwd in input e verificare con quella salvata nel db
 import os.path                          # per gestire i path
 import logging                          # per gestire il log
-from functools import partial
-
 import Tools                            # funzioni generiche di supporto
+from hashlib import sha256              # per creare l'hash di una pwd in input e verificare con quella salvata nel db
+from functools import partial
 
 
 class WrongValueInsert(Exception):
@@ -95,7 +94,8 @@ class Wallet:
 
         try:
             self._dsn = dsn     # la tengo nel caso mi serva nel metodo backup_database()
-            self.cursor = pyodbc.connect(self._dsn, autocommit=True).cursor()  # per comunicare con il database
+            self.connection = pyodbc.connect(self._dsn, autocommit=True)
+            self.cursor = self.connection.cursor()  # per comunicare con il database
 
         except pyodbc.Error as error:
             logging.error("[%-10s]: avvio istanza - errore - trace: %s", "Wallet", str(error))
@@ -180,7 +180,7 @@ class Wallet:
 
         elif type_movement == "Stipendio":
             if "PROVENIENZA" not in spec_mov_dict.keys() or spec_mov_dict["PROVENIENZA"].strip() == "":
-                raise WrongValueInsert("Provenienza non inserita")
+                raise WrongValueInsert("DDL non inserito")
 
             if "TOTALE" not in spec_mov_dict.keys() or spec_mov_dict["TOTALE"].strip() == "":
                 raise WrongValueInsert("Totale non inserito")
@@ -242,7 +242,6 @@ class Wallet:
                 raise WrongValueInsert("Tipo di pagamento non inserito")
             if "NOTE" not in spec_mov_dict.keys():
                 spec_mov_dict["NOTE"] = ""
-
             dare_avere, importo = self.get_prev_deb_info(spec_mov_dict["ID_PREV_DEB_CRED"])
             # NB main_mov_dict["ID_PAG"] è già salvato del dizionario
             main_mov_dict["IMPORTO"] = importo
@@ -396,14 +395,16 @@ class Wallet:
 
     def close_wallet(self):
         """concludo il log"""
+        self.cursor.close()
+        self.connection.close()
         logging.info("[%-10s]: chiusura di wallet e del collegamento al database... " % "Wallet")
         logging.info("[%-10s]: %s", "Wallet", "*" * 80)
 
-    # tutti i metodi sottostanti sono interrogazioni al database per ricavare o modificare delle informazioni
+
     def backup_database(self, db_name, backup_path):
         """Esegue un backup del db wallet presente su SQL Server"""
         if not os.path.isabs(backup_path):
-            backup_path = os.path.join(os.getcwd(), backup_path)
+            backup_path = os.path.join(os.getcwd(), "..", backup_path)
         backup_name = "{}_{}.bak".format(db_name, datetime.datetime.now().strftime("%d-%m-%Y"))
         sql_string = Tools.format_sql_string(suide="E",
                                              proc_name="BK_DATABASE",
@@ -428,7 +429,7 @@ class Wallet:
          una lista contente i nomi dei campi e una matrice di tutte le righe raccolte"""
         sql_string = Tools.format_sql_string(suide="S",
                                              table_name="V_DEBITI_CREDITI_APERTI",
-                                             order_by_dict={"convert(date, DATA)": "DESC"})
+                                             order_by_dict={"convert(date, DATA, 103)": "DESC"})
         try:
             logging.debug("[%-10s]: raccolta debiti/crediti aperti - esecuzione della stringa SQL: %s", "Wallet", sql_string)
             self.cursor.execute(sql_string)
@@ -660,7 +661,7 @@ class Wallet:
             sql_string = Tools.format_sql_string(suide="S",
                                                  table_name=v_table_name,
                                                  top=no_rows,
-                                                 order_by_dict={"convert(date, DATA)": "DESC"})
+                                                 order_by_dict={"convert(date, DATA, 103)": "DESC"})
             logging.debug("[%-10s]: raccolta record movimenti - esecuzione della stringa SQL: %s", "Wallet", sql_string)
             self.cursor.execute(sql_string)
 
