@@ -144,12 +144,6 @@ class WalletApp(App):
             logging.info("[%-10s]: chiusura app - applicazione chiusa" % "WalletApp")
             logging.info("[%-10s]: %s", "WalletApp",  "#" * 80)
 
-    def _on_keyboard_down(self, instance, keyboard, keycode, text, modifiers):
-        if keycode == 27:  # 27 è il codice del tasto ESC
-            self.on_stop()
-            return True
-        return False
-
     def get_movements(self, type_mov=None, name_mov=None):
         return self.wallet_instance.get_movements(type_mov, name_mov)
 
