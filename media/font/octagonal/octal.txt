@@ -1,0 +1,57 @@
+Octagonal Light & Ultra Light
+
+font by Vít Èondák
+2014-2015
+
+Mail:	gunny(a)post.cz
+Web:	fonty.condak.cz
+FB:	facebook.com/GunnyHandwritingFont
+
+En Cz Sk De Fr Pl
+
+[ English License ]
+
+Free for personal or non-commercial use.
+In case you want to use the font for a commercial project please contact me to buy a license.
+
+If you think something in this font doesn't feel right please contact me.
+
+
+[ Èeská licence ]
+
+Zdarma pro osobní a nekomerèní užití.
+V pøípadì, že chcete font použít pro komerèní úèely, je nutné mì kontaktovat a koupit si licenci.
+
+Pokud ve fontu objevíte nìco, co by bylo vhodné opravit nebo doladit, tak mì prosím kontaktujte.
+
+---
+
+History
+
+0.17	2015-03-07
+	* germandbls Euro
+	+ AaIiOoUu-caron
+	+ AaOo-dotaccent
+
+0.16	2014-11-30
+	* clean up a-z
+	+ ordmas ordfem germandbls paragraph No TM
+
+0.15	2014-11-29
+	* clean up A-Z
+
+0.14	2014-11-28
+	+ ogonek+ cedilla+ breve+ comma+
+	+ cent currency Llslash divide bullet endash
+
+0.13	2014-11-25
+	* 0-9 more narrow
+	* .&
+	+ "#'% ae
+	+ macron+
+
+0.11	2014-11-24
+	+ @$^&*{} acute+ grave+ caron+
+
+0.10	2014-11-24
+	+ A-Z a-z 0-9 () .,:;!?
