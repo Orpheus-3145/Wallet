@@ -49,7 +49,6 @@ class WalletApp(App):
                             log_path=Config["log"]["path_log_file"],
                             log_name=Config["log"]["name_log_file"],
                             fmt=Config["log"]["format_log_file"])
-
         logging.info("[%-10s]: %s", "WalletApp", "#" * 80)
         logging.info("[%-10s]: avvio app - applicazione avviata" % "WalletApp")
 
@@ -96,33 +95,20 @@ class WalletApp(App):
         user, pwd = self.wallet_instance.get_bi_credentials()
         self.qlik_app.open(user, pwd)
 
-        # move it
+        # NB move it
         # except Wallet.FatalError as generic_error:
         #     Factory.ErrorPopup(err_text=str(generic_error)).open()
 
-    def check_movement(self):
-        # propagare errore
+    def insert_movement(self):
         try:
-            self.wallet_instance.check_values(
-                type_movement=self.manager.type_mov,
-                date_mov=self.date_dict,
-                main_mov_dict=self.main_mov_dict,
-                spec_mov_dict=self.spec_mov_dict)
+            self.wallet_instance.check_values(type_movement=self.manager.type_mov,
+                                              date_mov=self.date_dict,
+                                              main_mov_dict=self.main_mov_dict,
+                                              spec_mov_dict=self.spec_mov_dict)
+            self.wallet_instance.insert_movement()
         except (Wallet.WrongValueInsert, Wallet.FatalError) as error:
             Factory.ErrorPopup(err_text=str(error)).open()
-            return False
         else:
-            return True
-
-    def insert_movement(self):
-        """Deve essere chiamato dopo il metodo check_movement(); inserisce i valori del database"""
-        try:
-            self.wallet_instance.insert_movement()
-
-        except (Wallet.WrongValueInsert, Wallet.FatalError, Tools.WrongSQLstatement) as error:
-            Factory.ErrorPopup(err_text=str(error)).open()
-
-        else:  # inserimento effettuato
             Factory.SingleChoicePopup(info="MOVIMENTO INSERITO", func_to_exec=self.manager.go_to_main_screen).open()
 
     def drop_records(self, list_records, type_movement):
@@ -131,10 +117,8 @@ class WalletApp(App):
             - type_movement -> tipo di movimento a cui gli id appartengono (a cui corrisponde la relativa tabella nel db"""
         try:
             self.wallet_instance.drop_records(list_records, type_movement)
-
         except (Wallet.WrongValueInsert, Wallet.FatalError, Tools.WrongSQLstatement) as error:
             Factory.ErrorPopup(err_text=str(error)).open()
-
         else:
             Factory.SingleChoicePopup(info="Movimenti selezionati eliminati").open()
 
@@ -153,21 +137,18 @@ class WalletApp(App):
         utilizzo il parametro _stopped"""
         if not self._stopped:
             self._stopped = True
-
             if self.wallet_instance:
                 self.wallet_instance.close_wallet()
-
             if self.qlik_app:
                 self.qlik_app.close()
-
             logging.info("[%-10s]: chiusura app - applicazione chiusa" % "WalletApp")
             logging.info("[%-10s]: %s", "WalletApp",  "#" * 80)
 
     def _on_keyboard_down(self, instance, keyboard, keycode, text, modifiers):
         if keycode == 27:  # 27 è il codice del tasto ESC
             self.on_stop()
-            return True  # Indica che l'evento è stato gestito
-        return False  # L'evento non è stato gestito
+            return True
+        return False
 
     def get_movements(self, type_mov=None, name_mov=None):
         return self.wallet_instance.get_movements(type_mov, name_mov)
@@ -180,12 +161,6 @@ class WalletApp(App):
 
     def get_type_entrate(self):
         return self.wallet_instance.get_type_entrate()
-
-    def get_dsn(self):
-        return self.dsn
-
-    def get_qlik_file(self):
-        return self.qlik_file
 
 
 if __name__ == "__main__":

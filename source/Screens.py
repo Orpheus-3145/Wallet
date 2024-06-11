@@ -56,9 +56,6 @@ class LoginScreen(Screen):
 
 
 class MainScreen(Screen):
-    """Schermata principale in cui scelgo quale azione compiere: inserire un movimento generico o deb/cred, visualizzare
-    i movimenti già inseriti oppure aprire la BI"""
-
     def on_kv_post(self, base_widget):
         movements_list = App.get_running_app().get_movements(type_mov="general").values()
         self.ids.general_mov.update_layout(movements_list)
@@ -87,7 +84,6 @@ class MainScreen(Screen):
         App.get_running_app().open_BI()
 
     def set_movement(self, instance_btn):
-        """Una volta scelto il movimento specifico cambia schermo su InsertMovementScreen"""
         self.manager.type_mov = instance_btn.text
 
     def backup(self):
@@ -142,8 +138,7 @@ class InsertMovementScreen(Screen):
             self.manager.go_to_main_screen()
 
     def insert_movement(self):
-        if App.get_running_app().check_movement():
-            App.get_running_app().insert_movement()
+        App.get_running_app().insert_movement()
 
 
 class PayOffScreen(Screen):
@@ -227,7 +222,8 @@ class ShowMovementsScreen(Screen):
         visionare"""
         self.ids.info_no_rows.text = self.ids.info_no_rows.text.format(self.records_to_show)                    # attivo la scritta
         list_movements = App.get_running_app().get_movements(type_mov="general").values()       # lista dei possibili movimenti da selezionare
-        self.ids.box_movements.update_layout(list_movements)                                                    # aggiorno il relativo layout
+        self.ids.box_movements.update_layout(list_movements)                      # aggiorno il relativo layout
+        self.ids.remove_record_btn.hide_widget()
 
     def on_leave(self):
         self.type_movement = ""                     # movimento scelto

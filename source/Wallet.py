@@ -400,11 +400,11 @@ class Wallet:
         logging.info("[%-10s]: chiusura di wallet e del collegamento al database... " % "Wallet")
         logging.info("[%-10s]: %s", "Wallet", "*" * 80)
 
-
     def backup_database(self, db_name, backup_path):
         """Esegue un backup del db wallet presente su SQL Server"""
-        if not os.path.isabs(backup_path):
-            backup_path = os.path.join(os.getcwd(), "..", backup_path)
+        # if not os.path.isabs(backup_path):
+        #     backup_path = os.path.join(os.getcwd(), backup_path)
+        backup_path = "abc"
         backup_name = "{}_{}.bak".format(db_name, datetime.datetime.now().strftime("%d-%m-%Y"))
         sql_string = Tools.format_sql_string(suide="E",
                                              proc_name="BK_DATABASE",
