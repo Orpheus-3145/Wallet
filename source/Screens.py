@@ -59,14 +59,16 @@ class MainScreen(Screen):
     """Schermata principale in cui scelgo quale azione compiere: inserire un movimento generico o deb/cred, visualizzare
     i movimenti già inseriti oppure aprire la BI"""
 
+    def on_kv_post(self, base_widget):
+        movements_list = App.get_running_app().get_movements(type_mov="general").values()
+        self.ids.general_mov.update_layout(movements_list)
+
     def on_pre_enter(self, *args):
         self.ids.deb_cred.hide_widget()
         self.ids.general_mov.hide_widget()
 
     def show_movements(self):
         """Attiva il layout per visualizzare i tipi di moviemento generici"""
-        movements_list = App.get_running_app().get_movements(type_mov="general").values()
-        self.ids.general_mov.update_layout(movements_list)
         self.ids.general_mov.show_widget()
         self.ids.deb_cred.hide_widget()
 
@@ -93,8 +95,6 @@ class MainScreen(Screen):
 
 
 class InsertMovementScreen(Screen):
-    """Schermata d'inserimento dei dati del movimento, contiene già tutti i layout di ogni movimento i quali vengono
-    attivati a seconda del tipo di mov. passato"""
     def on_pre_enter(self):
         self.add_widget(LayoutData(pos_hint={"x": .735, "y": .48}, size_hint=(.25, .28)))
         if self.name not in ["Stipendio", "Saldo Debito - Credito"]:
@@ -129,23 +129,21 @@ class InsertMovementScreen(Screen):
                 break
 
     def on_leave(self):
-        """Svuota le informazioni parzialmente inserite nello screen"""
-        App.get_running_app().main_mov_dict.clear()         # svuoto i dizionari
+        App.get_running_app().main_mov_dict.clear()
         App.get_running_app().spec_mov_dict.clear()
         App.get_running_app().date_dict.clear()
         for layout in [layout for layout in self.children if isinstance(layout, DefaultLayout)]:
             self.remove_widget(layout)
 
     def interrupt_insertion(self):
-        """Nel caso si voglia chiudere una schermata d'inserimento movimento con i campi parzialmente compilati: se
-        ho inserito almeno un valore nei campi allora apro il popup di conferma per l'uscita, se no chiudo
-        direttamente"""
-
         if App.get_running_app().main_mov_dict != {} or App.get_running_app().spec_mov_dict != {}:
             Factory.DoubleChoicePopup(info="Esci senza inserire il movimento?", func_to_exec=self.manager.go_to_main_screen).open()
-
-        else:   # non ho inserito nessun dato, vado direttamente alla schermata iniziale
+        else:
             self.manager.go_to_main_screen()
+
+    def insert_movement(self):
+        if App.get_running_app().check_movement():
+            App.get_running_app().insert_movement()
 
 
 class PayOffScreen(Screen):
@@ -163,7 +161,7 @@ class PayOffScreen(Screen):
         self.selected_ids.clear()                       # cancello gli id dei record selezionati
         self.ids.deb_cred_columns.clear_widgets()       # svuoto i nomi dei campi letti
         self.ids.deb_cred_tab.clear_widgets()           # svuoto la tabella
-        self.hide_box(self.ids.appearing_box)           # faccio sparire il box di eliminazione/saldo
+        self.ids.appearing_box.hide_widget()           # faccio sparire il box di eliminazione/saldo
 
     def update_rows(self):
         """Aggiorna i record della tabella e i nomi dei campi leggendoli dal db"""
@@ -187,24 +185,12 @@ class PayOffScreen(Screen):
         id_record = btn_instance.parent_layout.id_record
         if id_record not in self.selected_ids:      # se non c'è, aggiungo l'id e visualizzo il btn SALDA/RIMUOVI
             self.selected_ids.append(id_record)
-
         else:                                       # in caso contrario lo rimuovo
             self.selected_ids.remove(id_record)
-
         if not self.selected_ids:                   # se la lista è vuota faccio sparire il bottone
-            self.hide_box(self.ids.appearing_box)
+            self.ids.appearing_box.hide_widget()
         else:                                       # in caso contrario lo faccio apparire
-            self.show_box(self.ids.appearing_box)
-
-    def show_box(self, widget_instance, size_hint_x=0.45):
-        """Rende visibile un widget"""
-        widget_instance.opacity = 1
-        widget_instance.size_hint_x = size_hint_x
-
-    def hide_box(self, widget_instance):
-        """Nasconde un widget"""
-        widget_instance.opacity = 0
-        widget_instance.size_hint_x = 0
+            self.ids.appearing_box.show_widget()
 
     def go_to_insert_screen(self):
         """Selezionati uno o più debiti/crediti da saldare vado in InsertMovementScreen per inserire le informazioni
@@ -221,20 +207,20 @@ class PayOffScreen(Screen):
         selezionati"""
         App.get_running_app().drop_records(self.selected_ids, "Debito - Credito")
         self.update_rows()
-        self.hide_box(self.ids.appearing_box)
+        self.ids.appearing_box.hide_widget()
 
 
 class ShowMovementsScreen(Screen):
     """Mostra gli ultimi movimenti inseriti appartenenti ad una tipologia specifica"""
-    max_rows_to_show = 50   # max numero di record da mostrare
-    records_to_show = 10    # numero di record da mostrare
+    max_rows_to_show = 50
+    records_to_show = 10
 
     def __init__(self, **kw):
+        super().__init__(**kw)
         self.type_movement = ""                                 # tipo di movimento scelto da esporre
         self._selected_records_to_show = True                   # flag t/f se ho impostato quante righe visualizzare (di default è sempre valorizzato)
         self._selected_movement = False                         # flag t/f se ho selezionato il movimento
         self.records_to_drop = []  # lista contenente gli id dei record da eliminare
-        super().__init__(**kw)
 
     def on_pre_enter(self):
         """Quando entro nello screen aggiorno il layout contenete i tipi di movimenti (entrata, spesa generica, ...) da
@@ -244,54 +230,40 @@ class ShowMovementsScreen(Screen):
         self.ids.box_movements.update_layout(list_movements)                                                    # aggiorno il relativo layout
 
     def on_leave(self):
-        """Rimuovo tutte le informazioni precedentemente inserite"""
         self.type_movement = ""                     # movimento scelto
         self.records_to_drop.clear()                # svuoto la lista di eventuali record selezionati
         self.ids.mov_columns.clear_widgets()        # svuoto il contenitore dei nomi dei campi
         self.ids.rows_box.clear_widgets()           # svuoto la tabella
         self.ids.box_movements.clear_widgets()      # svuoto il contenitore dei movimenti
-        self.hide_box(self.ids.remove_record_btn)   # faccio sparire il bottone per rimuovere i record
+        self.ids.remove_record_btn.hide_widget()   # faccio sparire il bottone per rimuovere i record
 
     def set_new_number(self, new_number):
-        """Aggiorno il nuovo numero di record da mostrare inserito in input, aggiorno anche la GUI"""
         if new_number.isdigit():
             self.records_to_show = int(new_number)
-
-            if self.records_to_show > self.max_rows_to_show:   # non deve essere superiore ad un max per evitare troppi rallentamenti
+            if self.records_to_show > self.max_rows_to_show:   # per evitare troppi rallentamenti
                 self.records_to_show = self.max_rows_to_show
-
             self.ids.info_no_rows.text = "Record da visualizzare: [color=f0f3f4]{}[/color]".format(self.records_to_show)
             self._selected_records_to_show = True
-
             if self._selected_movement is True:     # la tabella è già attiva, la aggiorno
                 self.update_rows()
-
         else:
             self.ids.info_no_rows.text = "Record da visualizzare: [color=cb4335][i]non valido[/i][/color]"
             self._selected_records_to_show = False
 
     def set_movement(self, btn_instance):
-        """Una volta selezionato il movimento scelto, e se è inserito un valore valido per il numero dei record da
-        recuperare, mostra la tabella"""
         self.type_movement = btn_instance.text
         self._selected_movement = True
-
         if self._selected_records_to_show is True:
             self.update_rows()
 
     def update_rows(self):
-        """Leggo dal db le n righe dalla tabella del movimento selezionato, aggiorno due widget: il contenitore dei
-        nomi dei campi e uno che contiene i record della tabella del db"""
         self.records_to_drop.clear()                # svuoto eventuali id selezionati in precedenza
         field_name_box = self.ids.mov_columns       # box contenente i nomi dei campi
         rows_box = self.ids.rows_box                # tabella contenente i vari record
-
         try:
             col_names, rows = App.get_running_app().wallet_instance.get_last_n_records(self.records_to_show, self.type_movement)
-
         except Exception as error:
             Factory.ErrorPopup(err_text=str(error)).open()
-
         else:
             field_name_box.update_layout(col_names)     # aggiorno l'header (i.e. nomi dei campi)
             rows_box.update_layout(rows)                # aggiorno la tabella
@@ -304,24 +276,12 @@ class ShowMovementsScreen(Screen):
             self.records_to_drop.append(id_record)
         else:
             self.records_to_drop.remove(id_record)
-
         if not self.records_to_drop:  # se la lista è vuota rendo invisibile il bottone per eliminare i record
-            self.hide_box(self.ids.remove_record_btn)
+            self.ids.remove_record_btn.hide_widget()
         else:
-            self.show_box(self.ids.remove_record_btn)
-
-    def show_box(self, widget_instance, size_hint_x=0.2):
-        """Rende visibile un widget"""
-        widget_instance.opacity = 1
-        widget_instance.size_hint_x = size_hint_x
-
-    def hide_box(self, widget_instance):
-        """Nasconde un widget"""
-        widget_instance.opacity = 0
-        widget_instance.size_hint_x = 0
+            self.ids.remove_record_btn.show_widget()
 
     def remove_records(self):
-        """Rimuove il/i record, e aggiorno la tabella"""
         App.get_running_app().drop_records(self.records_to_drop, self.type_movement)
         self.update_rows()
-        self.hide_box(self.ids.remove_record_btn)
+        self.ids.remove_record_btn.hide_widget()

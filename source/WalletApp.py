@@ -35,14 +35,8 @@ class WalletApp(App):
         self.dsn = Config["database"]["dsn_name"].strip("'")                        # istanza di wallet per accedere al database
         self.bi_file_path = Config["bi"]["qlik_file_path"]               # istanza dell'app di QlikView
         self.kv_files = Config["kivy_files"].values()               # file di stile .kv
-        # self.logo_path = Config["wallet_app"]["logo_path"]          # logo dell'app
-        # self.bi_logo_path = Config["bi"]["qlik_logo_path"]          # logo dell'app
-        # self.bk_path = Config["wallet_app"]["bk_path"]              # immagine di bk dell'app
-        # self.font = Config["wallet_app"]["font"]                    # font globale
         self.db_name = Config["database"]["database_name"]
         self.backup_path = Config["database"]["backup_path"]
-        # self.font_size = Config.getint("wallet_app", "font_size")   # ...
-        # self._colors = {key: value for key, value in Config["kivy_colors"].items()}
         self._stopped = False                                       # proprietà di servizio, vedi self.on_stop()
         self.date_dict = {}                                         # data movimento
         self.main_mov_dict = {}                                     # informazioni generali (comuni ad ogni tipo di spesa/entrata)

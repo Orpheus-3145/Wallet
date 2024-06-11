@@ -1,0 +1,82 @@
+<ErrorPopup>:
+    title: "ERRORE!"
+    title_size: FONT_SIZE
+    title_align: "center"
+    size_hint: 0.3, 0.5
+    auto_dismiss: False
+    title_color: RED_RGBA
+    separator_color: 1, 1, 1, 0
+
+    FloatLayout:
+        id: container_layout
+        size: root.size
+
+        DefaultLabel:
+            id: lbl_id
+            background_color: RED_RGBA
+            font_size: FONT_SIZE * 0.5
+            text: root.err_text
+            color: 1, 1, 1, 1
+            size_hint_y: 0.95
+            pos_hint: {"x": 0, "y": 0.4}
+
+        DefaultButton:
+            id: btn_id
+            text: "RIPROVA"
+            font_size: FONT_SIZE * 1.3
+            size_hint_y: 0.3
+            pos_hint: {"x": 0, "y": 0.05}
+            on_release:
+                root.dismiss()
+
+
+<InfoPopup>:
+    size_hint: 0.25, 0.5
+    auto_dismiss: False
+
+
+<SingleChoicePopup>:
+    FloatLayout:
+        DefaultLabel:
+            id: lbl_id
+            text: root.info
+            font_size: FONT_SIZE
+            size_hint: 0.9, 0.55
+            pos_hint: {"x": 0.05, "y": 0.4}
+
+        DefaultButton:
+            id: btn_id
+            text: "OK"
+            font_size: FONT_SIZE * 1.5
+            size_hint: 0.55, 0.25
+            pos_hint: {"x": 0.225, "y": 0.05}
+
+            on_release:
+                root.exec_function()
+
+
+<DoubleChoicePopup>:
+    FloatLayout:
+        DefaultLabel:
+            id: lbl_id
+            text: root.info
+            font_size: FONT_SIZE * 0.8
+            size_hint: 0.9, 0.65
+            pos_hint: {"x": 0.05, "y": 0.3}
+
+        DefaultLayout:
+            orientation: "horizontal"
+            pos_hint: {"x": 0.05, "y": 0.05}
+            size_hint: 0.9, 0.25
+
+            DefaultButton:
+                text: "ANNULLA"
+                font_size: FONT_SIZE * 0.6
+                on_release:
+                    root.exec_second_function()
+
+            DefaultButton:
+                text: "OK"
+                font_size: FONT_SIZE * 0.6
+                on_release:
+                    root.exec_function()
