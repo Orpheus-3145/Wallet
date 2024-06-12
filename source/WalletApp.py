@@ -3,6 +3,7 @@ import os
 from datetime import date
 import Wallet
 import Tools
+
 from kivy.config import Config
 
 Config.read(os.path.join(os.getcwd(), "..\\settings\\config_wallet.ini"))
@@ -47,8 +48,8 @@ class WalletApp(App):
         self.main_mov_dict = {}                                     # informazioni generali (comuni ad ogni tipo di spesa/entrata)
         self.spec_mov_dict = {}                                     # informazioni specifiche della spesa/entrata
         self.manager = None                                         # istanza di ScreenManager per muoversi tra le schermate
-        self.wallet_instance = None
-        self.qlik_app = None
+        self.wallet_instance = Wallet.Wallet(self.dsn)
+        self.qlik_app = Wallet.QlikViewApp(self.bi_file_path)
 
     def create_logger(self, logger_name, log_level, log_name, log_path, fmt):
         """Crea un file di log con livello, percorso, nome e formattazione dei record passati come parametri, richiamando
@@ -73,22 +74,12 @@ class WalletApp(App):
             logging.info("[%-10s]: avvio app - caricati i file di stile .kv, creato ScreenManager e Screen di login" % "WalletApp")
             return self.manager
 
-    def login(self, user, pwd, auto_login=False):
-        if auto_login is True:
-            self.wallet_instance = Wallet.Wallet(self.dsn)
-            self.manager.set_movements(self.wallet_instance.get_movements())
-            return True
+    def login(self, user, pwd):
         if user.strip() == "" or pwd.strip() == "":
             raise AppException("Credenziali mancanti")
-        self.wallet_instance = Wallet.Wallet(self.dsn)
-        self.manager.set_movements(self.wallet_instance.get_movements())
         return self.wallet_instance.login_wallet(user.strip(), pwd.strip())
 
     def open_BI(self):
-        if self.qlik_app is None:
-            self.qlik_app = Wallet.QlikViewApp(self.bi_file_path)
-        if self.wallet_instance is None:
-            self.wallet_instance = Wallet.Wallet(self.dsn)
         # try:
         user, pwd = self.wallet_instance.get_bi_credentials()
         self.qlik_app.open(user, pwd)
@@ -99,7 +90,7 @@ class WalletApp(App):
 
     def insert_movement(self):
         try:
-            self.wallet_instance.check_values(type_movement=self.manager.type_mov,
+            self.wallet_instance.check_values(type_movement=self.manager.get_type_mov(),
                                               date_mov=self.date_dict,
                                               main_mov_dict=self.main_mov_dict,
                                               spec_mov_dict=self.spec_mov_dict)

@@ -4,41 +4,43 @@ from kivy.factory import Factory
 from MovLayouts import *
 from DefaultLayouts import *
 from Popups import *
+from WalletApp import AppException
 
 
 class ManagerScreen(ScreenManager):
-    """Gestore delle varie schermate dell'app, le prime 2 ('access' e 'login') vengono aggiunte dal metodo app.build(),
-    poi se il login va a buon fine viene creata la schermata 'main'
-    - type_mov -> è il tipo di spesa/entrata che si sta inserendo, il cambiare il suo valore genera la creazione e
-        spostamento nella schermata relativa alla scelta fatta
-    - _type_mov_dict -> dizionario di tutti i movimenti possibili, popolato una volta che l'app è connessa al db"""
-    type_mov = ObjectProperty("")
-
     def __init__(self, **kw):
         super().__init__(**kw)
         self._type_mov_dict = {}
+        self.type_mov = ""
         self.add_widget(LoginScreen(name="login"))
 
-    def on_type_mov(self, instance, type_movement):
-        """Da usare solo per andare su screen di tipo InsertMovementScreen, in questo modo vengono correttamente attivate
-        le schermate a seconda del movimento scelto"""
-        if type_movement == "":       # quando torno nella schermata principale setto type_movement = "" in questo caso non mi serve alcun automatismo
-            return
-        if not self.has_screen(type_movement):
-            self.add_widget(InsertMovementScreen(name=type_movement))
-        self.current = type_movement
-        self.transition.direction = "left"
-
-    def set_movements(self, movements):
-        self._type_mov_dict = movements
-
-    def go_to_main_screen(self, direction="right"):
-        """Essendo che le istruzioni per cambiare schermo sono più di una, le raccolgo tutte nello stesso metodo"""
+    def create_screens(self):
         self.add_widget(MainScreen(name="main"))
+        self.add_widget(InsertMovementScreen(name="insert"))
         self.add_widget(PayOffScreen(name="open_deb_cred"))
         self.add_widget(ShowMovementsScreen(max_rows_to_show=App.get_running_app().get_max_rows_to_show(),
                                             default_rows_to_show=App.get_running_app().get_default_rows_to_show(),
                                             name="show_movements"))
+
+    def go_to_insert_screen(self, type_mov):
+        if type_mov == "":  # quando torno nella schermata principale setto type_movement = "" in questo caso non mi serve alcun automatismo
+            return
+        self.type_mov = type_mov
+        self.current = "insert"
+        self.transition.direction = "left"
+
+    def go_to_payoff_screen(self):
+        self.current = "open_deb_cred"
+        self.transition.direction = "up"
+
+    def set_movements(self, movements):
+        self._type_mov_dict = movements
+
+    def get_type_mov(self):
+        return self.type_mov
+
+    def go_to_main_screen(self, direction="right"):
+        """Essendo che le istruzioni per cambiare schermo sono più di una, le raccolgo tutte nello stesso metodo"""
         self.current = "main"
         self.transition.direction = direction
         self.type_mov = ""
@@ -46,8 +48,13 @@ class ManagerScreen(ScreenManager):
 
 class LoginScreen(Screen):
     def login(self, username, password, autologin=False):
+        if autologin is True:
+            self.manager.set_movements(App.get_running_app().get_movements())
+            self.manager.create_screens()
+            self.manager.go_to_main_screen()
+            return
         try:
-            login_status = App.get_running_app().login(username, password, autologin)
+            login_status = App.get_running_app().login(username, password)
         except Exception as error:
             Factory.SingleChoicePopup(info=str(error)).open()
             # Factory.ErrorPopup(err_text=str(error)).open()
@@ -55,11 +62,13 @@ class LoginScreen(Screen):
             if login_status is False:
                 Factory.SingleChoicePopup(info="Login fallito").open()
             else:
+                self.manager.set_movements(App.get_running_app().get_movements())
+                self.manager.create_screens()
                 self.manager.go_to_main_screen()
 
 
 class MainScreen(Screen):
-    def on_kv_post(self, base_widget):
+    def on_kv_post(self, base_widget):      # NB move in a constructor?
         movements_list = App.get_running_app().get_movements(type_mov="general").values()
         self.ids.general_mov.update_layout(movements_list)
 
@@ -87,7 +96,7 @@ class MainScreen(Screen):
         App.get_running_app().open_BI()
 
     def set_movement(self, instance_btn):
-        self.manager.type_mov = instance_btn.text
+        self.manager.go_to_insert_screen(instance_btn.text)
 
     def backup(self):
         App.get_running_app().backup_database()
@@ -95,37 +104,36 @@ class MainScreen(Screen):
 
 class InsertMovementScreen(Screen):
     def on_pre_enter(self):
+        self.ids.mov_name.text = self.manager.get_type_mov().upper()
         self.add_widget(LayoutData(pos_hint={"x": .735, "y": .48}, size_hint=(.25, .28)))
-        if self.name not in ["Stipendio", "Saldo Debito - Credito"]:
+        if self.manager.get_type_mov() not in ["Stipendio", "Saldo Debito - Credito"]:
             self.add_widget(LayoutMainMov(type_payments=App.get_running_app().get_type_payments(),
                                           pos_hint={"x": .015, "y": .1},
                                           size_hint=[.35, .66]))
-
-        for mov_name in App.get_running_app().get_movements().values():    # NB horrible, do it better
-            if mov_name == self.name:
-                if self.name == "Spesa Generica":
-                    self.add_widget(LayoutSpesaGenerica(mov_list=App.get_running_app().get_type_spec_movements(),
-                                                        pos_hint={"x": .375, "y": .1},
-                                                        size_hint=[.35, .66]))
-                elif self.name == "Spesa Fissa":
-                    self.add_widget(LayoutSpesaFissa(pos_hint={"x": .375, "y": .64}, size_hint=(.35, 0.12)))
-                elif self.name == "Stipendio":
-                    self.add_widget(LayoutStipendio(pos_hint={"x": .375, "y": .1}, size_hint=(.35, .66)))
-                elif self.name == "Entrata":
-                    self.add_widget(LayoutEntrata(type_entrate=App.get_running_app().get_type_entrate(),
-                                                  pos_hint={"x": .375, "y": .29},
-                                                  size_hint=(.35, .47)))
-                elif self.name == "Debito - Credito":
-                    self.add_widget(LayoutDebitoCredito(pos_hint={"x": .375, "y": .4}, size_hint=(.35, .36)))
-                elif self.name == "Saldo Debito - Credito":
-                    self.add_widget(LayoutSaldoDebitoCredito(type_payments=App.get_running_app().get_type_payments(),
-                                                             pos_hint={"x": .375, "y": .2},
-                                                             size_hint=(.35, .56)))
-                elif self.name == "Spesa di Mantenimento":
-                    self.add_widget(LayoutSpesaMantenimento(pos_hint={"x": .375, "y": .64}, size_hint=(.35, 0.12)))
-                elif self.name == "Spesa di Viaggio":
-                    self.add_widget(LayoutSpesaViaggio(pos_hint={"x": .375, "y": .52}, size_hint=(.35, .24)))
-                break
+        if self.manager.get_type_mov() == "Spesa Generica":
+            self.add_widget(LayoutSpesaGenerica(mov_list=App.get_running_app().get_type_spec_movements(),
+                                                pos_hint={"x": .375, "y": .1},
+                                                size_hint=[.35, .66]))
+        elif self.manager.get_type_mov() == "Spesa Fissa":
+            self.add_widget(LayoutSpesaFissa(pos_hint={"x": .375, "y": .64}, size_hint=(.35, 0.12)))
+        elif self.manager.get_type_mov() == "Stipendio":
+            self.add_widget(LayoutStipendio(pos_hint={"x": .375, "y": .1}, size_hint=(.35, .66)))
+        elif self.manager.get_type_mov() == "Entrata":
+            self.add_widget(LayoutEntrata(type_entrate=App.get_running_app().get_type_entrate(),
+                                          pos_hint={"x": .375, "y": .29},
+                                          size_hint=(.35, .47)))
+        elif self.manager.get_type_mov() == "Debito - Credito":
+            self.add_widget(LayoutDebitoCredito(pos_hint={"x": .375, "y": .4}, size_hint=(.35, .36)))
+        elif self.manager.get_type_mov() == "Saldo Debito - Credito":
+            self.add_widget(LayoutSaldoDebitoCredito(type_payments=App.get_running_app().get_type_payments(),
+                                                     pos_hint={"x": .375, "y": .2},
+                                                     size_hint=(.35, .56)))
+        elif self.manager.get_type_mov() == "Spesa di Mantenimento":
+            self.add_widget(LayoutSpesaMantenimento(pos_hint={"x": .375, "y": .64}, size_hint=(.35, 0.12)))
+        elif self.manager.get_type_mov() == "Spesa di Viaggio":
+            self.add_widget(LayoutSpesaViaggio(pos_hint={"x": .375, "y": .52}, size_hint=(.35, .24)))
+        else:
+            raise AppException("unknown type mov: {type}".format(type=self.manager.get_type_mov()))
 
     def on_leave(self):
         App.get_running_app().main_mov_dict.clear()
@@ -192,12 +200,9 @@ class PayOffScreen(Screen):
             self.ids.appearing_box.show_widget()
 
     def go_to_insert_screen(self):
-        """Selezionati uno o più debiti/crediti da saldare vado in InsertMovementScreen per inserire le informazioni
-        rimanenti"""
-        # verifico che i debiti/crediti selezionati siano relativi alla stessa persona
-        if App.get_running_app().wallet_instance.check_ids_to_pay(list(self.selected_ids)) is True:
+        if App.get_running_app().wallet_instance.check_ids_to_pay(list(self.selected_ids)) is True:  # verifico che i debiti/crediti selezionati siano relativi alla stessa persona
             App.get_running_app().spec_mov_dict["ID_PREV_DEB_CRED"] = list(self.selected_ids)
-            self.manager.type_mov = "Saldo Debito - Credito"    # vado allo screen InsertMovementScreen
+            self.manager.go_to_insert_screen("Saldo Debito - Credito")    # vado allo screen InsertMovementScreen
         else:
             Factory.ErrorPopup(err_text="Sono stati selezionati debiti e crediti da diversa origine").open()
 

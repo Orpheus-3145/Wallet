@@ -48,7 +48,6 @@
                 halign: "center"
                 multiline: False
                 password: True
-
                 on_text_validate:
                     root.login(user_input.text, pwd_input.text, True)
 
@@ -107,7 +106,6 @@
                 background_color: WHITE_RGBA
                 on_release:
                     root.open_bi()
-
                 canvas.after:
                     Rectangle:
                         size: self.size[0] / 4, self.size[1] / 4
@@ -130,22 +128,19 @@
             DefaultButton:
                 text: "Debito - Credito"
                 background_color: LIGHTYELLOW_RGBA
-
                 on_release:
-                    root.manager.type_mov = self.text
+                    root.manager.go_to_insert_screen(self.text)
 
             DefaultButton:
                 text: "Saldo debito - credito"
                 background_color: LIGHTYELLOW_RGBA
-
                 on_release:
-                    root.manager.current = "open_deb_cred"
-                    root.manager.transition.direction = "up"
+                    root.manager.go_to_payoff_screen()
 
 <InsertMovementScreen>:
     FloatLayout:
         DefaultLabel:
-            text: root.name.upper()
+            id: mov_name
             size_hint: 0.75, 0.18
             pos_hint: {"x": 0.125, "y": 0.81}
             font_size_scale: 1.5
@@ -211,7 +206,6 @@
                 font_size_scale: 1.2
                 background_color: LIGHTGREEN_RGBA
                 color: DARKGREY_RGBA
-
                 on_release:
                     root.go_to_insert_screen()
 
@@ -220,7 +214,6 @@
                 font_size_scale: 1.2
                 background_color: RED_RGBA
                 color: WHITE_RGBA
-
                 on_release:
                     root.remove_records()
 
@@ -255,7 +248,6 @@
                 valign: "middle"
                 halign: "left"
                 round_int: True
-
                 on_text:
                     root.set_new_number(self.text)
 
