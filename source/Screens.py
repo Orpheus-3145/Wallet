@@ -47,10 +47,11 @@ class LoginScreen(Screen):
         try:
             login_status = App.get_running_app().login(username, password, autologin)
         except Exception as error:
-            Factory.ErrorPopup(err_text=str(error)).open()
+            Factory.SingleChoicePopup(info=str(error)).open()
+            # Factory.ErrorPopup(err_text=str(error)).open()
         else:
             if login_status is False:
-                Factory.SingleChoicePopup(err_text="Credenziali non corrette, login fallito").open()
+                Factory.SingleChoicePopup(info="Login fallito").open()
             else:
                 self.manager.go_to_main_screen()
 
@@ -145,11 +146,12 @@ class PayOffScreen(Screen):
     """Schermata per gestire la selezione di uno o più debiti/crediti, essi possono essere eliminati o saldati
     chiamando lo screen InsertMovementScreen; nb: è possibile fare saldi (o rimozioni) multipli, il segno finale
     della somma determinerà se si tratta di una spesa o di un'entrata"""
-    selected_ids = []  # lista degli id dei record selezionati da eliminare o da saldare
+    selected_ids = []  # lista degli id dei record selezionati da eliminare o da saldare, NB mettere membro non static
 
     def on_pre_enter(self):
         """Ogni volta che entro nello screen aggiorno la tabella visualizzata"""
         self.update_rows()
+        self.ids.appearing_box.hide_widget()
 
     def on_leave(self, *args):
         """Ogni volta che abbandono lo screen svuoto la tabella e nascondo il bottone di saldo debito/credito"""
@@ -212,10 +214,10 @@ class ShowMovementsScreen(Screen):
 
     def __init__(self, **kw):
         super().__init__(**kw)
-        self.type_movement = ""                                 # tipo di movimento scelto da esporre
-        self._selected_records_to_show = True                   # flag t/f se ho impostato quante righe visualizzare (di default è sempre valorizzato)
-        self._selected_movement = False                         # flag t/f se ho selezionato il movimento
-        self.records_to_drop = []  # lista contenente gli id dei record da eliminare
+        self.type_movement = ""                 # tipo di movimento scelto da esporre
+        self._selected_records_to_show = True   # flag t/f se ho impostato quante righe visualizzare (di default è sempre valorizzato)
+        self._selected_movement = False         # flag t/f se ho selezionato il movimento
+        self.records_to_drop = []               # lista contenente gli id dei record da eliminare
 
     def on_pre_enter(self):
         """Quando entro nello screen aggiorno il layout contenete i tipi di movimenti (entrata, spesa generica, ...) da
@@ -231,20 +233,24 @@ class ShowMovementsScreen(Screen):
         self.ids.mov_columns.clear_widgets()        # svuoto il contenitore dei nomi dei campi
         self.ids.rows_box.clear_widgets()           # svuoto la tabella
         self.ids.box_movements.clear_widgets()      # svuoto il contenitore dei movimenti
-        self.ids.remove_record_btn.hide_widget()   # faccio sparire il bottone per rimuovere i record
+        self.ids.remove_record_btn.hide_widget()    # faccio sparire il bottone per rimuovere i record
 
     def set_new_number(self, new_number):
-        if new_number.isdigit():
+        try:
             self.records_to_show = int(new_number)
-            if self.records_to_show > self.max_rows_to_show:   # per evitare troppi rallentamenti
-                self.records_to_show = self.max_rows_to_show
-            self.ids.info_no_rows.text = "Record da visualizzare: [color=f0f3f4]{}[/color]".format(self.records_to_show)
-            self._selected_records_to_show = True
-            if self._selected_movement is True:     # la tabella è già attiva, la aggiorno
-                self.update_rows()
-        else:
-            self.ids.info_no_rows.text = "Record da visualizzare: [color=cb4335][i]non valido[/i][/color]"
+            if self.records_to_show < 0:
+                raise ValueError()
+        except ValueError:
+            self.ids.info_no_rows.text = "[color=cb4335][i]non valido[/i][/color]"
             self._selected_records_to_show = False
+        else:
+            self.ids.info_no_rows.text = "Record visualizzati [max: " + str(self.max_rows_to_show) + "]"
+            if self.records_to_show > self.max_rows_to_show:  # per evitare troppi rallentamenti
+                self.records_to_show = self.max_rows_to_show
+                self.ids.input_no_rows.text = str(self.max_rows_to_show)
+            self._selected_records_to_show = True
+            if self._selected_movement is True:  # la tabella è già attiva, la aggiorno
+                self.update_rows()
 
     def set_movement(self, btn_instance):
         self.type_movement = btn_instance.text

@@ -3,7 +3,7 @@
 <ManagerScreen>:
     canvas:
         Color:
-            rgba: 1, 1, 1, 1
+            rgba: WHITE_RGBA
 
         Rectangle:
             size: self.size
@@ -19,10 +19,10 @@
 
         GridLayout:
             cols: 2
-            spacing: 10
+            spacing: 15
             padding: 10
-            size_hint: 0.4, 0.3
-            pos_hint: {"x": 0.3, "y": 0.2}
+            size_hint: 0.5, 0.25
+            pos_hint: {"x": 0.25, "y": 0.2}
 
             DefaultLabel:
                 text: "USERNAME"
@@ -30,10 +30,10 @@
 
             DefaultTextInput:
                 id: user_input
+                font_size_scale: 0.8
                 size_hint_x: 0.63
                 valign: "middle"
                 halign: "center"
-                font_size: FONT_SIZE * 0.8
                 focus: True
 
             DefaultLabel:
@@ -42,24 +42,23 @@
 
             DefaultTextInput:
                 id: pwd_input
+                font_size_scale: 0.8
                 size_hint_x: 0.63
                 valign: "middle"
                 halign: "center"
                 multiline: False
                 password: True
-                font_size: FONT_SIZE * 0.8
 
                 on_text_validate:
                     root.login(user_input.text, pwd_input.text, True)
-
 
 <MainScreen>:
     FloatLayout:
         DefaultLabel:
             text: "WALL€T"
-            size_hint: 0.45, 0.15
-            pos_hint: {"x": 0.275, "y": 0.8}
-            font_size: FONT_SIZE * 2.6
+            size_hint: 0.4, 0.15
+            pos_hint: {"x": 0.3, "y": 0.8}
+            font_size_scale: 2.8
 
         DefaultLayout:
             size_hint: 0.25, 0.63
@@ -67,7 +66,7 @@
 
             DefaultButton:
                 text: "Nuovo movimento"
-                font_size: FONT_SIZE * 1.2
+                font_size_scale: 1.2
                 multiline: True
                 background_color: LIGHTBLUE_RGBA
                 border_color: DARKGREY_RGBA
@@ -76,7 +75,7 @@
 
             DefaultButton:
                 text: "Debiti - Crediti"
-                font_size: FONT_SIZE * 1.2
+                font_size_scale: 1.2
                 multiline: True
                 background_color: YELLOW_RGBA
                 border_color: DARKGREY_RGBA
@@ -85,21 +84,35 @@
 
             DefaultButton:
                 text: "Movimenti inseriti"
-                font_size: FONT_SIZE * 1.2
+                font_size_scale: 1.2
                 background_color: PURPLE_RGBA
                 border_color: DARKGREY_RGBA
                 on_release:
                     root.show_last_movements()
 
             DefaultButton:
+                text: "Backup DB"
+                font_size_scale: 1.2
+                border_color: DARKGREY_RGBA
+                background_color: LIGHTGREEN_RGBA
+                on_release:
+                    root.backup()
+
+            DefaultButton:
                 id: button_bi
-                text: "Apri BI"
-                font_size: FONT_SIZE * 1.2
+                text: "Statistics"
+                font_size_scale: 1.2
                 color: DARKGREY_RGBA
                 border_color: DARKGREY_RGBA
-                background_color: [1, 1, 1, 1]
+                background_color: WHITE_RGBA
                 on_release:
                     root.open_bi()
+
+                canvas.after:
+                    Rectangle:
+                        size: self.size[0] / 4, self.size[1] / 4
+                        pos: self.pos[0] + self.size[0] * 3 / 4, self.pos[1]
+                        source: BI_LOGO_PATH
 
         ButtonDynamicInputLayout:
             id: general_mov
@@ -129,48 +142,30 @@
                     root.manager.current = "open_deb_cred"
                     root.manager.transition.direction = "up"
 
-        Image:
-            source: BI_LOGO_PATH
-            allow_stretch: True
-            keep_ratio: False
-            size_hint: 0.09, 0.0405  # il rapporto h/l è 0.45
-            pos_hint: {"x": 0.2, "y": 0.11}
-
-        DefaultButton:
-            text: "BACKUP DATABASE"
-            size_hint: 0.2, 0.14
-            pos_hint: {"x": 0.78, "y": 0.05}
-            font_size: FONT_SIZE * 0.9
-            multiline: True
-            background_color: CYAN_RGBA
-            on_release:
-                root.backup()
-
-
 <InsertMovementScreen>:
     FloatLayout:
         DefaultLabel:
             text: root.name.upper()
             size_hint: 0.75, 0.18
             pos_hint: {"x": 0.125, "y": 0.81}
-            font_size: FONT_SIZE * 1.35
-            color: [1, 1, 1, 1]
+            font_size_scale: 1.5
+            color: WHITE_RGBA
             background_color: BLUE_RGBA
-            border_color: 1, 1, 1, 1
+            border_color: WHITE_RGBA
 
     DefaultButton:
         text: "Inserisci".upper()
-        font_size: FONT_SIZE * 1.1
+        font_size_scale: 1.1
         size_hint: 0.2, 0.1
         pos_hint: {"x": 0.76, "y": 0.35}
         background_color: LIGHTGREEN_RGBA
-        color: 1, 1, 1, 1
+        color: WHITE_RGBA
         on_release:
             root.insert_movement()
 
     DefaultButton:
         text: "HOME"
-        font_size: FONT_SIZE * 1.5
+        font_size_scale: 1.5
         size_hint: 0.2, 0.1
         pos_hint: {"x": 0.76, "y": 0.24}
         background_color: RED_RGBA
@@ -181,14 +176,15 @@
 <PayOffScreen>:
     FloatLayout:
         DefaultLabel:
-            text: "Debiti/crediti da saldare"
-            font_size: FONT_SIZE * 1.9
-            size_hint: 0.8, 0.14
-            pos_hint: {"x": 0.1, "y": 0.78}
+            text: "Debiti/crediti aperti"
+            font_size_scale: 1.9
+            size_hint: 0.5, 0.14
+            pos_hint: {"x": 0.25, "y": 0.78}
 
         LabelDynamicLayout:
             id: deb_cred_columns
             orientation: "horizontal"
+            font_size_chars: FONT_SIZE * 0.8
             pos_hint: {"x": 0.05, "y": 0.6}
             size_hint: 0.9, None
             height: 80
@@ -200,6 +196,7 @@
             TableDynamicInputLayout:
                 id: deb_cred_tab
                 f_to_launch: root.add_new_id
+                font_size_chars: FONT_SIZE * 0.6
 
         DefaultLayout:
             id: appearing_box
@@ -210,8 +207,8 @@
             padding: 9
 
             DefaultButton:
-                text: "Salda record".upper()
-                font_size: FONT_SIZE * 0.7
+                text: "Salda".upper()
+                font_size_scale: 1.2
                 background_color: LIGHTGREEN_RGBA
                 color: DARKGREY_RGBA
 
@@ -219,18 +216,17 @@
                     root.go_to_insert_screen()
 
             DefaultButton:
-                text: "Elimina record".upper()
-                font_size: FONT_SIZE * 0.7
+                text: "Elimina".upper()
+                font_size_scale: 1.2
                 background_color: RED_RGBA
-                color: 1, 1, 1, 1
+                color: WHITE_RGBA
 
                 on_release:
                     root.remove_records()
 
-
         DefaultButton:
             text: "HOME"
-            font_size: FONT_SIZE * 1.5
+            font_size_scale: 1.5
             size_hint: 0.15, 0.1
             pos_hint: {"x": 0.83, "y": 0.03}
             background_color: RED_RGBA
@@ -240,80 +236,71 @@
 
 <ShowMovementsScreen>:
     FloatLayout:
-        DefaultLabel:
-            text: "Visualizza movimenti"
-            font_size: FONT_SIZE * 1.9
-            size_hint: 0.7, 0.15
-            pos_hint: {"x": 0.15, "y": 0.83}
-
         DefaultLayout:
             orientation: "horizontal"
-            size_hint: 0.64, 0.1
-            pos_hint: {"x": 0.21, "y": 0.73}
+            size_hint: 0.45, 0.1
+            pos_hint: {"x": 0.01, "y": 0.89}
 
             DefaultLabel:
                 id: info_no_rows
                 markup: True
-                text: "Record da visualizzare: [color=f0f3f4]{}[/color]"
-                size_hint_x: 0.7
-                halign: "left"
-                font_size: FONT_SIZE * 0.8
-
-            DefaultLabel:
-                text: "MODIFICA"
-                font_size: FONT_SIZE * 0.7
-                size_hint_x: 0.2
+                text: "Record visualizzati [max: " + str(root.max_rows_to_show) + "]"
+                size_hint_x: 0.8
                 halign: "right"
+                font_size_scale: 0.9
 
             DefaultTextInput:
                 id: input_no_rows
-                size_hint_x: 0.1
-                font_size: FONT_SIZE * 0.7
+                size_hint_x: 0.2
+                font_size_scale: 0.9
                 valign: "middle"
+                halign: "left"
                 round_int: True
+                text: str(root.records_to_show)
 
                 on_text:
                     root.set_new_number(self.text)
 
         ButtonDynamicInputLayout:      # list of movements to check
             id: box_movements
-            size_hint: 0.2, 0.55
-            pos_hint: {"x": 0.01, "y": 0.18}
+            size_hint: 0.2, 0.65
+            pos_hint: {"x": 0.01, "y": 0.15}
             f_to_launch: root.set_movement
-            font_size_chars: FONT_SIZE * 0.6
+            font_size_chars: FONT_SIZE * 0.9
             selection_type: "single"
-
-        DefaultLayout:
-            id: remove_record_btn
-            size_hint: 0.2, 0.13
-            pos_hint: {"x": 0.01, "y": 0.01}
-
-            DefaultButton:
-                text: "Elimina record".upper()
-                color: 1, 1, 1, 1
-                background_color: RED_RGBA
-                font_size: FONT_SIZE * 0.7
-                on_release:
-                    root.remove_records()
 
         LabelDynamicLayout:      # list of field names
             id: mov_columns
             orientation: "horizontal"
-            pos_hint: {"x": 0.22, "y": 0.62}
-            size_hint: 0.77, 0.11
-            font_size_chars: FONT_SIZE * 0.8
+            pos_hint: {"x": 0.22, "y": 0.7}
+            size_hint: 0.77, 0.1
+            font_size_chars: FONT_SIZE * 0.6
 
         DefaultScrollView
-            pos_hint: {"x": 0.22, "y": 0.198}
-            size_hint: 0.77, 0.417
+            pos_hint: {"x": 0.22, "y": 0.16}
+            size_hint: 0.77, 0.54
 
             TableDynamicInputLayout:
                 id: rows_box
+                font_size_chars: FONT_SIZE * 0.6
                 f_to_launch: root.add_record_to_remove
+
+        DefaultLayout:
+            id: remove_record_btn
+            size_hint: 0.2, 0.13
+            pos_hint: {"x": 0.375, "y": 0.095}
+
+            DefaultButton:
+                text: "Elimina".upper()
+                color: WHITE_RGBA
+                background_color: RED_RGBA
+                font_size_scale: 0.7
+                on_release:
+                    root.remove_records()
 
         DefaultButton:
             text: "HOME"
-            font_size: FONT_SIZE * 1.5
+            font_size_scale: 1.5
             size_hint: 0.15, 0.1
             pos_hint: {"x": 0.83, "y": 0.03}
             background_color: RED_RGBA

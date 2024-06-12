@@ -402,9 +402,8 @@ class Wallet:
 
     def backup_database(self, db_name, backup_path):
         """Esegue un backup del db wallet presente su SQL Server"""
-        # if not os.path.isabs(backup_path):
-        #     backup_path = os.path.join(os.getcwd(), backup_path)
-        backup_path = "abc"
+        if not os.path.isabs(backup_path):
+            backup_path = os.path.normpath(os.path.join(os.getcwd(), backup_path))
         backup_name = "{}_{}.bak".format(db_name, datetime.datetime.now().strftime("%d-%m-%Y"))
         sql_string = Tools.format_sql_string(suide="E",
                                              proc_name="BK_DATABASE",
@@ -412,17 +411,14 @@ class Wallet:
                                                              "bk_path": backup_path,
                                                              "db_to_backup": db_name},
                                              varchar_values=[backup_name, backup_path, db_name])
-
         try:
             logging.debug("[%-10s]: creazione backup database: %s - esecuzione della stringa SQL: %s", "Wallet", db_name, sql_string)
             self.cursor.execute(sql_string)
-
         except pyodbc.Error as error:
             logging.error("[%-10s]: creazione backup database: %s - errore - trace: %s", "Wallet", db_name, str(error))
             raise FatalError("Errore nel backup del database, consulta il log per maggiori dettagli")
-
         else:
-            logging.info("[%-10s]: creazione backup database: %s - backup creato al percorso: %s", "Wallet", db_name, os.path.join(backup_path, backup_name))
+            logging.info("[%-10s]: creazione backup database: %s - backup %s creato in %s", "Wallet", db_name, backup_name, backup_path)
 
     def get_open_deb_creds(self):
         """Ottiene tutti i debiti-crediti non ancora saldati, leggendo dalla vista V_DEBITI_CREDITI_APERTI restituise

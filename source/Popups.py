@@ -7,6 +7,9 @@ class ErrorPopup(Popup):
     """Popop che compare al verificarsi di errori, il parametro err_text contiene informazioni sull'anomalia
     verificatasi"""
     err_text = ObjectProperty("")
+    # def __init__(self, err_text="", **kw):      # se e object property funziona
+    #     super().__init__(**kw)
+    #     self.err_text = err_text
 
 
 class InfoPopup(ModalView):  # ModalView e non Popup perchè in questo caso non uso non mi serve il titolo

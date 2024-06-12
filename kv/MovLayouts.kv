@@ -7,9 +7,10 @@
             text: "Giorno"
             halign: "right"
             valign: "middle"
-            font_size: FONT_SIZE * 0.8
+            font_size_scale: 0.8
 
         DefaultTextInput:
+            font_size_scale: 0.8
             on_focus:
                 if self.text != "": app.date_dict["day"] = self.text
 
@@ -21,9 +22,10 @@
             text: "Mese"
             halign: "right"
             valign: "middle"
-            font_size: FONT_SIZE * 0.8
+            font_size_scale: 0.8
 
         DefaultTextInput:
+            font_size_scale: 0.8
             on_focus:
                 if self.text != "": app.date_dict["month"] = self.text
 
@@ -35,9 +37,10 @@
             text: "Anno"
             halign: "right"
             valign: "middle"
-            font_size: FONT_SIZE * 0.8
+            font_size_scale: 0.8
 
         DefaultTextInput:
+            font_size_scale: 0.8
             on_focus:
                 if self.text != "": app.date_dict["year"] = self.text
 
@@ -50,10 +53,11 @@
             text: "Importo"
             halign: "right"
             valign: "top"
-            font_size: FONT_SIZE * 0.8
+            font_size_scale: 0.8
 
         DefaultTextInput:
             id: input_importo
+            font_size_scale: 0.8
             valign: "middle"
             on_text:
                 if self.text != "": app.main_mov_dict["IMPORTO"] = self.text
@@ -62,7 +66,7 @@
         id: input_payments
         size_hint_y: 0.55
         f_to_launch: root.set_payment
-        font_size_chars: FONT_SIZE * 0.6
+        font_size_chars: FONT_SIZE * 0.8
         selection_type: "single"
 
     GridLayout:
@@ -74,11 +78,11 @@
             halign: "right"
             valign: "top"
             size_hint_x: 0.25
-            font_size: FONT_SIZE * 0.8
+            font_size_scale: 0.8
 
         DefaultTextInput:
             id: input_note
-            font_size: FONT_SIZE * 0.8
+            font_size_scale: 0.8
             size_hint_x: 0.5
 
             on_text:
@@ -98,13 +102,12 @@
 
         DefaultLabel:
             text: "Descrizione"
+            font_size_scale: 0.8
             valign: "top"
             halign: "right"
-            font_size: FONT_SIZE * 0.8
-
 
         DefaultTextInput:
-            font_size: FONT_SIZE * 0.8
+            font_size_scale: 0.8
             on_text:
                 if self.text != "": app.spec_mov_dict["DESCRIZIONE"] = self.text
 
@@ -116,10 +119,10 @@
             text: "Descrizione"
             halign: "right"
             valign: "top"
-            font_size: FONT_SIZE * 0.8
+            font_size_scale: 0.8
 
         DefaultTextInput:
-            font_size: FONT_SIZE * 0.8
+            font_size_scale: 0.8
             on_text:
                 if self.text != "": app.spec_mov_dict["DESCRIZIONE"] = self.text
 
@@ -130,13 +133,14 @@
 
         DefaultLabel:
             text: "Totale"
+            font_size_scale: 0.8
             size_hint_y: 0.18
             halign: "right"
             valign: "top"
-            font_size: FONT_SIZE * 0.8
 
         DefaultTextInput:
             valign: "middle"
+            font_size_scale: 0.8
             size_hint_y: 0.18
             on_text:
                 if self.text != "": app.spec_mov_dict["TOTALE"] = self.text
@@ -147,13 +151,14 @@
 
         DefaultLabel:
             text: "Netto"
+            font_size_scale: 0.8
             size_hint_y: 0.18
             halign: "right"
             valign: "top"
-            font_size: FONT_SIZE * 0.8
 
         DefaultTextInput:
             valign: "middle"
+            font_size_scale: 0.8
             size_hint_y: 0.18
             on_text:
                 if self.text != "": app.spec_mov_dict["NETTO"] = self.text
@@ -164,13 +169,14 @@
 
         DefaultLabel:
             text: "Rimborso spese"
+            font_size_scale: 0.8
             size_hint_y: 0.18
             halign: "right"
             valign: "top"
-            font_size: FONT_SIZE * 0.8
 
         DefaultTextInput:
             valign: "middle"
+            font_size_scale: 0.8
             size_hint_y: 0.18
             on_text:
                 if self.text != "": app.spec_mov_dict["RIMBORSO_SPESE"] = self.text
@@ -181,14 +187,14 @@
 
         DefaultLabel:
             text: "DDL"
+            font_size_scale: 0.8
             size_hint_y: 0.28
             halign: "right"
             valign: "top"
-            font_size: FONT_SIZE * 0.8
 
         DefaultTextInput:
             valign: "middle"
-            font_size: FONT_SIZE * 0.8
+            font_size_scale: 0.8
             size_hint_y: 0.28
             on_text:
                 if self.text != "": app.spec_mov_dict["PROVENIENZA"] = self.text
@@ -199,14 +205,14 @@
 
         DefaultLabel:
             text: "Note"
+            font_size_scale: 0.8
             size_hint_y: 0.28
             halign: "right"
             valign: "top"
-            font_size: FONT_SIZE * 0.8
 
         DefaultTextInput:
             valign: "middle"
-            font_size: FONT_SIZE * 0.8
+            font_size_scale: 0.8
             size_hint_y: 0.28
             on_text:
                 if self.text != "": app.spec_mov_dict["NOTE"] = self.text
@@ -225,13 +231,13 @@
 
         DefaultLabel:
             text: "Descrizione"
+            font_size_scale: 0.8
             valign: "top"
             halign: "right"
-            font_size: FONT_SIZE * 0.8
 
 
         DefaultTextInput:
-            font_size: FONT_SIZE * 0.8
+            font_size_scale: 0.8
             on_text:
                 if self.text != "": app.spec_mov_dict["DESCRIZIONE"] = self.text
 
@@ -242,7 +248,6 @@
         orientation: "horizontal"
         selection_type: "single"
         f_to_launch: root.set_deb_cred
-        font_size_chars: FONT_SIZE * 0.8
 
     GridLayout:
         rows: 1
@@ -250,12 +255,12 @@
 
         DefaultLabel:
             text: "Origine"
+            font_size_scale: 0.8
             halign: "right"
             valign: "top"
-            font_size: FONT_SIZE * 0.8
 
         DefaultTextInput:
-            font_size: FONT_SIZE * 0.8
+            font_size_scale: 0.8
             on_text:
                 if self.text != "": app.spec_mov_dict["ORIGINE"] = self.text
 
@@ -265,12 +270,12 @@
 
         DefaultLabel:
             text: "Descrizione"
+            font_size_scale: 0.8
             halign: "right"
             valign: "top"
-            font_size: FONT_SIZE * 0.8
 
         DefaultTextInput:
-            font_size: FONT_SIZE * 0.8
+            font_size_scale: 0.8
             on_text:
                 if self.text != "": app.spec_mov_dict["DESCRIZIONE"] = self.text
 
@@ -279,7 +284,7 @@
         id: input_payments
         size_hint_y: 0.88
         f_to_launch: root.set_payment
-        font_size_chars: FONT_SIZE * 0.6
+        font_size_chars: FONT_SIZE * 0.8
         selection_type: "single"
 
     GridLayout:
@@ -288,12 +293,12 @@
 
         DefaultLabel:
             text: "Note"
+            font_size_scale: 0.8
             halign: "right"
             valign: "top"
-            font_size: FONT_SIZE * 0.8
 
         DefaultTextInput:
-            font_size: FONT_SIZE * 0.8
+            font_size_scale: 0.8
             on_text:
                 if self.text != "": app.spec_mov_dict["NOTE"] = self.text
 
@@ -303,12 +308,12 @@
 
         DefaultLabel:
             text: "Descrizione"
+            font_size_scale: 0.8
             halign: "right"
             valign: "top"
-            font_size: FONT_SIZE * 0.8
 
         DefaultTextInput:
-            font_size: FONT_SIZE * 0.8
+            font_size_scale: 0.8
             on_text:
                 if self.text != "": app.spec_mov_dict["DESCRIZIONE"] = self.text
 
@@ -319,12 +324,12 @@
 
         DefaultLabel:
             text: "Viaggio"
+            font_size_scale: 0.8
             halign: "right"
             valign: "top"
-            font_size: FONT_SIZE * 0.8
 
         DefaultTextInput:
-            font_size: FONT_SIZE * 0.8
+            font_size_scale: 0.8
             on_text:
                 if self.text != "": app.spec_mov_dict["VIAGGIO"] = self.text
 
@@ -334,11 +339,11 @@
 
         DefaultLabel:
             text: "Descrizione"
+            font_size_scale: 0.8
             halign: "right"
             valign: "top"
-            font_size: FONT_SIZE * 0.8
 
         DefaultTextInput:
-            font_size: FONT_SIZE * 0.8
+            font_size_scale: 0.8
             on_text:
                 if self.text != "": app.spec_mov_dict["DESCRIZIONE"] = self.text

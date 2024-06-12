@@ -25,32 +25,28 @@ class AppException(Exception):
 
 
 class WalletApp(App):
-    """Applicazione principale che gestisce il front end con l'utente, essa permette:
-        1) la modifica delle informazioni, inserendo nuovi movimenti o saldando debiti/crediti esistenti
-        2) l'accesso alla BI per analisi"""
-
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.title = Config["wallet_app"]["app_name"]               # nome dell'app
-        self.dsn = Config["database"]["dsn_name"].strip("'")                        # istanza di wallet per accedere al database
-        self.bi_file_path = Config["bi"]["qlik_file_path"]               # istanza dell'app di QlikView
+        self.dsn = Config["database"]["dsn_name"].strip("'")        # istanza di wallet per accedere al database
+        self.bi_file_path = Config["bi"]["qlik_file_path"]          # istanza dell'app di QlikView
         self.kv_files = Config["kivy_files"].values()               # file di stile .kv
         self.db_name = Config["database"]["database_name"]
         self.backup_path = Config["database"]["backup_path"]
+        self.create_logger(logger_name="wallet_logger",
+                           log_level=log_levels[Config.getint("log", "level")],
+                           log_path=Config["log"]["path_log_file"],
+                           log_name=Config["log"]["name_log_file"],
+                           fmt=Config["log"]["format_log_file"])
+        logging.info("[%-10s]: %s", "WalletApp", "#" * 80)
+        logging.info("[%-10s]: avvio app - applicazione avviata" % "WalletApp")
         self._stopped = False                                       # proprietà di servizio, vedi self.on_stop()
         self.date_dict = {}                                         # data movimento
         self.main_mov_dict = {}                                     # informazioni generali (comuni ad ogni tipo di spesa/entrata)
         self.spec_mov_dict = {}                                     # informazioni specifiche della spesa/entrata
-        self.manager = None                                        # istanza di ScreenManager per muoversi tra le schermate
+        self.manager = None                                         # istanza di ScreenManager per muoversi tra le schermate
         self.wallet_instance = None
         self.qlik_app = None
-        self.create_logger(logger_name="wallet_logger",
-                            log_level=log_levels[Config.getint("log", "level")],
-                            log_path=Config["log"]["path_log_file"],
-                            log_name=Config["log"]["name_log_file"],
-                            fmt=Config["log"]["format_log_file"])
-        logging.info("[%-10s]: %s", "WalletApp", "#" * 80)
-        logging.info("[%-10s]: avvio app - applicazione avviata" % "WalletApp")
 
     def create_logger(self, logger_name, log_level, log_name, log_path, fmt):
         """Crea un file di log con livello, percorso, nome e formattazione dei record passati come parametri, richiamando

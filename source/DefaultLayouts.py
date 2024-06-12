@@ -53,20 +53,23 @@ class InputLayout(DefaultLayout):
 class DynamicLayout(DefaultLayout):
     """Questo Layout contiene il comportamento per venire riempito in automatico con il metodo self.update_layout() una
     una volta che gli viene passata una lista in argomento. Parametri da valorizzare del file .kv:
-        - font_size_chars: dimensione del font di ogni widget figlio;
+        - font_size_scale: proporzione del font di ogni widget figlio;
         - color_widgets: colore di ogni widget figlio"""
+    def __init__(self, font_size_chars=1, **kw):
+        super().__init__(**kw)
+        self.font_size_chars = font_size_chars
+
     def update_layout(self, field_list):
         pass
 
 
 class LabelDynamicLayout(DynamicLayout):
     """Layout dinamico, crea una serie di label per ogni elemento della lista passata"""
-
     def update_layout(self, field_list):
         self.clear_widgets()
         for label_name in field_list:
             label = DefaultLabel(text=label_name,
-                                 font_size=self.font_size_chars * 0.6,
+                                 font_size=self.font_size_chars,
                                  background_color=self.color_widgets,
                                  border_color=[1, 1, 1, 1],
                                  color=[1, 1, 1, 1])
@@ -88,9 +91,9 @@ class ButtonDynamicInputLayout(DynamicLayout, InputLayout):
         self.clear_widgets()
         btn_class = self._type_btns[self.type_btn]
         for field in field_list:
-            btn = btn_class(background_color=self.color_widgets,
-                            text=field,
+            btn = btn_class(text=field,
                             font_size=self.font_size_chars,
+                            background_color=self.color_widgets,
                             parent_layout=self)
             self.add_widget(btn)
 
@@ -106,7 +109,7 @@ class RowDynamicInputLayout(DynamicLayout, InputLayout):
         self.clear_widgets()
         for btn_name in field_list:
             label_field = DefaultSelectionButton(text=str(btn_name),
-                                                 font_size=self.font_size_chars * 0.45,
+                                                 font_size=self.font_size_chars,
                                                  background_color=self.color_widgets,
                                                  parent_layout=self)
             self.add_widget(label_field)
@@ -125,7 +128,8 @@ class TableDynamicInputLayout(DynamicLayout, InputLayout):
         for record in field_list:
             id_record = record[-1]
             record.pop()
-            row = RowDynamicInputLayout(id_record=id_record,
+            row = RowDynamicInputLayout(font_size_chars=self.font_size_chars,
+                                        id_record=id_record,
                                         f_to_launch=self.f_to_launch,
                                         height=self.size_records,
                                         orientation="horizontal",

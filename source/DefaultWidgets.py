@@ -11,6 +11,19 @@ class BKG(Widget):
     border_color = ListProperty([1, 1, 1, 1])
 
 
+class DefaultWidget(Widget):
+    pass
+
+
+class Writable(Widget):
+    def __init__(self, font_size_scale=1, **kw):
+        super().__init__(**kw)
+        self.font_size_scale = font_size_scale
+
+    def on_kv_post(self, base_widget):
+        self.font_size *= self.font_size_scale
+
+
 class BKGlabel(BKG):
     background_color = ListProperty([1, 1, 1, 1])
 
@@ -19,12 +32,14 @@ class BKGrowLayout(BKG):
     pass
 
 
-class DefaultLabel(Label, BKGlabel):
+class DefaultLabel(Label, BKGlabel, Writable):
     pass
 
 
-class DefaultButton(Button):
-    parent_layout = ObjectProperty(None)       # NB move non static member non objectproperty
+class DefaultButton(Button, Writable):
+    def __init__(self, parent_layout=None, **kw):
+        super().__init__(**kw)
+        self.parent_layout = parent_layout
 
     def on_state(self, instance, pressed):
         if pressed == "down":
@@ -32,18 +47,20 @@ class DefaultButton(Button):
                 self.parent_layout.btn_pressed(self)
             self.background_color.pop()
             self.background_color.append(0.75)
-
         else:
             self.background_color.pop()
             self.background_color.append(1)
 
 
-class DefaultSelectionButton(Button):
+class DefaultSelectionButton(Button, Writable):
     """Bottone che rimane attivo una volta premuto, self.activate segnala se esso è attivo o meno, vedi DefaultButton
     per self.parent_layout"""
     activate = ObjectProperty(False)
-    parent_layout = ObjectProperty(None)       # NB move non static member non objectproperty
     tmp_color = [1, 1, 1, 1]
+
+    def __init__(self, parent_layout=None, **kw):
+        super().__init__(**kw)
+        self.parent_layout = parent_layout
 
     def on_activate(self, instance, activate):
         """Ad ogni pressione attivo il bottone se era disattivato o viceversa"""
@@ -62,11 +79,9 @@ class DefaultSelectionButton(Button):
         self.activate = not self.activate
 
 
-class DefaultTextInput(TextInput):
-    """TextInput standard, definito in DefaultWidgets.kv"""
+class DefaultTextInput(TextInput, Writable):
     pass
 
 
 class DefaultScrollView(ScrollView):
-    """Lo dichiaro per settare alcuni valori fissi in DefaultWidgets.kv"""
     pass
