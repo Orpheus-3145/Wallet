@@ -36,7 +36,9 @@ class ManagerScreen(ScreenManager):
         """Essendo che le istruzioni per cambiare schermo sono più di una, le raccolgo tutte nello stesso metodo"""
         self.add_widget(MainScreen(name="main"))
         self.add_widget(PayOffScreen(name="open_deb_cred"))
-        self.add_widget(ShowMovementsScreen(name="show_movements"))
+        self.add_widget(ShowMovementsScreen(max_rows_to_show=App.get_running_app().get_max_rows_to_show(),
+                                            default_rows_to_show=App.get_running_app().get_default_rows_to_show(),
+                                            name="show_movements"))
         self.current = "main"
         self.transition.direction = direction
         self.type_mov = ""
@@ -208,21 +210,20 @@ class PayOffScreen(Screen):
 
 
 class ShowMovementsScreen(Screen):
-    """Mostra gli ultimi movimenti inseriti appartenenti ad una tipologia specifica"""
-    max_rows_to_show = 50
-    records_to_show = 10
-
-    def __init__(self, **kw):
+    def __init__(self, max_rows_to_show, default_rows_to_show, **kw):
         super().__init__(**kw)
         self.type_movement = ""                 # tipo di movimento scelto da esporre
         self._selected_records_to_show = True   # flag t/f se ho impostato quante righe visualizzare (di default è sempre valorizzato)
         self._selected_movement = False         # flag t/f se ho selezionato il movimento
         self.records_to_drop = []               # lista contenente gli id dei record da eliminare
+        self.max_rows_to_show = max_rows_to_show
+        self.current_rows_shown = default_rows_to_show
 
     def on_pre_enter(self):
         """Quando entro nello screen aggiorno il layout contenete i tipi di movimenti (entrata, spesa generica, ...) da
         visionare"""
-        self.ids.info_no_rows.text = self.ids.info_no_rows.text.format(self.records_to_show)                    # attivo la scritta
+        self.ids.info_no_rows.text = "Record visualizzati [max: {}]".format(self.max_rows_to_show)
+        self.ids.input_no_rows.text = str(self.current_rows_shown)
         list_movements = App.get_running_app().get_movements(type_mov="general").values()       # lista dei possibili movimenti da selezionare
         self.ids.box_movements.update_layout(list_movements)                      # aggiorno il relativo layout
         self.ids.remove_record_btn.hide_widget()
@@ -237,16 +238,16 @@ class ShowMovementsScreen(Screen):
 
     def set_new_number(self, new_number):
         try:
-            self.records_to_show = int(new_number)
-            if self.records_to_show < 0:
+            self.current_rows_shown = int(new_number)
+            if self.current_rows_shown < 0:
                 raise ValueError()
         except ValueError:
             self.ids.info_no_rows.text = "[color=cb4335][i]non valido[/i][/color]"
             self._selected_records_to_show = False
         else:
-            self.ids.info_no_rows.text = "Record visualizzati [max: " + str(self.max_rows_to_show) + "]"
-            if self.records_to_show > self.max_rows_to_show:  # per evitare troppi rallentamenti
-                self.records_to_show = self.max_rows_to_show
+            self.ids.info_no_rows.text = "Record visualizzati [max: {}]".format(self.max_rows_to_show)
+            if self.current_rows_shown > self.max_rows_to_show:  # per evitare troppi rallentamenti
+                self.current_rows_shown = self.max_rows_to_show
                 self.ids.input_no_rows.text = str(self.max_rows_to_show)
             self._selected_records_to_show = True
             if self._selected_movement is True:  # la tabella è già attiva, la aggiorno
@@ -255,6 +256,8 @@ class ShowMovementsScreen(Screen):
     def set_movement(self, btn_instance):
         self.type_movement = btn_instance.text
         self._selected_movement = True
+        self.records_to_drop.clear()
+        self.ids.remove_record_btn.hide_widget()
         if self._selected_records_to_show is True:
             self.update_rows()
 
@@ -263,7 +266,7 @@ class ShowMovementsScreen(Screen):
         field_name_box = self.ids.mov_columns       # box contenente i nomi dei campi
         rows_box = self.ids.rows_box                # tabella contenente i vari record
         try:
-            col_names, rows = App.get_running_app().wallet_instance.get_last_n_records(self.records_to_show, self.type_movement)
+            col_names, rows = App.get_running_app().wallet_instance.get_last_n_records(self.current_rows_shown, self.type_movement)
         except Exception as error:
             Factory.ErrorPopup(err_text=str(error)).open()
         else:

@@ -11,10 +11,6 @@ class BKG(Widget):
     border_color = ListProperty([1, 1, 1, 1])
 
 
-class DefaultWidget(Widget):
-    pass
-
-
 class Writable(Widget):
     def __init__(self, font_size_scale=1, **kw):
         super().__init__(**kw)

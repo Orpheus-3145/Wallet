@@ -28,6 +28,8 @@ class WalletApp(App):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.title = Config["wallet_app"]["app_name"]               # nome dell'app
+        self.max_rows_to_show = Config.getint("wallet_app", "max_rows_to_show")            # max righe mostrate in SowMovementScreen
+        self.default_rows_to_show = Config.getint("wallet_app", "default_rows_to_show")   # default righe mostrate in SowMovementScreen
         self.dsn = Config["database"]["dsn_name"].strip("'")        # istanza di wallet per accedere al database
         self.bi_file_path = Config["bi"]["qlik_file_path"]          # istanza dell'app di QlikView
         self.kv_files = Config["kivy_files"].values()               # file di stile .kv
@@ -151,6 +153,12 @@ class WalletApp(App):
 
     def get_type_entrate(self):
         return self.wallet_instance.get_type_entrate()
+
+    def get_max_rows_to_show(self):
+        return self.max_rows_to_show
+
+    def get_default_rows_to_show(self):
+        return self.default_rows_to_show
 
 
 if __name__ == "__main__":

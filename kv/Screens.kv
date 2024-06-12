@@ -244,7 +244,6 @@
             DefaultLabel:
                 id: info_no_rows
                 markup: True
-                text: "Record visualizzati [max: " + str(root.max_rows_to_show) + "]"
                 size_hint_x: 0.8
                 halign: "right"
                 font_size_scale: 0.9
@@ -256,7 +255,6 @@
                 valign: "middle"
                 halign: "left"
                 round_int: True
-                text: str(root.records_to_show)
 
                 on_text:
                     root.set_new_number(self.text)
@@ -264,7 +262,7 @@
         ButtonDynamicInputLayout:      # list of movements to check
             id: box_movements
             size_hint: 0.2, 0.65
-            pos_hint: {"x": 0.01, "y": 0.15}
+            pos_hint: {"x": 0.01, "y": 0.23}
             f_to_launch: root.set_movement
             font_size_chars: FONT_SIZE * 0.9
             selection_type: "single"
@@ -272,12 +270,12 @@
         LabelDynamicLayout:      # list of field names
             id: mov_columns
             orientation: "horizontal"
-            pos_hint: {"x": 0.22, "y": 0.7}
+            pos_hint: {"x": 0.22, "y": 0.78}
             size_hint: 0.77, 0.1
             font_size_chars: FONT_SIZE * 0.6
 
         DefaultScrollView
-            pos_hint: {"x": 0.22, "y": 0.16}
+            pos_hint: {"x": 0.22, "y": 0.24}
             size_hint: 0.77, 0.54
 
             TableDynamicInputLayout:
@@ -287,14 +285,14 @@
 
         DefaultLayout:
             id: remove_record_btn
-            size_hint: 0.2, 0.13
-            pos_hint: {"x": 0.375, "y": 0.095}
+            size_hint: 0.2, 0.1
+            pos_hint: {"x": 0.505, "y": 0.05}
 
             DefaultButton:
                 text: "Elimina".upper()
                 color: WHITE_RGBA
                 background_color: RED_RGBA
-                font_size_scale: 0.7
+                font_size_scale: 1.2
                 on_release:
                     root.remove_records()
 
