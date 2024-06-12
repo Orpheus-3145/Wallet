@@ -22,6 +22,12 @@ class ManagerScreen(ScreenManager):
                                             default_rows_to_show=App.get_running_app().get_default_rows_to_show(),
                                             name="show_movements"))
 
+    def set_movements(self, movements):
+        self._type_mov_dict = movements
+
+    def get_type_mov(self):
+        return self.type_mov
+
     def go_to_insert_screen(self, type_mov):
         if type_mov == "":  # quando torno nella schermata principale setto type_movement = "" in questo caso non mi serve alcun automatismo
             return
@@ -33,31 +39,20 @@ class ManagerScreen(ScreenManager):
         self.current = "open_deb_cred"
         self.transition.direction = "up"
 
-    def set_movements(self, movements):
-        self._type_mov_dict = movements
-
-    def get_type_mov(self):
-        return self.type_mov
-
     def go_to_main_screen(self, direction="right"):
-        """Essendo che le istruzioni per cambiare schermo sono più di una, le raccolgo tutte nello stesso metodo"""
+        self.type_mov = ""
         self.current = "main"
         self.transition.direction = direction
-        self.type_mov = ""
 
 
 class LoginScreen(Screen):
     def login(self, username, password, autologin=False):
-        if autologin is True:
-            self.manager.set_movements(App.get_running_app().get_movements())
-            self.manager.create_screens()
-            self.manager.go_to_main_screen()
-            return
+        login_status = True
         try:
-            login_status = App.get_running_app().login(username, password)
+            if autologin is False:
+                login_status = App.get_running_app().login(username, password)
         except Exception as error:
-            Factory.SingleChoicePopup(info=str(error)).open()
-            # Factory.ErrorPopup(err_text=str(error)).open()
+            Factory.ErrorPopup(err_text=str(error)).open()
         else:
             if login_status is False:
                 Factory.SingleChoicePopup(info="Login fallito").open()
@@ -92,14 +87,21 @@ class MainScreen(Screen):
         self.manager.transition.direction = "up"
 
     def open_bi(self):
-        """Apre la BI (file qlik)"""
-        App.get_running_app().open_BI()
+        try:
+            App.get_running_app().open_BI()
+        except Exception as error:
+            Factory.ErrorPopup(err_text=str(error)).open()
 
     def set_movement(self, instance_btn):
         self.manager.go_to_insert_screen(instance_btn.text)
 
     def backup(self):
-        App.get_running_app().backup_database()
+        try:
+            App.get_running_app().backup_database()
+        except Exception as err:
+            Factory.ErrorPopup(err_text=str(err)).open()
+        else:
+            Factory.SingleChoicePopup(info="Backup creato con successo").open()
 
 
 class InsertMovementScreen(Screen):
@@ -149,7 +151,12 @@ class InsertMovementScreen(Screen):
             self.manager.go_to_main_screen()
 
     def insert_movement(self):
-        App.get_running_app().insert_movement()
+        try:
+            App.get_running_app().insert_movement()
+        except Exception as error:
+            Factory.ErrorPopup(err_text=str(error)).open()
+        else:
+            Factory.SingleChoicePopup(info="MOVIMENTO INSERITO", func_to_exec=self.manager.go_to_main_screen).open()
 
 
 class PayOffScreen(Screen):
@@ -172,13 +179,11 @@ class PayOffScreen(Screen):
 
     def update_rows(self):
         """Aggiorna i record della tabella e i nomi dei campi leggendoli dal db"""
+        self.selected_ids.clear()
         try:
-            self.selected_ids.clear()                       # cancello gli id dei record selezionati
             cols, rows = App.get_running_app().wallet_instance.get_open_deb_creds()
-
         except Exception as error:
             Factory.ErrorPopup(err_text=str(error)).open()
-
         else:
             deb_cred_box_col = self.ids.deb_cred_columns        # contenitore dei vari nomi di colonna
             deb_cred_view = self.ids.deb_cred_tab               # tabella dei record
@@ -204,14 +209,18 @@ class PayOffScreen(Screen):
             App.get_running_app().spec_mov_dict["ID_PREV_DEB_CRED"] = list(self.selected_ids)
             self.manager.go_to_insert_screen("Saldo Debito - Credito")    # vado allo screen InsertMovementScreen
         else:
-            Factory.ErrorPopup(err_text="Sono stati selezionati debiti e crediti da diversa origine").open()
+            Factory.ErrorPopup(err_text="Sono stati selezionati record da diversa origine").open()
 
     def remove_records(self):
         """Rimuove i record (cioè i movimenti), aggiorna la tabella e nasconde il box per la rimozione dei record
         selezionati"""
-        App.get_running_app().drop_records(self.selected_ids, "Debito - Credito")
-        self.update_rows()
-        self.ids.appearing_box.hide_widget()
+        try:
+            App.get_running_app().drop_records(self.selected_ids, "Debito - Credito")
+        except Exception as error:
+            Factory.ErrorPopup(err_text=str(error)).open()
+        else:
+            self.update_rows()
+            self.ids.appearing_box.hide_widget()
 
 
 class ShowMovementsScreen(Screen):
@@ -292,6 +301,10 @@ class ShowMovementsScreen(Screen):
             self.ids.remove_record_btn.show_widget()
 
     def remove_records(self):
-        App.get_running_app().drop_records(self.records_to_drop, self.type_movement)
-        self.update_rows()
-        self.ids.remove_record_btn.hide_widget()
+        try:
+            App.get_running_app().drop_records(self.records_to_drop, self.type_movement)
+        except Exception as error:
+            Factory.ErrorPopup(err_text=str(error)).open()
+        else:
+            self.update_rows()
+            self.ids.remove_record_btn.hide_widget()

@@ -71,11 +71,9 @@ class LayoutEntrata(DefaultLayout, BKGrowLayout):
 
 
 class LayoutDebitoCredito(DefaultLayout, BKGrowLayout):
-    """Layout di inserimento delle informazioni  del movimento di tipo debito/credito"""
-    _deb_cred_list = ["DEBITO", "CREDITO"]
-
     def __init__(self, **kw):
         super().__init__(**kw)
+        self._deb_cred_list = ["DEBITO", "CREDITO"]
         self.ids.input_deb_cred.update_layout(self._deb_cred_list)
 
     def set_deb_cred(self, btn_instance):

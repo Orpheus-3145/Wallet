@@ -1,16 +1,14 @@
 import logging
 import os
 from datetime import date
-import Wallet
-import Tools
+from win32api import GetSystemMetrics
 
 from kivy.config import Config
-
 Config.read(os.path.join(os.getcwd(), "..\\settings\\config_wallet.ini"))
-Tools.set_center_app(Config)
-
 from kivy.lang import Builder
 from Screens import *
+
+import Wallet
 
 log_levels = {10: logging.DEBUG, 20: logging.INFO, 30: logging.WARNING, 40: logging.ERROR, 50: logging.CRITICAL}
 
@@ -41,6 +39,7 @@ class WalletApp(App):
                            log_path=Config["log"]["path_log_file"],
                            log_name=Config["log"]["name_log_file"],
                            fmt=Config["log"]["format_log_file"])
+        self.set_center_app()
         logging.info("[%-10s]: %s", "WalletApp", "#" * 80)
         logging.info("[%-10s]: avvio app - applicazione avviata" % "WalletApp")
         self._stopped = False                                       # proprietà di servizio, vedi self.on_stop()
@@ -64,15 +63,15 @@ class WalletApp(App):
         logger.addHandler(file_handler)
 
     def build(self):
-        try:
-            for kv_file in self.kv_files:
+        for kv_file in self.kv_files:
+            try:
                 Builder.load_file(kv_file)
-        except Exception as error:
-            raise AppException("Errore GUI - " + str(error))
-        else:
-            self.manager = ManagerScreen()
-            logging.info("[%-10s]: avvio app - caricati i file di stile .kv, creato ScreenManager e Screen di login" % "WalletApp")
-            return self.manager
+            except Exception as error:
+                logging.error("[%-10s]: avvio app - errore file %s - trace: %s", "WalletApp", kv_file, str(error))
+                raise AppException(str(error))
+        self.manager = ManagerScreen()
+        logging.info("[%-10s]: avvio app - caricati i file di stile .kv, creato ScreenManager e Screen di login" % "WalletApp")
+        return self.manager
 
     def login(self, user, pwd):
         if user.strip() == "" or pwd.strip() == "":
@@ -80,46 +79,26 @@ class WalletApp(App):
         return self.wallet_instance.login_wallet(user.strip(), pwd.strip())
 
     def open_BI(self):
-        # try:
         user, pwd = self.wallet_instance.get_bi_credentials()
         self.qlik_app.open(user, pwd)
 
-        # NB move it
-        # except Wallet.FatalError as generic_error:
-        #     Factory.ErrorPopup(err_text=str(generic_error)).open()
-
     def insert_movement(self):
-        try:
-            self.wallet_instance.check_values(type_movement=self.manager.get_type_mov(),
-                                              date_mov=self.date_dict,
-                                              main_mov_dict=self.main_mov_dict,
-                                              spec_mov_dict=self.spec_mov_dict)
-            self.wallet_instance.insert_movement()
-        except (Wallet.WrongValueInsert, Wallet.FatalError) as error:
-            Factory.ErrorPopup(err_text=str(error)).open()
-        else:
-            Factory.SingleChoicePopup(info="MOVIMENTO INSERITO", func_to_exec=self.manager.go_to_main_screen).open()
+        self.wallet_instance.check_values(type_movement=self.manager.get_type_mov(),
+                                          date_mov=self.date_dict,
+                                          main_mov_dict=self.main_mov_dict,
+                                          spec_mov_dict=self.spec_mov_dict)
+        self.wallet_instance.insert_movement()
 
     def drop_records(self, list_records, type_movement):
         """Ricevo in argomento una lista di id, ciascuno corrispondente ad un movimento, da eliminare
             - list_records -> lista di id di movimenti da rimuovere
             - type_movement -> tipo di movimento a cui gli id appartengono (a cui corrisponde la relativa tabella nel db"""
-        try:
-            self.wallet_instance.drop_records(list_records, type_movement)
-        except (Wallet.WrongValueInsert, Wallet.FatalError, Tools.WrongSQLstatement) as error:
-            Factory.ErrorPopup(err_text=str(error)).open()
-        else:
-            Factory.SingleChoicePopup(info="Movimenti selezionati eliminati").open()
+        self.wallet_instance.drop_records(list_records, type_movement)
 
     def backup_database(self):
         """Crea un backup del database al percorso inserito nel file .ini, il formato del nome del backup viene
         stabilito più a basso livello (metodo Wallet.backup_database)"""
-        try:
-            self.wallet_instance.backup_database(self.db_name, self.backup_path)
-        except Exception as err:
-            Factory.ErrorPopup(err_text=str(err)).open()
-        else:
-            Factory.SingleChoicePopup(info="Backup creato con successo").open()
+        self.wallet_instance.backup_database(self.db_name, self.backup_path)
 
     def on_stop(self):
         """Non è chiaro perchè ma il metodo app.stop() viene chiamato due volte, per evitare di scrivere due volte sul log
@@ -133,23 +112,33 @@ class WalletApp(App):
             logging.info("[%-10s]: chiusura app - applicazione chiusa" % "WalletApp")
             logging.info("[%-10s]: %s", "WalletApp",  "#" * 80)
 
-    def get_movements(self, type_mov=None, name_mov=None):
-        return self.wallet_instance.get_movements(type_mov, name_mov)
-
-    def get_type_payments(self):
-        return self.wallet_instance.get_type_payments()
-
-    def get_type_spec_movements(self):
-        return self.wallet_instance.get_type_spec_movements()
-
-    def get_type_entrate(self):
-        return self.wallet_instance.get_type_entrate()
+    def set_center_app(self):
+        """A seconda dello schermo che uso, centro l'app nel monitor"""
+        width_app = Config.getint("graphics", "width")
+        height_app = Config.getint("graphics", "height")
+        width_screen = GetSystemMetrics(0)
+        height_screen = GetSystemMetrics(1)
+        Config.set("graphics", "top", str((height_screen - height_app) // 2))
+        Config.set("graphics", "left", str((width_screen - width_app) // 2))
+        Config.write()
 
     def get_max_rows_to_show(self):
         return self.max_rows_to_show
 
     def get_default_rows_to_show(self):
         return self.default_rows_to_show
+
+    def get_movements(self, type_mov=None):
+        return self.wallet_instance.get_movements(type_mov, None)
+
+    def get_type_payments(self):
+        return self.wallet_instance.get_info_db("pagamenti")
+
+    def get_type_spec_movements(self):
+        return self.wallet_instance.get_info_db("spese_varie")
+
+    def get_type_entrate(self):
+        return self.wallet_instance.get_info_db("entrate")
 
 
 if __name__ == "__main__":

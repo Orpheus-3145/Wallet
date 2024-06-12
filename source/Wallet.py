@@ -1,7 +1,7 @@
 import win32com.client as win32         # per aprire applicazioni win
 import pywintypes                       # per gestire alcune eccezioni legate al modulo di cui sopra
 import time
-import datetime
+from datetime import datetime, date
 import pyodbc                           # per la connessione al db SQL Server
 import os.path                          # per gestire i path
 import logging                          # per gestire il log
@@ -43,15 +43,12 @@ class QlikViewApp:
         self.current_file = None    # istanza del file qlik
 
         if os.path.exists(bi_path):
-            if bi_path[-3:] != "qvw":
+            if os.path.splitext(bi_path)[1] != ".qvw":
                 logging.error("[%-10s]: Creazione app pywin32 - errore - il file passato non ha estensione .qvw" % "BI")
                 raise FatalError("Il file di BI non ha estensione .qvw")
-
             else:
-                logging.debug("[%-10s]: Creazione app pywin32 -  file qlikview di BI al percorso %s", "BI", bi_path)
                 self.bi_path = os.path.dirname(bi_path)    # percorso del file qlik
                 self.bi_name = os.path.basename(bi_path)   # nome del file qlik
-
         else:
             logging.error("[%-10s]: Creazione app pywin32 - errore - il percorso %s non esiste", "BI", bi_path)
             raise FatalError("Il percorso passato non esiste")
@@ -142,7 +139,7 @@ class Wallet:
         # check sul movimento principale (main_mov_dict)
         if type_movement not in ["Stipendio", "Saldo Debito - Credito"]:  # se inserisco uno stipendio o un saldo d/c il movimento principale viene gestito in automatico
             if "IMPORTO" not in main_mov_dict.keys():
-                raise WrongValueInsert("Non hai inserito l'importo")
+                raise WrongValueInsert("Importo non inserito")
 
             else:
                 try:    # verifico l'importo
@@ -261,11 +258,13 @@ class Wallet:
             main_mov_dict["DARE_AVERE"] = 0  # è una spesa, valorizzo dare
 
         # spec_mov_dict è corretto e compilato con eventuali valori di default
-        logging.info("[%-10s]: verifica movimento - informazioni specifiche corrette: %s", "Wallet",
-                     Tools.list_to_str(spec_mov_dict))
-        data_movimento = Tools.validate_and_set_date(date_mov)  # check sulla data del movimento
-        if data_movimento is None:
-            raise WrongValueInsert("Data movimento non valida")
+        logging.info("[%-10s]: verifica movimento - informazioni specifiche corrette: %s", "Wallet", Tools.list_to_str(spec_mov_dict))
+        if not date_mov:  # il dizionario è vuoto, restituisce la data odierna
+            data_movimento = datetime.now().strftime("%d-%m-%Y")
+        else:
+            data_movimento = self.check_date(date_mov)  # check sulla data del movimento
+            if data_movimento is None:
+                raise WrongValueInsert("Data movimento non valida")
         # data_movimento è corretta e comipilato con eventuali valori di default
         logging.info("[%-10s]: verifica movimento - data corretta: %s", "Wallet", date_mov)
         # valorizzo i campi per l'inserimento nel db e flaggo a True la variabile per inserire il movimento
@@ -277,7 +276,7 @@ class Wallet:
 
     def insert_movement(self):
         """Una volta valorizzati campi del movimento inserito con il metodo check_values() vengono create le istruzioni
-        SQL (con il metodo Tools.format_sql_string()) per l'inserimento dei dati nel db"""
+        SQL (con il metodo self.format_sql_string()) per l'inserimento dei dati nel db"""
 
         if not self._ready_to_insert_data:
             logging.error("[%-10s]: inserimento movimento - errore - tentativo di inserimento di un movimento senza che i dati siano stati verificati" % "Wallet")
@@ -290,22 +289,20 @@ class Wallet:
 
         if self.type_movement == "Spesa Generica":
             varchar_values.append(self.spec_mov_dict.get("DESCRIZIONE"))
-            spec_movement_query = Tools.format_sql_string("I", "SPESE_VARIE", insert_dict=
+            spec_movement_query = self.format_sql_string("I", "SPESE_VARIE", insert_dict=
             {"ID_MOV": "{id}",
              "ID_TIPO_SPESA": self.spec_mov_dict.get("ID_TIPO_SPESA"),
              "DESCRIZIONE": self.spec_mov_dict.get("DESCRIZIONE")}, varchar_values=varchar_values)
-
         elif self.type_movement == "Spesa Fissa":
             varchar_values.append(self.spec_mov_dict.get("DESCRIZIONE"))
-            spec_movement_query = Tools.format_sql_string("I", "SPESE_FISSE", insert_dict=
+            spec_movement_query = self.format_sql_string("I", "SPESE_FISSE", insert_dict=
             {"ID_MOV": "{id}",
              "DESCRIZIONE": self.spec_mov_dict.get("DESCRIZIONE"),
              "MESE": self.data_movimento.split("-")[1]}, varchar_values=varchar_values)
-
         elif self.type_movement == "Stipendio":
             varchar_values.append(self.spec_mov_dict.get("PROVENIENZA"))
             varchar_values.append(self.spec_mov_dict.get("NOTE"))
-            spec_movement_query = Tools.format_sql_string("I", "STIPENDI", insert_dict=
+            spec_movement_query = self.format_sql_string("I", "STIPENDI", insert_dict=
             {"ID_MOV": "{id}",
              "PROVENIENZA": self.spec_mov_dict.get("PROVENIENZA"),
              "MESE": int(self.data_movimento.split("-")[1]) - 1 if int(self.data_movimento.split("-")[1]) != 1 else 12,  # divido per il separatore, prendo il mese diminuito di uno
@@ -314,19 +311,17 @@ class Wallet:
              "TRATTENUTE": self.spec_mov_dict.get("TRATTENUTE"),
              "RIMBORSO_SPESE": self.spec_mov_dict.get("RIMBORSO_SPESE"),
              "NOTE": self.spec_mov_dict.get("NOTE")}, varchar_values=varchar_values)
-
         elif self.type_movement == "Entrata":
             varchar_values.append(self.spec_mov_dict.get("ORIGINE"))
             varchar_values.append(self.spec_mov_dict.get("DESCRIZIONE"))
-            spec_movement_query = Tools.format_sql_string("I", "ENTRATE", insert_dict=
+            spec_movement_query = self.format_sql_string("I", "ENTRATE", insert_dict=
             {"ID_MOV": "{id}",
              "ID_TIPO_ENTRATA": self.spec_mov_dict.get("ID_TIPO_ENTRATA"),
              "DESCRIZIONE": self.spec_mov_dict.get("DESCRIZIONE")}, varchar_values=varchar_values)
-
         elif self.type_movement == "Debito - Credito":
             varchar_values.append(self.spec_mov_dict.get("ORIGINE"))
             varchar_values.append(self.spec_mov_dict.get("DESCRIZIONE"))
-            spec_movement_query = Tools.format_sql_string("I", "DEBITI_CREDITI", insert_dict=
+            spec_movement_query = self.format_sql_string("I", "DEBITI_CREDITI", insert_dict=
             {"ID_MOV": "{id}",
              "DEBCRED": self.spec_mov_dict.get("DEBCRED"),
              "DESCRIZIONE": self.spec_mov_dict.get("DESCRIZIONE"),
@@ -334,31 +329,28 @@ class Wallet:
              "SALDATO": 0,
              "ID_MOV_SALDO": "NULL",
              "DATA_SALDO": "NULL"}, varchar_values=varchar_values)
-
         elif self.type_movement == "Saldo Debito - Credito":
             spec_movement_query = ""
             id_records = self.spec_mov_dict["ID_PREV_DEB_CRED"]
             for id_record in id_records:        # per ogni debito/credito nella lista aggiorno il relativo record nella tabella creando una sequenza di UPDATE
-                spec_movement_query += Tools.format_sql_string("U", "DEBITI_CREDITI",
+                spec_movement_query += self.format_sql_string("U", "DEBITI_CREDITI",
                                                                update_dict={"SALDATO": 1, "ID_MOV_SALDO": "{id}", "DATA_SALDO": "CONVERT(DATE, '{}', 105)".format(self.data_movimento)},
                                                                where_dict={"ID_MOV": id_record}) + "\n"
-
         elif self.type_movement == "Spesa di Mantenimento":
             varchar_values.append(self.spec_mov_dict.get("DESCRIZIONE"))
-            spec_movement_query = Tools.format_sql_string("I", "SPESE_MANTENIMENTO", insert_dict=
+            spec_movement_query = self.format_sql_string("I", "SPESE_MANTENIMENTO", insert_dict=
             {"ID_MOV": "{id}",
              "DESCRIZIONE": self.spec_mov_dict.get("DESCRIZIONE")}, varchar_values=varchar_values)
-
         elif self.type_movement == "Spesa di Viaggio":
             varchar_values.append(self.spec_mov_dict.get("VIAGGIO"))
             varchar_values.append(self.spec_mov_dict.get("DESCRIZIONE"))
-            spec_movement_query = Tools.format_sql_string("I", "SPESE_VIAGGI", insert_dict=
+            spec_movement_query = self.format_sql_string("I", "SPESE_VIAGGI", insert_dict=
             {"ID_MOV": "{id}",
              "VIAGGIO": self.spec_mov_dict.get("VIAGGIO"),
              "DESCRIZIONE": self.spec_mov_dict.get("DESCRIZIONE")}, varchar_values=varchar_values)
 
         varchar_values.append(self.main_mov_dict.get("NOTE"))
-        main_movement_query = Tools.format_sql_string("I", "MOVIMENTI", insert_dict=
+        main_movement_query = self.format_sql_string("I", "MOVIMENTI", insert_dict=
         {"DATA_MOV": "CONVERT(DATE, '{}', 105)".format(self.data_movimento),
          "DATA_INS": "GETDATE()",
          "IMPORTO": self.main_mov_dict["IMPORTO"],
@@ -404,13 +396,11 @@ class Wallet:
         """Esegue un backup del db wallet presente su SQL Server"""
         if not os.path.isabs(backup_path):
             backup_path = os.path.normpath(os.path.join(os.getcwd(), backup_path))
-        backup_name = "{}_{}.bak".format(db_name, datetime.datetime.now().strftime("%d-%m-%Y"))
-        sql_string = Tools.format_sql_string(suide="E",
-                                             proc_name="BK_DATABASE",
-                                             proc_args_dict={"bk_name": backup_name,
-                                                             "bk_path": backup_path,
-                                                             "db_to_backup": db_name},
-                                             varchar_values=[backup_name, backup_path, db_name])
+        backup_name = "{}_{}.bak".format(db_name, datetime.now().strftime("%d-%m-%Y"))
+        sql_string = self.format_sql_string(suide="E",
+                                            proc_name="BK_DATABASE",
+                                            proc_args_dict={"bk_name": backup_name, "bk_path": backup_path, "db_to_backup": db_name},
+                                            varchar_values=[backup_name, backup_path, db_name])
         try:
             logging.debug("[%-10s]: creazione backup database: %s - esecuzione della stringa SQL: %s", "Wallet", db_name, sql_string)
             self.cursor.execute(sql_string)
@@ -423,7 +413,7 @@ class Wallet:
     def get_open_deb_creds(self):
         """Ottiene tutti i debiti-crediti non ancora saldati, leggendo dalla vista V_DEBITI_CREDITI_APERTI restituise
          una lista contente i nomi dei campi e una matrice di tutte le righe raccolte"""
-        sql_string = Tools.format_sql_string(suide="S",
+        sql_string = self.format_sql_string(suide="S",
                                              table_name="V_DEBITI_CREDITI_APERTI",
                                              order_by_dict={"convert(date, DATA, 103)": "DESC"})
         try:
@@ -445,11 +435,11 @@ class Wallet:
                 matrix_deb_cred.append([elem for elem in row])
             return column_list, matrix_deb_cred
 
-    def get_prev_deb_info(self, id_records):
+    def get_prev_deb_info(self, id_records):        # potrebbe eseguire una sp
         """Da una lista di id di debiti e/o crediti (NB di cui è già stato verificata la provenienza dalla stessa entità)
          restituisce l'importo come somma di valori positivi (crediti) e negativi (debiti) dei movimenti selezionati e
          il dare_avere valorizzato di conseguenza"""
-        sql_string_total = Tools.format_sql_string(suide="S",
+        sql_string_total = self.format_sql_string(suide="S",
                                                    table_name="MOVIMENTI mv",
                                                    field_select_list=["cast(sum(case when DARE_AVERE = 1 then importo * -1 else importo end) as decimal(9, 2)) as importo"],
                                                    join_type="I",
@@ -479,10 +469,7 @@ class Wallet:
                 raise FatalError("Errore nel risalire ai debiti/crediti selezionati")
 
     def get_movements(self, type_mov=None, name_mov=None):
-        """Restituisce un dizionario dei tipi di movimenti presenti nel database formato {id_mov: nome_mov}, se
-        type_mov != None allora filtro per categoria (general o deb/cred), name_mov != None allora restituisce soltanto
-        il singolo elemento"""
-        partial_sql = partial(Tools.format_sql_string,
+        partial_sql = partial(self.format_sql_string,
                               suide="S",
                               table_name="MAP_MOVIMENTI",
                               field_select_list=["ID", "DESCRIZIONE"],
@@ -493,7 +480,6 @@ class Wallet:
             sql_string = partial_sql(where_dict={"DESCRIZIONE": name_mov}, varchar_values=[name_mov])
         else:           # oppure per tutti i movimenti
             sql_string = partial_sql()
-
         try:
             logging.debug("[%-10s]: raccolta tipi di movimenti - esecuzione della stringa SQL: %s", "Wallet", sql_string)
             self.cursor.execute(sql_string)
@@ -508,68 +494,91 @@ class Wallet:
                           Tools.list_to_str(type_movements_dict))
             return type_movements_dict
 
-    def get_type_payments(self):
+    def get_info_db(self, info_type):
         """Restituisce un dizionario sui tipi di pagamento nel formato {id_pagamento: nome_pagamento}"""
-        sql_string = Tools.format_sql_string(suide="S",
-                                             table_name="MAP_PAGAMENTI",
-                                             field_select_list=["ID", "DESCRIZIONE"],
-                                             order_by_dict={"DESCRIZIONE": "ASC"})
+        _types = {"pagamenti": "MAP_PAGAMENTI", "spese_varie": "MAP_SPESE_VARIE", "entrate": "MAP_ENTRATE"}
         try:
-            logging.debug("[%-10s]: raccolta tipi di pagamenti - esecuzione della stringa SQL: %s", "Wallet", sql_string)
+            sql_string = self.format_sql_string(suide="S",
+                                                 table_name=_types[info_type],
+                                                 field_select_list=["ID", "DESCRIZIONE"],
+                                                 order_by_dict={"DESCRIZIONE": "ASC"})
+            logging.debug("[%-10s]: raccolta tipi di %s - esecuzione della stringa SQL: %s", "Wallet", info_type, sql_string)
             self.cursor.execute(sql_string)
         except pyodbc.Error as error:
-            logging.error("[%-10s]:  raccolta tipi di pagamenti - errore - trace: {}", "Wallet", str(error))
-            raise FatalError("Errore nella raccolta dei tipi di pagamenti, consulta il log per maggiori dettagli")
+            logging.error("[%-10s]:  raccolta tipi di %s - errore - trace: {}", "Wallet", info_type, str(error))
+            raise FatalError("Errore database, consulta il log per maggiori dettagli")
+        except ValueError:
+            logging.error("[%-10s]:  errore - chiave sconosciuta: %s", "Wallet", info_type)
+            raise FatalError("Errore interno, consulta il log per maggiori dettagli")
         else:
-            type_payments_dict = {}
+            info_data = {}
             for row in self.cursor:
-                type_payments_dict[row[0]] = row[1]
-            logging.debug("[%-10s]: raccolta tipi di pagamenti - esecuzione riuscita" % "Wallet")
-            return type_payments_dict
+                info_data[row[0]] = row[1]
+            logging.debug("[%-10s]: raccolta tipi di %s - esecuzione riuscita", "Wallet", info_type)
+            return info_data
 
-    def get_type_spec_movements(self):
-        """Restituisce un dizionario sui tipi di spesa generica nel formato {id_spesa: nome_spesa}"""
-        sql_string = Tools.format_sql_string(suide="S",
-                                             table_name="MAP_SPESE_VARIE",
-                                             field_select_list=["ID", "DESCRIZIONE"],
-                                             order_by_dict={"DESCRIZIONE": "ASC"})
-        try:
-            logging.debug("[%-10s]: raccolta tipi di spese variabili - esecuzione della stringa SQL: %s", "Wallet", sql_string)
-            self.cursor.execute(sql_string)
-        except pyodbc.Error as error:
-            logging.error("[%-10s]: raccolta tipi di spese variabili - errore - trace: %s", "Wallet", str(error))
-            raise FatalError("Errore nella raccolta dei tipi di spese variabili, consulta il log per maggiori dettagli")
-        else:
-            type_spec_movments_dict = {}
-            for row in self.cursor:
-                type_spec_movments_dict[row[0]] = row[1]
-            logging.debug("[%-10s]: raccolta tipi di spese variabili - esecuzione riuscita, valori trovati - %s", "Wallet",
-                          Tools.list_to_str(type_spec_movments_dict))
-            return type_spec_movments_dict
-
-    def get_type_entrate(self):
-        """Restituisce un dizionario sui tipi di entrata nel formato {id_entrata: nome_entrata}"""
-        sql_string = Tools.format_sql_string(suide="S",
-                                             table_name="MAP_ENTRATE",
-                                             field_select_list=["ID", "DESCRIZIONE"],
-                                             order_by_dict={"DESCRIZIONE": "ASC"})
-        try:
-            logging.debug("[%-10s]: raccolta tipi di entrate - esecuzione della stringa SQL: %s", "Wallet", sql_string)
-            self.cursor.execute(sql_string)
-        except pyodbc.Error as error:
-            logging.error("[%-10s]: raccolta tipi di entrate - errore - trace: %s", "Wallet", str(error))
-            raise FatalError("Errore nella raccolta dei tipi di entrate, consulta il log per maggiori dettagli")
-        else:
-            type_entrate_dict = {}
-            for row in self.cursor:
-                type_entrate_dict[row[0]] = row[1]
-            logging.debug("[%-10s]: raccolta tipi di entrate - esecuzione riuscita, valori trovati - %s", "Wallet",
-                          Tools.list_to_str(type_entrate_dict))
-            return type_entrate_dict
+    # def get_type_payments(self):
+    #     """Restituisce un dizionario sui tipi di pagamento nel formato {id_pagamento: nome_pagamento}"""
+    #     sql_string = self.format_sql_string(suide="S",
+    #                                          table_name="MAP_PAGAMENTI",
+    #                                          field_select_list=["ID", "DESCRIZIONE"],
+    #                                          order_by_dict={"DESCRIZIONE": "ASC"})
+    #     try:
+    #         logging.debug("[%-10s]: raccolta tipi di pagamenti - esecuzione della stringa SQL: %s", "Wallet", sql_string)
+    #         self.cursor.execute(sql_string)
+    #     except pyodbc.Error as error:
+    #         logging.error("[%-10s]:  raccolta tipi di pagamenti - errore - trace: {}", "Wallet", str(error))
+    #         raise FatalError("Errore nella raccolta dei tipi di pagamenti, consulta il log per maggiori dettagli")
+    #     else:
+    #         type_payments_dict = {}
+    #         for row in self.cursor:
+    #             type_payments_dict[row[0]] = row[1]
+    #         logging.debug("[%-10s]: raccolta tipi di pagamenti - esecuzione riuscita" % "Wallet")
+    #         return type_payments_dict
+    #
+    # def get_type_spec_movements(self):
+    #     """Restituisce un dizionario sui tipi di spesa generica nel formato {id_spesa: nome_spesa}"""
+    #     sql_string = self.format_sql_string(suide="S",
+    #                                          table_name="MAP_SPESE_VARIE",
+    #                                          field_select_list=["ID", "DESCRIZIONE"],
+    #                                          order_by_dict={"DESCRIZIONE": "ASC"})
+    #     try:
+    #         logging.debug("[%-10s]: raccolta tipi di spese variabili - esecuzione della stringa SQL: %s", "Wallet", sql_string)
+    #         self.cursor.execute(sql_string)
+    #     except pyodbc.Error as error:
+    #         logging.error("[%-10s]: raccolta tipi di spese variabili - errore - trace: %s", "Wallet", str(error))
+    #         raise FatalError("Errore nella raccolta dei tipi di spese variabili, consulta il log per maggiori dettagli")
+    #     else:
+    #         type_spec_movments_dict = {}
+    #         for row in self.cursor:
+    #             type_spec_movments_dict[row[0]] = row[1]
+    #         logging.debug("[%-10s]: raccolta tipi di spese variabili - esecuzione riuscita, valori trovati - %s", "Wallet",
+    #                       Tools.list_to_str(type_spec_movments_dict))
+    #         return type_spec_movments_dict
+    #
+    # def get_type_entrate(self):
+    #     """Restituisce un dizionario sui tipi di entrata nel formato {id_entrata: nome_entrata}"""
+    #     sql_string = self.format_sql_string(suide="S",
+    #                                          table_name="MAP_ENTRATE",
+    #                                          field_select_list=["ID", "DESCRIZIONE"],
+    #                                          order_by_dict={"DESCRIZIONE": "ASC"})
+    #     try:
+    #         logging.debug("[%-10s]: raccolta tipi di entrate - esecuzione della stringa SQL: %s", "Wallet", sql_string)
+    #         self.cursor.execute(sql_string)
+    #     except pyodbc.Error as error:
+    #         logging.error("[%-10s]: raccolta tipi di entrate - errore - trace: %s", "Wallet", str(error))
+    #         raise FatalError("Errore nella raccolta dei tipi di entrate, consulta il log per maggiori dettagli")
+    #     else:
+    #         type_entrate_dict = {}
+    #         for row in self.cursor:
+    #             type_entrate_dict[row[0]] = row[1]
+    #         logging.debug("[%-10s]: raccolta tipi di entrate - esecuzione riuscita, valori trovati - %s", "Wallet",
+    #                       Tools.list_to_str(type_entrate_dict))
+    #         return type_entrate_dict
 
     def get_last_prog(self, table_name):
         """Recupera l'ultimo id inserito nella tabella passata"""
-        sql_string = Tools.format_sql_string(suide="S",
+        sql_string = self.format_sql_string(suide="S",
                                              table_name=table_name,
                                              field_select_list=["TOP 1 ID"],
                                              order_by_dict={"ID": "DESC"})
@@ -587,7 +596,7 @@ class Wallet:
 
     def get_bi_credentials(self, role="ADMIN"):
         """Recupera username e password per accedere alla BI, parametro role per un ruolo diverso da ADMIN"""
-        sql_string = Tools.format_sql_string(suide="S",
+        sql_string = self.format_sql_string(suide="S",
                                              table_name="QLIK_USERS",
                                              field_select_list=["username", "password"],
                                              where_dict={"RUOLO": role},
@@ -609,7 +618,7 @@ class Wallet:
 
     def get_password_from_username(self, username):
         """Resituisce la password (sha256) relativa all'utente dato in input"""
-        sql_str = Tools.format_sql_string(suide="S",
+        sql_str = self.format_sql_string(suide="S",
                                           table_name="WALLET_USERS",
                                           field_select_list=["PASSWORD"],
                                           where_dict={"USERNAME": username},
@@ -631,7 +640,7 @@ class Wallet:
 
     def get_table_name_from_type_mov(self, type_movement):
         """A seconda del movimento passato restituisce il relativo nome della tabella"""
-        sql_string = Tools.format_sql_string(suide="S",
+        sql_string = self.format_sql_string(suide="S",
                                              table_name="MAP_MOVIMENTI",
                                              field_select_list=["NOME_TABELLA"],
                                              where_dict={"DESCRIZIONE": type_movement},
@@ -654,16 +663,15 @@ class Wallet:
         v_table_name = "V_{}".format(table_name)
 
         try:
-            sql_string = Tools.format_sql_string(suide="S",
+            sql_string = self.format_sql_string(suide="S",
                                                  table_name=v_table_name,
                                                  top=no_rows,
                                                  order_by_dict={"convert(date, DATA, 103)": "DESC"})
             logging.debug("[%-10s]: raccolta record movimenti - esecuzione della stringa SQL: %s", "Wallet", sql_string)
             self.cursor.execute(sql_string)
-
-        except Tools.WrongSQLstatement as error:  # ho inserito un valore non valido nella stringa (nello specifico il numero di record da visualizzare che viene dato grezzo in input) segnalo
+        except WrongValueInsert as error:  # ho inserito un valore non valido nella stringa (nello specifico il numero di record da visualizzare che viene dato grezzo in input) segnalo
+            logging.error("[%-10s]: raccolta record movimenti - errore - trace: %s", "Wallet", str(error))
             raise WrongValueInsert(str(error))
-
         except pyodbc.Error as error:
             logging.error("[%-10s]: raccolta record movimenti - errore - trace: %s", "Wallet", str(error))
             raise FatalError(
@@ -685,7 +693,7 @@ class Wallet:
 
     def check_ids_to_pay(self, ids_deb_cred_list):
         """Verifica che gli id, eventualmente più di uno, debiti o crediti, appartengano alla stessa persona"""
-        sql_string = Tools.format_sql_string(suide="S",
+        sql_string = self.format_sql_string(suide="S",
                                              field_select_list=["count(distinct ORIGINE)"],
                                              table_name="DEBITI_CREDITI dc",
                                              join_type="I",
@@ -711,10 +719,10 @@ class Wallet:
             raise WrongValueInsert("Non è stato selezionato nessun record")
 
         for record in list_records:
-            sql_string_delete_spec = Tools.format_sql_string(suide="D",
+            sql_string_delete_spec = self.format_sql_string(suide="D",
                                                              table_name=self.get_table_name_from_type_mov(type_movement),
                                                              where_dict={"ID_MOV": record})
-            sql_string_delete_main = Tools.format_sql_string(suide="D",
+            sql_string_delete_main = self.format_sql_string(suide="D",
                                                              table_name="MOVIMENTI",
                                                              where_dict={"ID": record})
             try:
@@ -732,6 +740,177 @@ class Wallet:
                 logging.info("[%-10s]: eliminazione movimento id: %s - movimento rimosso", "Wallet", record)
 
         self.cursor.commit()
+
+    def format_sql_string(self, suide,
+                          table_name=None,
+                          field_select_list=None,
+                          where_dict=None,
+                          update_dict=None,
+                          insert_dict=None,
+                          join_type=None,
+                          join_table=None,
+                          join_dict=None,
+                          varchar_values=None,
+                          order_by_dict=None,
+                          top=None,
+                          proc_name=None,
+                          proc_args_dict=None):
+        """Crea e formatta un'instruzione SQL di tipo suid (SELECT, UPDATE, INSERT, DELETE)
+            - suid -> ha come valore 'S' SELECT, 'U' UPDATE, 'I' INSERT, 'D' DELETE, 'E' EXEC (esegue procedura)
+            - table_name -> nome della tabella in questione,
+            - field_select_list -> lista di campi da selezionare/modificare/inserire/cancellare
+            - where_dict -> dizionario che contiene n condizioni che devono essere interamente soddisfatte (AND ... AND ... ) nella forma chiave = valore inseriti nel costrutto WHERE
+            - update_dict -> dizionario in cui chaive (<-campo) = valore nel costrutto SET di UPDATE
+            - insert_dict -> dizionario contenete il campo (chiave) e il valore da inserire in esso nel costrutto INSERT INTO
+            - join -> tipo di join da eseguire -> 'I' inner, 'L' left, 'R' right, 'C' cross
+            - join_table -> tabella da joinare, NB per ora non sono previsti join multipli
+            - join_fields -> dizionario di campi da uguagliare per il join
+            - varchar_values -> lista di valori varchar da inserire in select, where, insert o update, restituisce il valore nello statement SQL racchiuso da singoli apici
+            - order_by_dict -> coppie CAMPO: DESC/ASC
+            - top -> se diverso da None mostra le prime top (int) righe
+            - proc_name -> nome procedura da eseguire
+            - proc_args_dict -> dizionario nella forma {nome_argomento: valore_argomento}"""
+        sql_string = ""
+        join_types_dict = {"I": "INNER JOIN", "L": "LEFT JOIN", "R": "RIGHT JOIN", "C": "CROSS JOIN"}
+
+        if suide == 'S':
+            sql_string = "SELECT * FROM {}".format(table_name)
+
+            if top is not None:  # inserisco top x nella select
+                if str(top).isdigit():
+                    top_n_values = "top {}".format(int(top))
+                    sql_string = sql_string.replace("SELECT", "SELECT {}".format(top_n_values))
+
+                else:
+                    raise WrongValueInsert(
+                        "Non è stato passato un valore numerico per il numero di record da selezionare")
+
+            if isinstance(field_select_list, list):  # field_select_list <> None rimuovo '*' e creo l'elenco dei campi
+                fields_to_select = ", ".join(field_select_list)
+                sql_string = sql_string.replace("*", fields_to_select)
+
+            elif where_dict:
+                raise WrongValueInsert(
+                    "è stato passato un parametro non valido per la condizione SELECT, deve essere list")
+
+            if join_dict or join_table or join_type:
+                if join_type in join_types_dict.keys() and join_table and isinstance(join_dict,
+                                                                                     dict):  # in questo caso devo inserire anche un join
+                    fields_to_join = " AND ".join("{} = {}".format(key, value) for key, value in join_dict.items())
+                    sql_string = " ".join(
+                        [sql_string, join_types_dict.get(join_type), join_table, "ON", fields_to_join])
+
+                else:
+                    raise WrongValueInsert(
+                        "Nel caso di un join deve essere fornita sia la tabella da legare, sia l'elenco "
+                        "dei cambi da uguagliare, sia il parametro corretto per il tipo di join")
+
+            if isinstance(where_dict,
+                          dict):  # se where_dict <> da None aggiungo anche le restrizioni tramite WHERE statement
+                fields_to_filter = " AND ".join("{} = {}".format(key, "'{}'".format(
+                    Tools.escape_sql_chars(value)) if varchar_values and value in varchar_values else value) for key, value in
+                                                where_dict.items())
+                sql_string = " ".join([sql_string, "WHERE", fields_to_filter])
+
+            elif where_dict:
+                raise WrongValueInsert(
+                    "è stato passato un parametro non valido per la condizione WHERE, deve essere dict")
+
+            if isinstance(order_by_dict, dict):  # se order_by_dict <> da None inserisco l'ordinamento
+                fields_to_order_by = ", ".join("{} {}".format(key, value) for key, value in order_by_dict.items())
+                sql_string = " ".join([sql_string, "ORDER BY", fields_to_order_by])
+
+            elif order_by_dict:
+                raise WrongValueInsert(
+                    "è stato passato un parametro non valido per la condizione ORDER BY, deve essere dict")
+        elif suide == 'U':
+            sql_string = "UPDATE {} SET".format(table_name)
+
+            if isinstance(update_dict, dict):
+                fields_to_update = ", ".join("{} = {}".format(key, "'{}'".format(
+                    Tools.escape_sql_chars(value)) if varchar_values and value in varchar_values else value) for key, value in
+                                             update_dict.items())
+                sql_string = " ".join([sql_string, fields_to_update])
+
+            else:
+                raise WrongValueInsert(
+                    "Non è stata fornita la lista dei campi da modificare oppure il tipo non è corretto, deve essere dict")
+
+            if isinstance(where_dict,
+                          dict):  # se where_dict è tipo dict aggiungo anche le restrizioni tramite WHERE statement
+                fields_to_filter = " AND ".join("{} = {}".format(key, "'{}'".format(
+                    Tools.escape_sql_chars(value)) if varchar_values and value in varchar_values else value) for key, value in
+                                                where_dict.items())
+                sql_string = " ".join([sql_string, "WHERE", fields_to_filter])
+
+            elif where_dict is not None:
+                raise WrongValueInsert(
+                    "è stato passato un parametro non valido per la condizione WHERE, deve essere dict")
+
+            else:  # cautela personale per non modificare una tabella per intero
+                raise WrongValueInsert("Non si può modificare interamente una tabella!")
+        elif suide == 'I':
+            if isinstance(insert_dict,
+                          dict):  # mi accerto che venga fornita la lista dei campi e il loro relativo valore da aggiungere
+                sql_string = "INSERT INTO {}".format(table_name)
+                fields_to_insert = "({})".format(", ".join(insert_dict.keys()))  # elenco campi da inserire
+                values_to_insert = "({})".format(", ".join(["'{}'".format(
+                    Tools.escape_sql_chars(value)) if varchar_values and value in varchar_values else str(value) for value in
+                                                            insert_dict.values()]))  # elenco valori da inserire
+
+                sql_string = " ".join([sql_string, fields_to_insert, "VALUES", values_to_insert])
+
+            elif insert_dict is not None:
+                raise WrongValueInsert(
+                    "è stato passato un parametro non valido per la condizione INSERT, deve essere dict")
+
+            else:
+                raise WrongValueInsert("Non è stata fornita la lista dei campi da inserire!")
+        elif suide == 'D':
+            sql_string = "DELETE {}".format(table_name)
+
+            if isinstance(where_dict,
+                          dict):  # non voglio mai cancellare per intero la tabella, faccio sì che debbano esserci sempre clausole WHERE
+                fields_to_filter = " AND ".join("{} = {}".format(key, "'{}'".format(
+                    Tools.escape_sql_chars(value)) if varchar_values and value in varchar_values else value) for key, value in
+                                                where_dict.items())
+                sql_string = " ".join([sql_string, "WHERE", fields_to_filter])
+
+            elif where_dict is not None:
+                raise WrongValueInsert(
+                    "è stato passato un parametro non valido per la condizione WHERE, deve essere dict")
+
+            else:
+                raise WrongValueInsert("Non è possibile eliminare per intero una tabella!")
+        elif suide == "E":
+            sql_string = "exec {}".format(proc_name)
+            if isinstance(proc_args_dict, dict):  # se proc_args_dict <> da None aggiungo anche la lista di argomenti
+                args = ", ".join("@{} = {}".format(key, "'{}'".format(
+                    Tools.escape_sql_chars(value)) if varchar_values and value in varchar_values else value) for key, value in
+                                 proc_args_dict.items())
+                sql_string = " ".join([sql_string, args])
+        return sql_string
+
+    def check_date(self, date: datetime):
+        """Verifica che il dizionario in input contenga una data e la restituisce come istanza di datetime"""
+        count = 0  # se arriva a 3 alla fine del ciclo restituisce data odierna, vedi poi
+        time_dict = {"day": range(1, 32), "month": range(1, 13), "year": range(2000, 2026)}
+        for time_period, time_range in time_dict.items():
+            if time_period not in date.keys() or date[time_period].strip() == "":  # se manca l'elemento oppure è vuoto aumento count
+                count += 1
+            else:  # in caso contrario allora esiste e non è vuoto
+                try:
+                    if int(date[
+                               time_period]) not in time_range:  # se è all'esterno del relativo range il numero non è valido e quindi la data
+                        return None
+                except (ValueError, TypeError):  # l'elemento non è in formato numerico intero, data non valida
+                    return None
+        if count == 3:  # se per tre volte l'elemento mancava oppure era vuoto allora restituisce data odierna
+            return datetime.now().strftime("%d-%m-%Y")
+        elif count == 0:  # crea la data con i tre parametri passati
+            return datetime(int(date["year"]), int(date["month"]), int(date["day"])).strftime("%d-%m-%Y")
+        else:  # mancano uno o due elementi, data non valida
+            return None
 
 
 if __name__ == "__main__":
