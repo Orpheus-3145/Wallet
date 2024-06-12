@@ -2,13 +2,13 @@ import logging
 import os
 from datetime import date
 from win32api import GetSystemMetrics
+import Wallet
 
 from kivy.config import Config
 Config.read(os.path.join(os.getcwd(), "..\\settings\\config_wallet.ini"))
 from kivy.lang import Builder
 from Screens import *
 
-import Wallet
 
 log_levels = {10: logging.DEBUG, 20: logging.INFO, 30: logging.WARNING, 40: logging.ERROR, 50: logging.CRITICAL}
 

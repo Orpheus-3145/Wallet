@@ -88,16 +88,13 @@ class Wallet:
     def __init__(self, dsn):
         """Creo la connessione al database tramite il dsn"""
         logging.info("[%-10s]: %s", "Wallet", "*" * 80)
-
         try:
             self._dsn = dsn     # la tengo nel caso mi serva nel metodo backup_database()
             self.connection = pyodbc.connect(self._dsn, autocommit=True)
             self.cursor = self.connection.cursor()  # per comunicare con il database
-
         except pyodbc.Error as error:
             logging.error("[%-10s]: avvio istanza - errore - trace: %s", "Wallet", str(error))
             raise FatalError("Errore nella connessione al database, consulta il log per maggiori dettagli")
-
         else:
             logging.info("[%-10s]: avvio istanza - creazione di un'istanza di Wallet e connessione al database riuscita" % "Wallet")
             self._ready_to_insert_data = False          # proprietà valorizzata dal metodo check_values, indica se il movimento è stato controllato
@@ -169,12 +166,10 @@ class Wallet:
             if "DESCRIZIONE" not in spec_mov_dict.keys():  # se non c'è descrizione la valorizzo come vuota
                 spec_mov_dict["DESCRIZIONE"] = ""
             main_mov_dict["DARE_AVERE"] = 0  # è una spesa, valorizzo dare
-
         elif type_movement == "Spesa Fissa":
             if "DESCRIZIONE" not in spec_mov_dict.keys() or spec_mov_dict["DESCRIZIONE"].strip == "":
                 raise WrongValueInsert("Descrizione non inserita")
             main_mov_dict["DARE_AVERE"] = 0  # è una spesa, valorizzo dare
-
         elif type_movement == "Stipendio":
             if "PROVENIENZA" not in spec_mov_dict.keys() or spec_mov_dict["PROVENIENZA"].strip() == "":
                 raise WrongValueInsert("DDL non inserito")
@@ -217,14 +212,12 @@ class Wallet:
             main_mov_dict["IMPORTO"] = spec_mov_dict["NETTO"]
             main_mov_dict["DARE_AVERE"] = 1     # è un'entrata, valorizzo avere
             main_mov_dict["ID_PAG"] = 5         # gli stipendi si accreditano mediante bonifico (id_payment: 5)
-
         elif type_movement == "Entrata":
             if "ID_TIPO_ENTRATA" not in spec_mov_dict.keys():
                 raise WrongValueInsert("Tipo di entrata non inserito")
             if "DESCRIZIONE" not in spec_mov_dict.keys() or spec_mov_dict.get("DESCRIZIONE").strip() == "":
                 raise WrongValueInsert("Descrizione non inserita")
             main_mov_dict["DARE_AVERE"] = 1  # è un'entrata, valorizzo avere
-
         elif type_movement == "Debito - Credito":
             if "ORIGINE" not in spec_mov_dict.keys() or spec_mov_dict.get("ORIGINE").strip() == "":
                 raise WrongValueInsert("Origine non inserita")
@@ -233,7 +226,6 @@ class Wallet:
             if "DEBCRED" not in spec_mov_dict.keys():
                 raise WrongValueInsert("Specificare debito o credito")
             main_mov_dict["DARE_AVERE"] = int(not bool(int(spec_mov_dict["DEBCRED"])))  # debito -> avere, credito -> dare
-
         elif type_movement == "Saldo Debito - Credito":
             if "ID_PAG" not in main_mov_dict.keys():
                 raise WrongValueInsert("Tipo di pagamento non inserito")
@@ -244,12 +236,10 @@ class Wallet:
             main_mov_dict["IMPORTO"] = importo
             main_mov_dict["DARE_AVERE"] = dare_avere
             main_mov_dict["NOTE"] = "[Saldo dei {} di id: {}] {}".format("crediti" if dare_avere == "1" else "debiti", spec_mov_dict["ID_PREV_DEB_CRED"], spec_mov_dict["NOTE"]).strip()
-
         elif type_movement == "Spesa di Mantenimento":
             if "DESCRIZIONE" not in spec_mov_dict.keys() or spec_mov_dict.get("DESCRIZIONE").strip() == "":
                 raise WrongValueInsert("Descrizione non inserita")
             main_mov_dict["DARE_AVERE"] = 0  # è una spesa, valorizzo dare
-
         elif type_movement == "Spesa di Viaggio":
             if "VIAGGIO" not in spec_mov_dict.keys() or spec_mov_dict.get("VIAGGIO").strip() == "":
                 raise WrongValueInsert("Viaggio non inserito")
@@ -414,8 +404,8 @@ class Wallet:
         """Ottiene tutti i debiti-crediti non ancora saldati, leggendo dalla vista V_DEBITI_CREDITI_APERTI restituise
          una lista contente i nomi dei campi e una matrice di tutte le righe raccolte"""
         sql_string = self.format_sql_string(suide="S",
-                                             table_name="V_DEBITI_CREDITI_APERTI",
-                                             order_by_dict={"convert(date, DATA, 103)": "DESC"})
+                                            table_name="V_DEBITI_CREDITI_APERTI",
+                                            order_by_dict={"convert(date, DATA, 103)": "DESC"})
         try:
             logging.debug("[%-10s]: raccolta debiti/crediti aperti - esecuzione della stringa SQL: %s", "Wallet", sql_string)
             self.cursor.execute(sql_string)
@@ -440,12 +430,11 @@ class Wallet:
          restituisce l'importo come somma di valori positivi (crediti) e negativi (debiti) dei movimenti selezionati e
          il dare_avere valorizzato di conseguenza"""
         sql_string_total = self.format_sql_string(suide="S",
-                                                   table_name="MOVIMENTI mv",
-                                                   field_select_list=["cast(sum(case when DARE_AVERE = 1 then importo * -1 else importo end) as decimal(9, 2)) as importo"],
-                                                   join_type="I",
-                                                   join_table="DEBITI_CREDITI dc",
-                                                   join_dict={"mv.id": "dc.ID_MOV"}) + "\nWHERE dc.id_mov IN ({})".format(
-            Tools.list_to_str(id_records))
+                                                  table_name="MOVIMENTI mv",
+                                                  field_select_list=["cast(sum(case when DARE_AVERE = 1 then importo * -1 else importo end) as decimal(9, 2)) as importo"],
+                                                  join_type="I",
+                                                  join_table="DEBITI_CREDITI dc",
+                                                  join_dict={"mv.id": "dc.ID_MOV"}) + "\nWHERE dc.id_mov IN ({})".format(Tools.list_to_str(id_records))
         try:
             logging.debug("[%-10s]: raccolta info dai deb_cred di id in %s - esecuzione della stringa SQL: %s", "Wallet", str(id_records), sql_string_total)
             self.cursor.execute(sql_string_total)
@@ -499,9 +488,9 @@ class Wallet:
         _types = {"pagamenti": "MAP_PAGAMENTI", "spese_varie": "MAP_SPESE_VARIE", "entrate": "MAP_ENTRATE"}
         try:
             sql_string = self.format_sql_string(suide="S",
-                                                 table_name=_types[info_type],
-                                                 field_select_list=["ID", "DESCRIZIONE"],
-                                                 order_by_dict={"DESCRIZIONE": "ASC"})
+                                                table_name=_types[info_type],
+                                                field_select_list=["ID", "DESCRIZIONE"],
+                                                order_by_dict={"DESCRIZIONE": "ASC"})
             logging.debug("[%-10s]: raccolta tipi di %s - esecuzione della stringa SQL: %s", "Wallet", info_type, sql_string)
             self.cursor.execute(sql_string)
         except pyodbc.Error as error:
@@ -517,71 +506,12 @@ class Wallet:
             logging.debug("[%-10s]: raccolta tipi di %s - esecuzione riuscita", "Wallet", info_type)
             return info_data
 
-    # def get_type_payments(self):
-    #     """Restituisce un dizionario sui tipi di pagamento nel formato {id_pagamento: nome_pagamento}"""
-    #     sql_string = self.format_sql_string(suide="S",
-    #                                          table_name="MAP_PAGAMENTI",
-    #                                          field_select_list=["ID", "DESCRIZIONE"],
-    #                                          order_by_dict={"DESCRIZIONE": "ASC"})
-    #     try:
-    #         logging.debug("[%-10s]: raccolta tipi di pagamenti - esecuzione della stringa SQL: %s", "Wallet", sql_string)
-    #         self.cursor.execute(sql_string)
-    #     except pyodbc.Error as error:
-    #         logging.error("[%-10s]:  raccolta tipi di pagamenti - errore - trace: {}", "Wallet", str(error))
-    #         raise FatalError("Errore nella raccolta dei tipi di pagamenti, consulta il log per maggiori dettagli")
-    #     else:
-    #         type_payments_dict = {}
-    #         for row in self.cursor:
-    #             type_payments_dict[row[0]] = row[1]
-    #         logging.debug("[%-10s]: raccolta tipi di pagamenti - esecuzione riuscita" % "Wallet")
-    #         return type_payments_dict
-    #
-    # def get_type_spec_movements(self):
-    #     """Restituisce un dizionario sui tipi di spesa generica nel formato {id_spesa: nome_spesa}"""
-    #     sql_string = self.format_sql_string(suide="S",
-    #                                          table_name="MAP_SPESE_VARIE",
-    #                                          field_select_list=["ID", "DESCRIZIONE"],
-    #                                          order_by_dict={"DESCRIZIONE": "ASC"})
-    #     try:
-    #         logging.debug("[%-10s]: raccolta tipi di spese variabili - esecuzione della stringa SQL: %s", "Wallet", sql_string)
-    #         self.cursor.execute(sql_string)
-    #     except pyodbc.Error as error:
-    #         logging.error("[%-10s]: raccolta tipi di spese variabili - errore - trace: %s", "Wallet", str(error))
-    #         raise FatalError("Errore nella raccolta dei tipi di spese variabili, consulta il log per maggiori dettagli")
-    #     else:
-    #         type_spec_movments_dict = {}
-    #         for row in self.cursor:
-    #             type_spec_movments_dict[row[0]] = row[1]
-    #         logging.debug("[%-10s]: raccolta tipi di spese variabili - esecuzione riuscita, valori trovati - %s", "Wallet",
-    #                       Tools.list_to_str(type_spec_movments_dict))
-    #         return type_spec_movments_dict
-    #
-    # def get_type_entrate(self):
-    #     """Restituisce un dizionario sui tipi di entrata nel formato {id_entrata: nome_entrata}"""
-    #     sql_string = self.format_sql_string(suide="S",
-    #                                          table_name="MAP_ENTRATE",
-    #                                          field_select_list=["ID", "DESCRIZIONE"],
-    #                                          order_by_dict={"DESCRIZIONE": "ASC"})
-    #     try:
-    #         logging.debug("[%-10s]: raccolta tipi di entrate - esecuzione della stringa SQL: %s", "Wallet", sql_string)
-    #         self.cursor.execute(sql_string)
-    #     except pyodbc.Error as error:
-    #         logging.error("[%-10s]: raccolta tipi di entrate - errore - trace: %s", "Wallet", str(error))
-    #         raise FatalError("Errore nella raccolta dei tipi di entrate, consulta il log per maggiori dettagli")
-    #     else:
-    #         type_entrate_dict = {}
-    #         for row in self.cursor:
-    #             type_entrate_dict[row[0]] = row[1]
-    #         logging.debug("[%-10s]: raccolta tipi di entrate - esecuzione riuscita, valori trovati - %s", "Wallet",
-    #                       Tools.list_to_str(type_entrate_dict))
-    #         return type_entrate_dict
-
     def get_last_prog(self, table_name):
         """Recupera l'ultimo id inserito nella tabella passata"""
         sql_string = self.format_sql_string(suide="S",
-                                             table_name=table_name,
-                                             field_select_list=["TOP 1 ID"],
-                                             order_by_dict={"ID": "DESC"})
+                                            table_name=table_name,
+                                            field_select_list=["TOP 1 ID"],
+                                            order_by_dict={"ID": "DESC"})
         try:
             logging.debug("[%-10s]: recupero ultimo id da tabella %s - esecuzione della stringa SQL: %s", "Wallet", table_name, sql_string)
             self.cursor.execute(sql_string)
@@ -597,10 +527,10 @@ class Wallet:
     def get_bi_credentials(self, role="ADMIN"):
         """Recupera username e password per accedere alla BI, parametro role per un ruolo diverso da ADMIN"""
         sql_string = self.format_sql_string(suide="S",
-                                             table_name="QLIK_USERS",
-                                             field_select_list=["username", "password"],
-                                             where_dict={"RUOLO": role},
-                                             varchar_values=[role])
+                                            table_name="QLIK_USERS",
+                                            field_select_list=["username", "password"],
+                                            where_dict={"RUOLO": role},
+                                            varchar_values=[role])
         try:
             logging.debug("[%-10s]: recupero credenziali BI - esecuzione della stringa SQL: %s", "Wallet", sql_string)
             self.cursor.execute(sql_string)
@@ -619,10 +549,10 @@ class Wallet:
     def get_password_from_username(self, username):
         """Resituisce la password (sha256) relativa all'utente dato in input"""
         sql_str = self.format_sql_string(suide="S",
-                                          table_name="WALLET_USERS",
-                                          field_select_list=["PASSWORD"],
-                                          where_dict={"USERNAME": username},
-                                          varchar_values=[username])
+                                         table_name="WALLET_USERS",
+                                         field_select_list=["PASSWORD"],
+                                         where_dict={"USERNAME": username},
+                                         varchar_values=[username])
         try:
             logging.debug("[%-10s]: recupero password da username - esecuzione della stringa SQL: %s", "Wallet", sql_str)
             self.cursor.execute(sql_str)
@@ -641,10 +571,10 @@ class Wallet:
     def get_table_name_from_type_mov(self, type_movement):
         """A seconda del movimento passato restituisce il relativo nome della tabella"""
         sql_string = self.format_sql_string(suide="S",
-                                             table_name="MAP_MOVIMENTI",
-                                             field_select_list=["NOME_TABELLA"],
-                                             where_dict={"DESCRIZIONE": type_movement},
-                                             varchar_values=[type_movement])
+                                            table_name="MAP_MOVIMENTI",
+                                            field_select_list=["NOME_TABELLA"],
+                                            where_dict={"DESCRIZIONE": type_movement},
+                                            varchar_values=[type_movement])
         try:
             logging.debug("[%-10s]: recupero nome tabella - esecuzione della stringa SQL: %s", "Wallet", sql_string)
             self.cursor.execute(sql_string)
@@ -664,9 +594,9 @@ class Wallet:
 
         try:
             sql_string = self.format_sql_string(suide="S",
-                                                 table_name=v_table_name,
-                                                 top=no_rows,
-                                                 order_by_dict={"convert(date, DATA, 103)": "DESC"})
+                                                table_name=v_table_name,
+                                                top=no_rows,
+                                                order_by_dict={"convert(date, DATA, 103)": "DESC"})
             logging.debug("[%-10s]: raccolta record movimenti - esecuzione della stringa SQL: %s", "Wallet", sql_string)
             self.cursor.execute(sql_string)
         except WrongValueInsert as error:  # ho inserito un valore non valido nella stringa (nello specifico il numero di record da visualizzare che viene dato grezzo in input) segnalo
@@ -694,11 +624,11 @@ class Wallet:
     def check_ids_to_pay(self, ids_deb_cred_list):
         """Verifica che gli id, eventualmente più di uno, debiti o crediti, appartengano alla stessa persona"""
         sql_string = self.format_sql_string(suide="S",
-                                             field_select_list=["count(distinct ORIGINE)"],
-                                             table_name="DEBITI_CREDITI dc",
-                                             join_type="I",
-                                             join_table="MOVIMENTI mv",
-                                             join_dict={"mv.id": "dc.id_mov"})
+                                            field_select_list=["count(distinct ORIGINE)"],
+                                            table_name="DEBITI_CREDITI dc",
+                                            join_type="I",
+                                            join_table="MOVIMENTI mv",
+                                            join_dict={"mv.id": "dc.id_mov"})
         sql_string += " where mv.id in ({})".format(Tools.list_to_str(ids_deb_cred_list))
 
         try:
@@ -720,11 +650,11 @@ class Wallet:
 
         for record in list_records:
             sql_string_delete_spec = self.format_sql_string(suide="D",
-                                                             table_name=self.get_table_name_from_type_mov(type_movement),
-                                                             where_dict={"ID_MOV": record})
+                                                            table_name=self.get_table_name_from_type_mov(type_movement),
+                                                            where_dict={"ID_MOV": record})
             sql_string_delete_main = self.format_sql_string(suide="D",
-                                                             table_name="MOVIMENTI",
-                                                             where_dict={"ID": record})
+                                                            table_name="MOVIMENTI",
+                                                            where_dict={"ID": record})
             try:
                 self.cursor.execute(sql_string_delete_spec)
                 logging.debug("[%-10s]: eliminazione movimento id: %s - esecuzione della stringa SQL: %s", "Wallet", record, sql_string_delete_spec)
@@ -756,8 +686,8 @@ class Wallet:
                           proc_name=None,
                           proc_args_dict=None):
         """Crea e formatta un'instruzione SQL di tipo suid (SELECT, UPDATE, INSERT, DELETE)
-            - suid -> ha come valore 'S' SELECT, 'U' UPDATE, 'I' INSERT, 'D' DELETE, 'E' EXEC (esegue procedura)
-            - table_name -> nome della tabella in questione,
+            - suide -> ha come valore 'S' SELECT, 'U' UPDATE, 'I' INSERT, 'D' DELETE, 'E' EXEC
+            - table_name -> nome tabella,
             - field_select_list -> lista di campi da selezionare/modificare/inserire/cancellare
             - where_dict -> dizionario che contiene n condizioni che devono essere interamente soddisfatte (AND ... AND ... ) nella forma chiave = valore inseriti nel costrutto WHERE
             - update_dict -> dizionario in cui chaive (<-campo) = valore nel costrutto SET di UPDATE
