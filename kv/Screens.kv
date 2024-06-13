@@ -148,24 +148,29 @@
             background_color: BLUE_RGBA
             border_color: WHITE_RGBA
 
-    DefaultButton:
-        text: "Inserisci".upper()
-        font_size_scale: 1.1
-        size_hint: 0.2, 0.1
-        pos_hint: {"x": 0.76, "y": 0.35}
-        background_color: LIGHTGREEN_RGBA
-        color: WHITE_RGBA
-        on_release:
-            root.insert_movement()
+        BorderLayout:
+            border_color: LIGHTGREY_RGBA
+            size_hint: 0.2, 0.1
+            pos_hint: {"x": 0.76, "y": 0.35}
+            spacing: 5
+            padding: 5
 
-    DefaultButton:
-        text: "HOME"
-        font_size_scale: 1.5
-        size_hint: 0.2, 0.1
-        pos_hint: {"x": 0.76, "y": 0.24}
-        background_color: RED_RGBA
-        on_press:
-            root.interrupt_insertion()
+            DefaultButton:
+                text: "Inserisci".upper()
+                font_size_scale: 1.1
+                background_color: LIGHTGREEN_RGBA
+                color: WHITE_RGBA
+                on_release:
+                    root.insert_movement()
+
+        DefaultButton:
+            text: "HOME"
+            font_size_scale: 1.5
+            size_hint: 0.15, 0.1
+            pos_hint: {"x": 0.83, "y": 0.03}
+            background_color: RED_RGBA
+            on_press:
+                root.interrupt_insertion()
 
 
 <PayOffScreen>:
@@ -193,25 +198,31 @@
                 f_to_launch: root.add_new_id
                 font_size_chars: FONT_SIZE * 0.6
 
-        DefaultLayout:
+        BorderLayout:
             id: appearing_box
             orientation: "horizontal"
-            size_hint: 0.45, 0.14
-            pos_hint: {"x": 0.275, "y": 0.035}
-            spacing: 9
-            padding: 9
+            border_color: LIGHTGREY_RGBA
+            size_hint: 0.6, 0.13
+            pos_hint: {"x": 0.2, "y": 0.035}
+            spacing: 7
+            padding: 7
 
             DefaultButton:
                 text: "Salda".upper()
-                font_size_scale: 1.2
                 background_color: LIGHTGREEN_RGBA
                 color: DARKGREY_RGBA
                 on_release:
                     root.go_to_insert_screen()
 
             DefaultButton:
+                text: "Converti in movimento".upper()
+                background_color: LIGHTBLUE_RGBA
+                color: WHITE_RGBA
+                on_release:
+                    root.turn_deb_cred_into_mov()
+
+            DefaultButton:
                 text: "Elimina".upper()
-                font_size_scale: 1.2
                 background_color: RED_RGBA
                 color: WHITE_RGBA
                 on_release:
@@ -275,10 +286,11 @@
                 font_size_chars: FONT_SIZE * 0.6
                 f_to_launch: root.add_record_to_remove
 
-        DefaultLayout:
+        BorderLayout:
             id: remove_record_btn
             size_hint: 0.2, 0.1
             pos_hint: {"x": 0.505, "y": 0.05}
+            border_color: LIGHTGREY_RGBA
 
             DefaultButton:
                 text: "Elimina".upper()

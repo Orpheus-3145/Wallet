@@ -671,6 +671,24 @@ class Wallet:
 
         self.cursor.commit()
 
+    def turn_deb_cred_into_mov(self, list_records):
+        """Riceve una lista di ID (appartenenti alla tabella movimenti) cancella la relativa riga della tabella generica
+        movimenti, e specifica tramite il campo ID_MOV"""
+        if not list_records:
+            raise WrongValueInsert("Non è stato selezionato nessun record")
+        for id_record in list_records:
+            sql_string = self.format_sql_string(suide="E",
+                                                proc_name="TURN_INTO_MOVEMENT",
+                                                proc_args_dict={"id_record": id_record})
+            try:
+                logging.debug("[%-10s]: conversione deb/cred id: %s- esecuzione della stringa SQL: %s", "Wallet", id_record, sql_string)
+                self.cursor.execute(sql_string)
+            except pyodbc.Error as error:
+                logging.error("[%-10s]: conversione deb/cred id: %s - errore - trace: %s", "Wallet", id_record, str(error))
+                raise FatalError("Errore nella conversione, consulta il log per maggiori dettagli")
+            else:
+                logging.info("[%-10s]: conversione deb/cred id: %s - record convertito ", "Wallet", id_record)
+
     def format_sql_string(self, suide,
                           table_name=None,
                           field_select_list=None,

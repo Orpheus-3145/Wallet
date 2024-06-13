@@ -222,6 +222,15 @@ class PayOffScreen(Screen):
             self.update_rows()
             self.ids.appearing_box.hide_widget()
 
+    def turn_deb_cred_into_mov(self):
+        try:
+            App.get_running_app().turn_deb_cred_into_mov(self.selected_ids)
+        except Exception as error:
+            Factory.ErrorPopup(err_text=str(error)).open()
+        else:
+            self.update_rows()
+            self.ids.appearing_box.hide_widget()
+
 
 class ShowMovementsScreen(Screen):
     def __init__(self, max_rows_to_show, default_rows_to_show, **kw):

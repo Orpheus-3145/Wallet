@@ -26,6 +26,10 @@ class DefaultLayout(BoxLayout, Showable):
     pass
 
 
+class BorderLayout(DefaultLayout, BKGrowLayout):
+    pass
+
+
 class InputLayout(DefaultLayout):
     """Questo Layout contiene il comportamento per eseguire una determinata azione se uno dei sui widget figli viene
     premuto"""

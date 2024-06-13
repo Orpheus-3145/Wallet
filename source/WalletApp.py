@@ -95,6 +95,9 @@ class WalletApp(App):
             - type_movement -> tipo di movimento a cui gli id appartengono (a cui corrisponde la relativa tabella nel db"""
         self.wallet_instance.drop_records(list_records, type_movement)
 
+    def turn_deb_cred_into_mov(self, list_records):
+        self.wallet_instance.turn_deb_cred_into_mov(list_records)
+
     def backup_database(self):
         """Crea un backup del database al percorso inserito nel file .ini, il formato del nome del backup viene
         stabilito più a basso livello (metodo Wallet.backup_database)"""
