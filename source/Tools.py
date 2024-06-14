@@ -6,20 +6,10 @@ def get_key_from_dict(dictionary, value):
     return key_list[value_list.index(value)]
 
 
-def replace_coma(str_number, return_type=None):
+def convert_to_float(str_number):
     """Questa funzione riceve una stringa che rappresenta un float e, se presenti virgole, le sostituisce con i punti;
     eventualmente restituisce la stringa convertita in int o float"""
-    str_number = str(str_number)
-
-    if return_type:
-        if return_type == int:
-            return int(float(str_number.replace(",", ".")))
-
-        elif return_type == float:
-            return float(str_number.replace(",", "."))
-
-    else:
-        return str_number.replace(",", ".")
+    return float(str(str_number).replace(",", "."))
 
 
 def escape_sql_chars(string):
@@ -27,7 +17,7 @@ def escape_sql_chars(string):
     return string.replace("'", "''")
 
 
-def list_to_str(container):
+def list_to_str(container):     # NB sortare i valori
     """Converte in stringa un contenitore passato (list, dict, ...)"""
     str_elements = ""
     if isinstance(container, list) or isinstance(container, set):

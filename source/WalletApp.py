@@ -83,11 +83,14 @@ class WalletApp(App):
         self.qlik_app.open(user, pwd)
 
     def insert_movement(self):
-        self.wallet_instance.check_values(type_movement=self.manager.get_type_mov(),
-                                          date_mov=self.date_dict,
-                                          main_mov_dict=self.main_mov_dict,
-                                          spec_mov_dict=self.spec_mov_dict)
-        self.wallet_instance.insert_movement()
+        try:
+            self.wallet_instance.check_values(type_movement=self.manager.get_type_mov(),
+                                              date_mov=self.date_dict,
+                                              main_mov_dict=self.main_mov_dict,
+                                              spec_mov_dict=self.spec_mov_dict)
+            self.wallet_instance.insert_movement()
+        except Wallet.FatalError as err:
+            raise err
 
     def drop_records(self, list_records, type_movement):
         """Ricevo in argomento una lista di id, ciascuno corrispondente ad un movimento, da eliminare

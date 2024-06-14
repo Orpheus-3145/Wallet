@@ -37,21 +37,26 @@ class InputLayout(DefaultLayout):
         super().__init__(**kw)
         self.type_selection = type_selection        # tipi di selezione dei bottoni: 'single', 'multiple' o 'all' (vedi self.btn_pressed())
         self.f_to_launch = f_to_launch              # funzione da eseguire alla pressione
+        self.btn_pressed = None
 
-    def btn_pressed(self, btn_instance):
+    def btn_pressed(self, btn_instance):    # NB se premo per due volte sullo stesso bottone viene correttamente gestito?
         """self.btn_pressed() viene chiamata sia da DefaultButton sia da DefaultSelectionButton nei metodi on_state() o on_press()
         rispettivamente, lancia la funzione, se essa è definita, e modifica l'attivazione dei bottoni a seconda del
         parametro self.type_selection"""
+        self.btn_pressed = btn_instance
         if self.f_to_launch:
-            self.f_to_launch(btn_instance)
+            self.f_to_launch(self.btn_pressed)
         if self.type_selection == "single":     # 'single' = soltanto un bottone puà rimanere attivo nello stesso momento
             for btn in [selection_btn for selection_btn in self.children if isinstance(selection_btn, DefaultSelectionButton)]:
-                if btn != btn_instance and btn.activate is True:
+                if btn != self.btn_pressed and btn.activate is True:
                     btn.activate = False        # quindi disattivo ogni altro bottone precedentemente attivo
         elif self.type_selection == "all":      # 'all' = alla pressione attivo tutti i bottoni contenuti nel widget (vedi RowInputLayout)
             for btn in [selection_btn for selection_btn in self.children if isinstance(selection_btn, DefaultSelectionButton)]:
-                if btn != btn_instance:
-                    btn.activate = not btn_instance.activate  # il not è perchè btn_instance.activate è già stato modificato, quindi mi serve il valore opposto
+                if btn != self.btn_pressed:
+                    btn.activate = not self.btn_pressed.activate  # il not è perchè btn_instance.activate è già stato modificato, quindi mi serve il valore opposto
+
+    def get_selected_value(self):
+        return self.btn_pressed.text
 
 
 class DynamicLayout(DefaultLayout):
@@ -102,7 +107,7 @@ class ButtonDynamicInputLayout(DynamicLayout, InputLayout):
             self.add_widget(btn)
 
 
-class RowDynamicInputLayout(DynamicLayout, InputLayout):
+class RowDynamicInputLayout(DynamicLayout, InputLayout):        # NB put RowDynamicInout... inside Table
     def __init__(self, id_record, **kw):
         super().__init__(**kw)
         self.id_record = id_record      # id del record
@@ -147,3 +152,5 @@ class TableDynamicInputLayout(DynamicLayout, InputLayout):
         che lo contiene"""
         btn_instance.parent_layout.btn_pressed(btn_instance)
 
+    def get_selected_value(self):
+        pass

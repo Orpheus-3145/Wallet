@@ -17,6 +17,17 @@ class LayoutMainMov(DefaultLayout, BKGrowLayout):
         self._payments_dict = type_payments
         self.ids.input_payments.update_layout(type_payments.values())
 
+    def get_importo(self):
+        return self.ids.input_import.text
+
+    def get_id_payment(self):
+        payment_name = self.ids.input_payments.get_selected_value()
+        id_pag = Tools.get_key_from_dict(self._payments_dict, payment_name)
+        return id_pag
+
+    def get_note(self):
+        return self.ids.input_note.text
+
     def set_payment(self, btn_instance):
         """Aggiungo/rimuovo il pagmento selzionato a main_mov_dict"""
         id_pag = Tools.get_key_from_dict(self._payments_dict, btn_instance.text)
@@ -83,22 +94,22 @@ class LayoutDebitoCredito(DefaultLayout, BKGrowLayout):
             App.get_running_app().spec_mov_dict["DEBCRED"] = "1" if deb_cred == "CREDITO" else "0"
 
 
-class LayoutSaldoDebitoCredito(DefaultLayout, BKGrowLayout):
-    """Layout di inserimento delle informazioni per saldare uno o più debiti/crediti esistenti; il parametro
-    _payments_dict è un dizionario che contiene tutti i possibili tipi di pagamento selezionabili nella forma
-    id_pagamento: nome_pagamento, popolato in self.refresh_dynamic_objs()"""
-    def __init__(self, type_payments, **kw):
-        super().__init__(**kw)
-        self._payments_dict = type_payments
-        self.ids.input_payments.update_layout(type_payments.values())
-
-    def set_payment(self, btn_instance):
-        """Aggiungo/rimuovo il pagmento selzionato a main_mov_dict"""
-        id_pag = Tools.get_key_from_dict(self._payments_dict, btn_instance.text)
-        if "ID_PAG" in App.get_running_app().main_mov_dict.keys() and id_pag == App.get_running_app().main_mov_dict["ID_PAG"]:
-            App.get_running_app().main_mov_dict.pop("ID_PAG")
-        else:
-            App.get_running_app().main_mov_dict["ID_PAG"] = id_pag
+# class LayoutSaldoDebitoCredito(DefaultLayout, BKGrowLayout):
+#     """Layout di inserimento delle informazioni per saldare uno o più debiti/crediti esistenti; il parametro
+#     _payments_dict è un dizionario che contiene tutti i possibili tipi di pagamento selezionabili nella forma
+#     id_pagamento: nome_pagamento, popolato in self.refresh_dynamic_objs()"""
+#     def __init__(self, type_payments, **kw):
+#         super().__init__(**kw)
+#         self._payments_dict = type_payments
+#         self.ids.input_payments.update_layout(type_payments.values())
+#
+#     def set_payment(self, btn_instance):
+#         """Aggiungo/rimuovo il pagmento selzionato a main_mov_dict"""
+#         id_pag = Tools.get_key_from_dict(self._payments_dict, btn_instance.text)
+#         if "ID_PAG" in App.get_running_app().main_mov_dict.keys() and id_pag == App.get_running_app().main_mov_dict["ID_PAG"]:
+#             App.get_running_app().main_mov_dict.pop("ID_PAG")
+#         else:
+#             App.get_running_app().main_mov_dict["ID_PAG"] = id_pag
 
 
 class LayoutSpesaMantenimento(DefaultLayout, BKGrowLayout):

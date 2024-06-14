@@ -108,7 +108,7 @@ class InsertMovementScreen(Screen):
     def on_pre_enter(self):
         self.ids.mov_name.text = self.manager.get_type_mov().upper()
         self.add_widget(LayoutData(pos_hint={"x": .735, "y": .48}, size_hint=(.25, .28)))
-        if self.manager.get_type_mov() not in ["Stipendio", "Saldo Debito - Credito"]:
+        if self.manager.get_type_mov() != "Stipendio":
             self.add_widget(LayoutMainMov(type_payments=App.get_running_app().get_type_payments(),
                                           pos_hint={"x": .015, "y": .1},
                                           size_hint=[.35, .66]))
@@ -127,9 +127,10 @@ class InsertMovementScreen(Screen):
         elif self.manager.get_type_mov() == "Debito - Credito":
             self.add_widget(LayoutDebitoCredito(pos_hint={"x": .375, "y": .4}, size_hint=(.35, .36)))
         elif self.manager.get_type_mov() == "Saldo Debito - Credito":
-            self.add_widget(LayoutSaldoDebitoCredito(type_payments=App.get_running_app().get_type_payments(),
-                                                     pos_hint={"x": .375, "y": .2},
-                                                     size_hint=(.35, .56)))
+            pass
+            # self.add_widget(LayoutSaldoDebitoCredito(type_payments=App.get_running_app().get_type_payments(),
+            #                                          pos_hint={"x": .375, "y": .2},
+            #                                          size_hint=(.35, .56)))
         elif self.manager.get_type_mov() == "Spesa di Mantenimento":
             self.add_widget(LayoutSpesaMantenimento(pos_hint={"x": .375, "y": .64}, size_hint=(.35, 0.12)))
         elif self.manager.get_type_mov() == "Spesa di Viaggio":
@@ -205,11 +206,8 @@ class PayOffScreen(Screen):
             self.ids.appearing_box.show_widget()
 
     def go_to_insert_screen(self):
-        if App.get_running_app().wallet_instance.check_ids_to_pay(list(self.selected_ids)) is True:  # verifico che i debiti/crediti selezionati siano relativi alla stessa persona
-            App.get_running_app().spec_mov_dict["ID_PREV_DEB_CRED"] = list(self.selected_ids)
-            self.manager.go_to_insert_screen("Saldo Debito - Credito")    # vado allo screen InsertMovementScreen
-        else:
-            Factory.ErrorPopup(err_text="Sono stati selezionati record da diversa origine").open()
+        App.get_running_app().spec_mov_dict["ID_PREV_DEB_CRED"] = list(self.selected_ids)
+        self.manager.go_to_insert_screen("Saldo Debito - Credito")    # vado allo screen InsertMovementScreen
 
     def remove_records(self):
         """Rimuove i record (cioè i movimenti), aggiorna la tabella e nasconde il box per la rimozione dei record

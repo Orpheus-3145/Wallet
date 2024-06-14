@@ -59,13 +59,13 @@
             id: input_importo
             font_size_scale: 0.8
             valign: "middle"
-            on_text:
-                if self.text != "": app.main_mov_dict["IMPORTO"] = self.text
+#            on_text:
+#                if self.text != "": app.main_mov_dict["IMPORTO"] = self.text
 
     ButtonDynamicInputLayout:
         id: input_payments
         size_hint_y: 0.55
-        f_to_launch: root.set_payment
+#        f_to_launch: root.set_payment
         font_size_chars: FONT_SIZE * 0.8
         selection_type: "single"
 
@@ -84,9 +84,8 @@
             id: input_note
             font_size_scale: 0.8
             size_hint_x: 0.5
-
-            on_text:
-                if self.text != "": app.main_mov_dict["NOTE"] = self.text
+#            on_text:
+#                if self.text != "": app.main_mov_dict["NOTE"] = self.text
 
 <LayoutSpesaGenerica>:
     ButtonDynamicInputLayout:
@@ -278,29 +277,6 @@
             font_size_scale: 0.8
             on_text:
                 if self.text != "": app.spec_mov_dict["DESCRIZIONE"] = self.text
-
-<LayoutSaldoDebitoCredito>:
-    ButtonDynamicInputLayout:
-        id: input_payments
-        size_hint_y: 0.88
-        f_to_launch: root.set_payment
-        font_size_chars: FONT_SIZE * 0.8
-        selection_type: "single"
-
-    GridLayout:
-        rows: 1
-        size_hint_y: 0.12
-
-        DefaultLabel:
-            text: "Note"
-            font_size_scale: 0.8
-            halign: "right"
-            valign: "top"
-
-        DefaultTextInput:
-            font_size_scale: 0.8
-            on_text:
-                if self.text != "": app.spec_mov_dict["NOTE"] = self.text
 
 <LayoutSpesaMantenimento>:
     GridLayout:
