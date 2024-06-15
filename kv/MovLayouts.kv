@@ -10,9 +10,10 @@
             font_size_scale: 0.8
 
         DefaultTextInput:
+            id: input_day
             font_size_scale: 0.8
-            on_focus:
-                if self.text != "": app.date_dict["day"] = self.text
+#            on_focus:
+#                if self.text != "": app.date_dict["day"] = self.text
 
     GridLayout:
         rows: 1
@@ -25,9 +26,10 @@
             font_size_scale: 0.8
 
         DefaultTextInput:
+            id: input_month
             font_size_scale: 0.8
-            on_focus:
-                if self.text != "": app.date_dict["month"] = self.text
+#            on_focus:
+#                if self.text != "": app.date_dict["month"] = self.text
 
     GridLayout:
         rows: 1
@@ -40,9 +42,10 @@
             font_size_scale: 0.8
 
         DefaultTextInput:
+            id: input_year
             font_size_scale: 0.8
-            on_focus:
-                if self.text != "": app.date_dict["year"] = self.text
+#            on_focus:
+#                if self.text != "": app.date_dict["year"] = self.text
 
 <LayoutMainMov>:
     GridLayout:
@@ -65,7 +68,7 @@
     ButtonDynamicInputLayout:
         id: input_payments
         size_hint_y: 0.55
-#        f_to_launch: root.set_payment
+        f_to_launch: root.set_payment
         font_size_chars: FONT_SIZE * 0.8
         selection_type: "single"
 
@@ -246,7 +249,7 @@
         size_hint_y: 0.33
         orientation: "horizontal"
         selection_type: "single"
-        f_to_launch: root.set_deb_cred
+#        f_to_launch: root.set_deb_cred
 
     GridLayout:
         rows: 1
@@ -259,9 +262,10 @@
             valign: "top"
 
         DefaultTextInput:
+            id: input_origine
             font_size_scale: 0.8
-            on_text:
-                if self.text != "": app.spec_mov_dict["ORIGINE"] = self.text
+#            on_text:
+#                if self.text != "": app.spec_mov_dict["ORIGINE"] = self.text
 
     GridLayout:
         rows: 1
@@ -274,9 +278,10 @@
             valign: "top"
 
         DefaultTextInput:
+            id: input_descrizione
             font_size_scale: 0.8
-            on_text:
-                if self.text != "": app.spec_mov_dict["DESCRIZIONE"] = self.text
+#            on_text:
+#                if self.text != "": app.spec_mov_dict["DESCRIZIONE"] = self.text
 
 <LayoutSpesaMantenimento>:
     GridLayout:

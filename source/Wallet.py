@@ -98,7 +98,7 @@ class Wallet:
         else:
             logging.info("[%-10s]: avvio istanza - creazione di un'istanza di Wallet e connessione al database riuscita" % "Wallet")
             self._ready_to_insert_data = False          # proprietà valorizzata dal metodo check_values, indica se il movimento è stato controllato
-            self.type_movement = ""                     # tipo di movimento da inserire
+            self.type_mov = ""                     # tipo di movimento da inserire
             self.data_movimento = ""                    # data del movimento
             self.main_mov_dict = {}                     # dati in input del movimento principale
             self.spec_mov_dict = {}                     # dati in input del movimento specifico
@@ -118,7 +118,7 @@ class Wallet:
             logging.debug("[%-10s]: login nell'app - password non corretta, login fallito" % "Wallet")
             return False
 
-    def check_values(self, type_movement, date_mov, main_mov_dict, spec_mov_dict):
+    def check_values(self, type_mov, date_mov, main_mov_dict, spec_mov_dict):
         """Riceve tutti i dati che non possono essere generati automaticamente (progressivi, date, ... ) e li verifica.
            Ogni movimento di spesa si compone di alcune informazioni comuni (importo, data, ... ) e altre specifiche al
            tipo di movimento:
@@ -130,48 +130,36 @@ class Wallet:
         if self._ready_to_insert_data is True:
             raise FatalError("Movimento già verificato")
 
-        logging.info("[%-10s]: verifica movimento - tipo di movimento: %s", "Wallet", type_movement)
-        self.type_movement = type_movement
-
-        # check sul movimento principale (main_mov_dict)
-        if type_movement not in ["Stipendio", "Saldo Debito - Credito"]:  # se inserisco uno stipendio o un saldo d/c il movimento principale viene gestito in automatico
-            if "IMPORTO" not in main_mov_dict.keys():
-                raise WrongValueInsert("Importo non inserito")
-            else:
-                try:    # verifico che sia != None, un numero, diverso da 0 e positivo
-                    main_mov_dict["IMPORTO"] = Tools.convert_to_float(main_mov_dict["IMPORTO"])  # sostituisco virgole con punti nell'importo
-                    if main_mov_dict["IMPORTO"] <= 0:
-                        raise WrongValueInsert("Importo nullo o negativo")
-                except (TypeError, ValueError):
-                    raise WrongValueInsert("Importo non valido")
-            if "ID_PAG" not in main_mov_dict.keys():
-                raise WrongValueInsert("Tipo di pagamento non inserito")
-            if "NOTE" not in main_mov_dict.keys():  # se non ci sono note, le valorizzo come vuote
-                main_mov_dict["NOTE"] = ""
+        if type_mov not in ["Stipendio", "Saldo Debito - Credito"]:  # se inserisco uno stipendio o un saldo d/c il movimento principale viene gestito in automatico
+            if "importo" not in main_mov_dict:
+                raise WrongValueInsert("Importo mancante")
+            try:    # verifico che sia != None, un numero, diverso da 0 e positivo
+                main_mov_dict["importo"] = Tools.convert_to_float(main_mov_dict["importo"])  # sostituisco virgole con punti nell'importo
+            except (TypeError, ValueError):
+                raise WrongValueInsert("Importo non valido")
+            if main_mov_dict["importo"] <= 0:
+                raise WrongValueInsert("Importo nullo o negativo")
+            if "tipo_pag" not in main_mov_dict:
+                raise WrongValueInsert("Tipo di pagamento mancante")
 
             logging.info("[%-10s]: verifica movimento - informazioni principali corrette: %s", "Wallet",
                          Tools.list_to_str(main_mov_dict))
-
-        id_type_movement = Tools.get_key_from_dict(self.get_movements(name_mov=self.type_movement), self.type_movement)
-        main_mov_dict["TIPO_MOV"] = id_type_movement
-
-        # check sul movimento di dettaglio (spec_mov_dict)
-        if type_movement == "Spesa Generica":
-            if "ID_TIPO_SPESA" not in spec_mov_dict.keys():
+        if type_mov == "Spesa Generica":
+            if "ID_TIPO_SPESA" not in spec_mov_dict:
                 raise WrongValueInsert("Tipo di spesa non inserito")
 
-            if "DESCRIZIONE" not in spec_mov_dict.keys():  # se non c'è descrizione la valorizzo come vuota
+            if "DESCRIZIONE" not in spec_mov_dict:  # se non c'è descrizione la valorizzo come vuota
                 spec_mov_dict["DESCRIZIONE"] = ""
             main_mov_dict["DARE_AVERE"] = 0  # è una spesa, valorizzo dare
-        elif type_movement == "Spesa Fissa":
-            if "DESCRIZIONE" not in spec_mov_dict.keys() or spec_mov_dict["DESCRIZIONE"].strip == "":
+        elif type_mov == "Spesa Fissa":
+            if "DESCRIZIONE" not in spec_mov_dict or spec_mov_dict["DESCRIZIONE"].strip == "":
                 raise WrongValueInsert("Descrizione non inserita")
             main_mov_dict["DARE_AVERE"] = 0  # è una spesa, valorizzo dare
-        elif type_movement == "Stipendio":
-            if "PROVENIENZA" not in spec_mov_dict.keys() or spec_mov_dict["PROVENIENZA"].strip() == "":
+        elif type_mov == "Stipendio":
+            if "PROVENIENZA" not in spec_mov_dict or spec_mov_dict["PROVENIENZA"].strip() == "":
                 raise WrongValueInsert("DDL non inserito")
 
-            if "TOTALE" not in spec_mov_dict.keys() or spec_mov_dict["TOTALE"].strip() == "":
+            if "TOTALE" not in spec_mov_dict or spec_mov_dict["TOTALE"].strip() == "":
                 raise WrongValueInsert("Totale non inserito")
             else:
                 try:
@@ -180,7 +168,7 @@ class Wallet:
                 except (TypeError, ValueError, ZeroDivisionError):  # verifico che sia un numero, valido, e diverso da 0
                     raise WrongValueInsert("Totale non valido")
 
-            if "NETTO" not in spec_mov_dict.keys() or spec_mov_dict["NETTO"].strip() == "":
+            if "NETTO" not in spec_mov_dict or spec_mov_dict["NETTO"].strip() == "":
                 spec_mov_dict["NETTO"] = spec_mov_dict["TOTALE"]
             else:
                 if spec_mov_dict["NETTO"].isnumeric() is False:  # verifico che sia un numero
@@ -188,7 +176,7 @@ class Wallet:
                 else:
                     spec_mov_dict["NETTO"] = Tools.convert_to_float(spec_mov_dict["NETTO"])
 
-            if "RIMBORSO_SPESE" not in spec_mov_dict.keys() or spec_mov_dict["RIMBORSO_SPESE"].strip() == "":
+            if "RIMBORSO_SPESE" not in spec_mov_dict or spec_mov_dict["RIMBORSO_SPESE"].strip() == "":
                 spec_mov_dict["RIMBORSO_SPESE"] = "0"
             else:
                 if spec_mov_dict["RIMBORSO_SPESE"].isnumeric() is False:    # verifico che sia un numero
@@ -196,7 +184,7 @@ class Wallet:
                 else:
                     spec_mov_dict["RIMBORSO_SPESE"] = Tools.convert_to_float(spec_mov_dict["RIMBORSO_SPESE"])
 
-            if "NOTE" not in spec_mov_dict.keys() or spec_mov_dict["NOTE"].strip() == "":  # se non ci sono le note valorizzo come vuoto
+            if "NOTE" not in spec_mov_dict or spec_mov_dict["NOTE"].strip() == "":  # se non ci sono le note valorizzo come vuoto
                 spec_mov_dict["NOTE"] = ""
                 main_mov_dict["NOTE"] = ""
             else:
@@ -209,40 +197,39 @@ class Wallet:
             main_mov_dict["IMPORTO"] = spec_mov_dict["NETTO"]
             main_mov_dict["DARE_AVERE"] = 1     # è un'entrata, valorizzo avere
             main_mov_dict["ID_PAG"] = 5         # gli stipendi si accreditano mediante bonifico (id_payment: 5)
-        elif type_movement == "Entrata":
-            if "ID_TIPO_ENTRATA" not in spec_mov_dict.keys():
+        elif type_mov == "Entrata":
+            if "ID_TIPO_ENTRATA" not in spec_mov_dict:
                 raise WrongValueInsert("Tipo di entrata non inserito")
-            if "DESCRIZIONE" not in spec_mov_dict.keys() or spec_mov_dict.get("DESCRIZIONE").strip() == "":
+            if "DESCRIZIONE" not in spec_mov_dict or spec_mov_dict.get("DESCRIZIONE").strip() == "":
                 raise WrongValueInsert("Descrizione non inserita")
             main_mov_dict["DARE_AVERE"] = 1  # è un'entrata, valorizzo avere
-        elif type_movement == "Debito - Credito":
-            if "ORIGINE" not in spec_mov_dict.keys() or spec_mov_dict.get("ORIGINE").strip() == "":
+        elif type_mov == "Debito - Credito":
+            if "origine" not in spec_mov_dict or spec_mov_dict["origine"].strip() == "":
                 raise WrongValueInsert("Origine non inserita")
-            if "DESCRIZIONE" not in spec_mov_dict.keys() or spec_mov_dict.get("DESCRIZIONE").strip() == "":
+            if "descrizione" not in spec_mov_dict or spec_mov_dict["descrizione"].strip() == "":
                 raise WrongValueInsert("Descrizione non inserita")
-            if "DEBCRED" not in spec_mov_dict.keys():
+            if "deb_cred" not in spec_mov_dict:
                 raise WrongValueInsert("Specificare debito o credito")
-            main_mov_dict["DARE_AVERE"] = int(not bool(int(spec_mov_dict["DEBCRED"])))  # debito -> avere, credito -> dare
-        elif type_movement == "Saldo Debito - Credito":
-            if "ID_PREV_DEB_CRED" not in spec_mov_dict:
+        elif type_mov == "Saldo Debito - Credito":
+            if "id_saldo_deb_cred" not in spec_mov_dict:
                 raise WrongValueInsert("ID deb/cred(s) non selezionati")
-            elif "ID_PAG" not in main_mov_dict.keys():
-                raise WrongValueInsert("Tipo di pagamento non inserito")
-            if "IMPORTO" in main_mov_dict.keys():
+            if "importo" in main_mov_dict:
                 try:
-                    main_mov_dict["IMPORTO"] = Tools.convert_to_float(main_mov_dict["IMPORTO"])  # sostituisco virgole con punti nell'importo
+                    main_mov_dict["importo"] = Tools.convert_to_float(main_mov_dict["importo"])  # sostituisco virgole con punti nell'importo
                 except (TypeError, ValueError):
                     raise WrongValueInsert("Importo non valido")
-                if main_mov_dict["IMPORTO"] <= 0.:
+                if main_mov_dict["importo"] <= 0.:
                     raise WrongValueInsert("Importo nullo o negativo")
-        elif type_movement == "Spesa di Mantenimento":
-            if "DESCRIZIONE" not in spec_mov_dict.keys() or spec_mov_dict.get("DESCRIZIONE").strip() == "":
+            if "tipo_pag" not in main_mov_dict:
+                raise WrongValueInsert("Tipo di pagamento non inserito")
+        elif type_mov == "Spesa di Mantenimento":
+            if "DESCRIZIONE" not in spec_mov_dict or spec_mov_dict.get("DESCRIZIONE").strip() == "":
                 raise WrongValueInsert("Descrizione non inserita")
             main_mov_dict["DARE_AVERE"] = 0  # è una spesa, valorizzo dare
-        elif type_movement == "Spesa di Viaggio":
-            if "VIAGGIO" not in spec_mov_dict.keys() or spec_mov_dict.get("VIAGGIO").strip() == "":
+        elif type_mov == "Spesa di Viaggio":
+            if "VIAGGIO" not in spec_mov_dict or spec_mov_dict.get("VIAGGIO").strip() == "":
                 raise WrongValueInsert("Viaggio non inserito")
-            if "DESCRIZIONE" not in spec_mov_dict.keys() or spec_mov_dict.get("DESCRIZIONE").strip() == "":
+            if "DESCRIZIONE" not in spec_mov_dict or spec_mov_dict.get("DESCRIZIONE").strip() == "":
                 raise WrongValueInsert("Descrizione non inserita")
             main_mov_dict["DARE_AVERE"] = 0  # è una spesa, valorizzo dare
 
@@ -257,6 +244,7 @@ class Wallet:
         # data_movimento è corretta e comipilato con eventuali valori di default
         logging.info("[%-10s]: verifica movimento - data corretta: %s", "Wallet", date_mov)
         # valorizzo i campi per l'inserimento nel db e flaggo a True la variabile per inserire il movimento
+        self.type_mov = type_mov
         self.main_mov_dict = main_mov_dict
         self.spec_mov_dict = spec_mov_dict
         self.data_movimento = data_movimento
@@ -275,19 +263,19 @@ class Wallet:
         spec_movement_query = ""                                            # query SQL per inserire il movimento specifico
         varchar_values = []                                                 # lista di elementi di tipo varchar, essi dovranno essere racchiusi da apici singoli nelle istruzioni SQL
         main_mov_id = ""                                                    # id del movimento principale appena inserito
-        if self.type_movement == "Spesa Generica":
+        if self.type_mov == "Spesa Generica":
             varchar_values.append(self.spec_mov_dict.get("DESCRIZIONE"))
             spec_movement_query = self.format_sql_string("I", "SPESE_VARIE", insert_dict=
             {"ID_MOV": "{id}",
              "ID_TIPO_SPESA": self.spec_mov_dict.get("ID_TIPO_SPESA"),
              "DESCRIZIONE": self.spec_mov_dict.get("DESCRIZIONE")}, varchar_values=varchar_values)
-        elif self.type_movement == "Spesa Fissa":
+        elif self.type_mov == "Spesa Fissa":
             varchar_values.append(self.spec_mov_dict.get("DESCRIZIONE"))
             spec_movement_query = self.format_sql_string("I", "SPESE_FISSE", insert_dict=
             {"ID_MOV": "{id}",
              "DESCRIZIONE": self.spec_mov_dict.get("DESCRIZIONE"),
              "MESE": self.data_movimento.split("-")[1]}, varchar_values=varchar_values)
-        elif self.type_movement == "Stipendio":
+        elif self.type_mov == "Stipendio":
             varchar_values.append(self.spec_mov_dict.get("PROVENIENZA"))
             varchar_values.append(self.spec_mov_dict.get("NOTE"))
             spec_movement_query = self.format_sql_string("I", "STIPENDI", insert_dict=
@@ -299,45 +287,29 @@ class Wallet:
              "TRATTENUTE": self.spec_mov_dict.get("TRATTENUTE"),
              "RIMBORSO_SPESE": self.spec_mov_dict.get("RIMBORSO_SPESE"),
              "NOTE": self.spec_mov_dict.get("NOTE")}, varchar_values=varchar_values)
-        elif self.type_movement == "Entrata":
+        elif self.type_mov == "Entrata":
             varchar_values.append(self.spec_mov_dict.get("ORIGINE"))
             varchar_values.append(self.spec_mov_dict.get("DESCRIZIONE"))
             spec_movement_query = self.format_sql_string("I", "ENTRATE", insert_dict=
             {"ID_MOV": "{id}",
              "ID_TIPO_ENTRATA": self.spec_mov_dict.get("ID_TIPO_ENTRATA"),
              "DESCRIZIONE": self.spec_mov_dict.get("DESCRIZIONE")}, varchar_values=varchar_values)
-        elif self.type_movement == "Debito - Credito":
-            varchar_values.append(self.spec_mov_dict.get("ORIGINE"))
-            varchar_values.append(self.spec_mov_dict.get("DESCRIZIONE"))
-            spec_movement_query = self.format_sql_string("I", "DEBITI_CREDITI", insert_dict=
-            {"ID_MOV": "{id}",
-             "DEBCRED": self.spec_mov_dict.get("DEBCRED"),
-             "DESCRIZIONE": self.spec_mov_dict.get("DESCRIZIONE"),
-             "ORIGINE": self.spec_mov_dict.get("ORIGINE"),
-             "SALDATO": 0,
-             "ID_MOV_SALDO": "NULL",
-             "DATA_SALDO": "NULL"}, varchar_values=varchar_values)
-        elif self.type_movement == "Saldo Debito - Credito":
-            if "IMPORTO" not in self.main_mov_dict.keys():
-                self.main_mov_dict["IMPORTO"] = 0.0
-            if "NOTE" not in self.main_mov_dict.keys():
-                self.main_mov_dict["NOTE"] = ""
-            str_ids = Tools.list_to_str(self.spec_mov_dict["ID_PREV_DEB_CRED"])
-            varchar_values.append(str_ids)
+        elif self.type_mov == "Debito - Credito":
+            proc_args_dict = {"data_mov": self.data_movimento}
+            proc_args_dict.update(self.main_mov_dict)
+            proc_args_dict.update(self.spec_mov_dict)
             varchar_values.append(self.data_movimento)
-            varchar_values.append(self.main_mov_dict["NOTE"])
+            varchar_values.append(self.main_mov_dict["tipo_pag"])
+            if "note" in self.main_mov_dict:
+                varchar_values.append(self.main_mov_dict["note"])
+            varchar_values.append(self.spec_mov_dict["origine"])
+            varchar_values.append(self.spec_mov_dict["descrizione"])
             query_sql = self.format_sql_string(suide="E",
-                                               proc_name="SALDA_DEB_CRED",
-                                               proc_args_dict={"ids": str_ids,
-                                                               "data_mov": self.data_movimento,
-                                                               "input_importo": self.main_mov_dict["IMPORTO"],
-                                                               "id_pag": self.main_mov_dict["ID_PAG"],
-                                                               "note": self.main_mov_dict["NOTE"]},
+                                               proc_name="INSERISCI_DEB_CRED",
+                                               proc_args_dict=proc_args_dict,
                                                varchar_values=varchar_values)
             try:
                 self.cursor.execute(query_sql)
-                if self.main_mov_dict["ID_PAG"] == 1:
-                    raise FatalError("Errore nell'inserimento, consulta il log per maggiori dettagli")
             except pyodbc.Error as error:
                 logging.error("[%-10s]: inserimento movimento saldo debito/credito - errore - trace: %s", "Wallet", str(error))
                 self.cursor.rollback()
@@ -345,18 +317,47 @@ class Wallet:
                 logging.debug("[%-10s]: inserimento movimento saldo debito/credito - effettuato", "Wallet")
                 time.sleep(0.1)  # metto in pausa per 0.1 secondi per evitare che la (bassa) precisione di DATETIME di SQL scriva valori uguali
             finally:
-                self.type_movement = ""  # rimuovo le informazioni salvate
+                self.type_mov = ""
                 self.data_movimento = ""
                 self.main_mov_dict = {}
                 self.spec_mov_dict = {}
                 self._ready_to_insert_data = False  # ho inserito il movimento oppure ho avuto un errore imprevisto, la resetto a False
             return
-        elif self.type_movement == "Spesa di Mantenimento":
+        elif self.type_mov == "Saldo Debito - Credito":
+            proc_args_dict = {"data_mov": self.data_movimento}
+            proc_args_dict.update(self.main_mov_dict)
+            proc_args_dict.update(self.spec_mov_dict)
+            varchar_values.append(self.data_movimento)
+            varchar_values.append(self.spec_mov_dict["id_saldo_deb_cred"])
+            varchar_values.append(self.main_mov_dict["tipo_pag"])
+            if "note" in self.main_mov_dict:
+                varchar_values.append(self.main_mov_dict["note"])
+            query_sql = self.format_sql_string(suide="E",
+                                               proc_name="SALDA_DEB_CRED",
+                                               proc_args_dict=proc_args_dict,
+                                               varchar_values=varchar_values)
+            print(query_sql)
+            try:
+                self.cursor.execute(query_sql)
+            except pyodbc.Error as error:
+                logging.error("[%-10s]: inserimento movimento saldo debito/credito - errore - trace: %s", "Wallet", str(error))
+                self.cursor.rollback()
+            else:
+                logging.debug("[%-10s]: inserimento movimento saldo debito/credito - effettuato", "Wallet")
+                time.sleep(0.1)  # metto in pausa per 0.1 secondi per evitare che la (bassa) precisione di DATETIME di SQL scriva valori uguali
+            finally:
+                self.type_mov = ""
+                self.data_movimento = ""
+                self.main_mov_dict = {}
+                self.spec_mov_dict = {}
+                self._ready_to_insert_data = False  # ho inserito il movimento oppure ho avuto un errore imprevisto, la resetto a False
+            return
+        elif self.type_mov == "Spesa di Mantenimento":
             varchar_values.append(self.spec_mov_dict.get("DESCRIZIONE"))
             spec_movement_query = self.format_sql_string("I", "SPESE_MANTENIMENTO", insert_dict=
             {"ID_MOV": "{id}",
              "DESCRIZIONE": self.spec_mov_dict.get("DESCRIZIONE")}, varchar_values=varchar_values)
-        elif self.type_movement == "Spesa di Viaggio":
+        elif self.type_mov == "Spesa di Viaggio":
             varchar_values.append(self.spec_mov_dict.get("VIAGGIO"))
             varchar_values.append(self.spec_mov_dict.get("DESCRIZIONE"))
             spec_movement_query = self.format_sql_string("I", "SPESE_VIAGGI", insert_dict=
@@ -370,8 +371,8 @@ class Wallet:
          "DATA_INS": "GETDATE()",
          "IMPORTO": self.main_mov_dict["IMPORTO"],
          "DARE_AVERE": self.main_mov_dict["DARE_AVERE"],
-         "TIPO_MOV": self.main_mov_dict["TIPO_MOV"],
-         "ID_PAG": self.main_mov_dict["ID_PAG"],
+         "tipo_pag": self.main_mov_dict["tipo_pag"],
+         "TIPO_PAG": self.main_mov_dict["TIPO_PAG"],
          "NOTE": self.main_mov_dict["NOTE"]}, varchar_values=varchar_values)
         try:
             # inserisco il movimento principale
@@ -390,7 +391,7 @@ class Wallet:
 
         else:
             logging.info("[%-10s]: inserimento movimento - inserimento riuscito", "Wallet")
-            self.type_movement = ""                     # rimuovo le informazioni salvate
+            self.type_mov = ""
             self.data_movimento = ""
             self.main_mov_dict = {}
             self.spec_mov_dict = {}
@@ -486,7 +487,7 @@ class Wallet:
         partial_sql = partial(self.format_sql_string,
                               suide="S",
                               table_name="MAP_MOVIMENTI",
-                              field_select_list=["ID", "DESCRIZIONE"],
+                              field_select_list=["DESCRIZIONE"],
                               order_by_dict={"DESCRIZIONE": "ASC"})
         if type_mov:    # filtro nel caso cerchi il tipo di movimento (deb/cred o general)
             sql_string = partial_sql(where_dict={"TIPO_MOVIMENTO": type_mov}, varchar_values=[type_mov])
@@ -501,12 +502,12 @@ class Wallet:
             logging.error("[%-10s]: raccolta tipi di movimenti - errore - trace: %s", "Wallet", str(error))
             raise FatalError("Errore nella raccolta dei tipi di movimenti, consulta il log per maggiori dettagli")
         else:
-            type_movements_dict = {}
+            movement_list = []
             for row in self.cursor:
-                type_movements_dict[row.ID] = row.DESCRIZIONE
+                movement_list.append(row.DESCRIZIONE)
             logging.debug("[%-10s]: raccolta tipi di movimenti - esecuzione riuscita, valori trovati - %s", "Wallet",
-                          Tools.list_to_str(type_movements_dict))
-            return type_movements_dict
+                          Tools.list_to_str(movement_list))
+            return movement_list
 
     def get_info_db(self, info_type):
         """Restituisce un dizionario sui tipi di pagamento nel formato {id_pagamento: nome_pagamento}"""
@@ -514,7 +515,7 @@ class Wallet:
         try:
             sql_string = self.format_sql_string(suide="S",
                                                 table_name=_types[info_type],
-                                                field_select_list=["ID", "DESCRIZIONE"],
+                                                field_select_list=["DESCRIZIONE"],
                                                 order_by_dict={"DESCRIZIONE": "ASC"})
             logging.debug("[%-10s]: raccolta tipi di %s - esecuzione della stringa SQL: %s", "Wallet", info_type, sql_string)
             self.cursor.execute(sql_string)
@@ -525,9 +526,9 @@ class Wallet:
             logging.error("[%-10s]:  errore - chiave sconosciuta: %s", "Wallet", info_type)
             raise FatalError("Errore interno, consulta il log per maggiori dettagli")
         else:
-            info_data = {}
+            info_data = []
             for row in self.cursor:
-                info_data[row[0]] = row[1]
+                info_data.append(row.DESCRIZIONE)
             logging.debug("[%-10s]: raccolta tipi di %s - esecuzione riuscita", "Wallet", info_type)
             return info_data
 
@@ -646,27 +647,6 @@ class Wallet:
                 matrix_mov.append([elem for elem in row])
             return column_list, matrix_mov
 
-    # def check_ids_to_pay(self, ids_deb_cred_list):
-    #     """Verifica che gli id, eventualmente più di uno, debiti o crediti, appartengano alla stessa persona"""
-    #     sql_string = self.format_sql_string(suide="S",
-    #                                         field_select_list=["count(distinct ORIGINE)"],
-    #                                         table_name="DEBITI_CREDITI dc",
-    #                                         join_type="I",
-    #                                         join_table="MOVIMENTI mv",
-    #                                         join_dict={"mv.id": "dc.id_mov"})
-    #     sql_string += " where mv.id in ({})".format(Tools.list_to_str(ids_deb_cred_list))
-    #
-    #     try:
-    #         logging.debug("[%-10s]: controllo omogeneità origine - esecuzione della stringa SQL: %s", "Wallet", sql_string)
-    #         self.cursor.execute(sql_string)
-    #     except pyodbc.Error as error:  # errore generico, lo propago
-    #         logging.error("[%-10s]: controllo omogeneità origine - errore - trace: %s", "Wallet", str(error))
-    #         raise FatalError("Errore del controllo dei dati inseriti, consulta il log per maggiori dettagli")
-    #     else:   # se c'è omogeneità il count distinct deve dare come risultato 1 (ovvero un unico destinatario)
-    #         count_values_in_select = int(self.cursor.fetchval())
-    #         logging.debug("[%-10s]: controllo omogeneità origine - %s", "Wallet", "record omogenei" if count_values_in_select == len(ids_deb_cred_list) else "record non omogenei")
-    #         return count_values_in_select == 1
-
     def drop_records(self, list_records, type_movement):
         """Riceve una lista di ID (appartenenti alla tabella movimenti) cancella la relativa riga della tabella generica
         movimenti, e specifica tramite il campo ID_MOV"""
@@ -767,7 +747,7 @@ class Wallet:
                     "è stato passato un parametro non valido per la condizione SELECT, deve essere list")
 
             if join_dict or join_table or join_type:
-                if join_type in join_types_dict.keys() and join_table and isinstance(join_dict,
+                if join_type in join_types_dict and join_table and isinstance(join_dict,
                                                                                      dict):  # in questo caso devo inserire anche un join
                     fields_to_join = " AND ".join("{} = {}".format(key, value) for key, value in join_dict.items())
                     sql_string = " ".join(
@@ -867,14 +847,13 @@ class Wallet:
     def check_date(self, date: datetime):
         """Verifica che il dizionario in input contenga una data e la restituisce come istanza di datetime"""
         count = 0  # se arriva a 3 alla fine del ciclo restituisce data odierna, vedi poi
-        time_dict = {"day": range(1, 32), "month": range(1, 13), "year": range(2000, 2026)}
+        time_dict = {"DAY": range(1, 32), "MONTH": range(1, 13), "YEAR": range(2000, 2026)}
         for time_period, time_range in time_dict.items():
-            if time_period not in date.keys() or date[time_period].strip() == "":  # se manca l'elemento oppure è vuoto aumento count
+            if time_period not in date or date[time_period].strip() == "":  # se manca l'elemento oppure è vuoto aumento count
                 count += 1
             else:  # in caso contrario allora esiste e non è vuoto
                 try:
-                    if int(date[
-                               time_period]) not in time_range:  # se è all'esterno del relativo range il numero non è valido e quindi la data
+                    if int(date[time_period]) not in time_range:  # se è all'esterno del relativo range il numero non è valido e quindi la data
                         return None
                 except (ValueError, TypeError):  # l'elemento non è in formato numerico intero, data non valida
                     return None

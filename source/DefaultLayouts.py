@@ -4,8 +4,8 @@ from DefaultWidgets import *
 
 class Showable(Widget):
     def __init__(self, **kw):
-        super().__init__(**kw)
         self.tmp_size_hint_x = 0
+        super().__init__(**kw)
 
     def on_kv_post(self, base_widget):
         self.tmp_size_hint_x = self.size_hint[0]
@@ -39,24 +39,27 @@ class InputLayout(DefaultLayout):
         self.f_to_launch = f_to_launch              # funzione da eseguire alla pressione
         self.btn_pressed = None
 
-    def btn_pressed(self, btn_instance):    # NB se premo per due volte sullo stesso bottone viene correttamente gestito?
+    def update_state(self, btn_instance):    # NB se premo per due volte sullo stesso bottone viene correttamente gestito?
         """self.btn_pressed() viene chiamata sia da DefaultButton sia da DefaultSelectionButton nei metodi on_state() o on_press()
         rispettivamente, lancia la funzione, se essa è definita, e modifica l'attivazione dei bottoni a seconda del
         parametro self.type_selection"""
         self.btn_pressed = btn_instance
         if self.f_to_launch:
-            self.f_to_launch(self.btn_pressed)
+            self.f_to_launch(btn_instance)
         if self.type_selection == "single":     # 'single' = soltanto un bottone puà rimanere attivo nello stesso momento
-            for btn in [selection_btn for selection_btn in self.children if isinstance(selection_btn, DefaultSelectionButton)]:
-                if btn != self.btn_pressed and btn.activate is True:
+            for btn in [selection_btn for selection_btn in self.children if isinstance(selection_btn, SelectionButton)]:
+                if btn != btn_instance and btn.activate is True:
                     btn.activate = False        # quindi disattivo ogni altro bottone precedentemente attivo
         elif self.type_selection == "all":      # 'all' = alla pressione attivo tutti i bottoni contenuti nel widget (vedi RowInputLayout)
-            for btn in [selection_btn for selection_btn in self.children if isinstance(selection_btn, DefaultSelectionButton)]:
-                if btn != self.btn_pressed:
-                    btn.activate = not self.btn_pressed.activate  # il not è perchè btn_instance.activate è già stato modificato, quindi mi serve il valore opposto
+            for btn in [selection_btn for selection_btn in self.children if isinstance(selection_btn, SelectionButton)]:
+                if btn != btn_instance:
+                    btn.activate = not btn_instance.activate  # il not è perchè btn_instance.activate è già stato modificato, quindi mi serve il valore opposto
 
     def get_selected_value(self):
-        return self.btn_pressed.text
+        if self.btn_pressed:
+            return self.btn_pressed.text
+        else:
+            return ""
 
 
 class DynamicLayout(DefaultLayout):
@@ -87,11 +90,11 @@ class LabelDynamicLayout(DynamicLayout):
 
 class ButtonDynamicInputLayout(DynamicLayout, InputLayout):
     """Layout popolato dinamicamente con dei bottoni e che gestisce l'input se viene premuto un bottone"""
-    _type_btns = {"default": DefaultButton, "selection": DefaultSelectionButton}  # dict dei tipi possibili di btn da inserire nel box
+    _type_btns = {"simple": SimpleButton, "selection": SelectionButton}  # dict dei tipi possibili di btn da inserire nel box
 
     def __init__(self, type_btn="selection", **kw):
         super().__init__(**kw)
-        self.type_btn = type_btn            # tipo di bottone: "selection" --> MySelectionButton, "default" --> DefaultButton
+        self.type_btn = type_btn            # tipo di bottone: "selection" --> MySelectionButton, "simple" --> DefaultButton
         self.type_selection = "single"      # metto single di default: non può esserci più di un bottone attivo in contemporanea
 
     def update_layout(self, field_list):
@@ -117,10 +120,10 @@ class RowDynamicInputLayout(DynamicLayout, InputLayout):        # NB put RowDyna
         """Creo un bottone di tipo DefaultSelectionButton per ogni elemento della lista field_list"""
         self.clear_widgets()
         for btn_name in field_list:
-            label_field = DefaultSelectionButton(text=str(btn_name),
-                                                 font_size=self.font_size_chars,
-                                                 background_color=self.color_widgets,
-                                                 parent_layout=self)
+            label_field = SelectionButton(text=str(btn_name),
+                                          font_size=self.font_size_chars,
+                                          background_color=self.color_widgets,
+                                          parent_layout=self)
             self.add_widget(label_field)
 
 

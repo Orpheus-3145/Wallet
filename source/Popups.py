@@ -4,17 +4,10 @@ from kivy.properties import ObjectProperty
 
 
 class ErrorPopup(Popup):
-    """Popop che compare al verificarsi di errori, il parametro err_text contiene informazioni sull'anomalia
-    verificatasi"""
     err_text = ObjectProperty("")
-    # def __init__(self, err_text="", **kw):      # se e object property funziona
-    #     super().__init__(**kw)
-    #     self.err_text = err_text
 
 
 class InfoPopup(ModalView):  # ModalView e non Popup perchè in questo caso non uso non mi serve il titolo
-    """- info -> avviso del layout (va nel titolo)
-        - func_to_exec -> se <> None viene eseguita quando si preme il bottone con scritto OK"""
     info = ObjectProperty("")
     func_to_exec = ObjectProperty(None)
 

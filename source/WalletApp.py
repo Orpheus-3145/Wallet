@@ -8,7 +8,7 @@ from kivy.config import Config
 Config.read(os.path.join(os.getcwd(), "..\\settings\\config_wallet.ini"))
 from kivy.lang import Builder
 from Screens import *
-
+from Popups import *
 
 log_levels = {10: logging.DEBUG, 20: logging.INFO, 30: logging.WARNING, 40: logging.ERROR, 50: logging.CRITICAL}
 
@@ -43,9 +43,9 @@ class WalletApp(App):
         logging.info("[%-10s]: %s", "WalletApp", "#" * 80)
         logging.info("[%-10s]: avvio app - applicazione avviata" % "WalletApp")
         self._stopped = False                                       # proprietà di servizio, vedi self.on_stop()
-        self.date_dict = {}                                         # data movimento
-        self.main_mov_dict = {}                                     # informazioni generali (comuni ad ogni tipo di spesa/entrata)
-        self.spec_mov_dict = {}                                     # informazioni specifiche della spesa/entrata
+        # self.date_dict = {}                                         # data movimento
+        # self.main_mov_dict = {}                                     # informazioni generali (comuni ad ogni tipo di spesa/entrata)
+        # self.spec_mov_dict = {}                                     # informazioni specifiche della spesa/entrata
         self.manager = None                                         # istanza di ScreenManager per muoversi tra le schermate
         self.wallet_instance = Wallet.Wallet(self.dsn)
         self.qlik_app = Wallet.QlikViewApp(self.bi_file_path)
@@ -82,14 +82,14 @@ class WalletApp(App):
         user, pwd = self.wallet_instance.get_bi_credentials()
         self.qlik_app.open(user, pwd)
 
-    def insert_movement(self):
+    def insert_movement(self, type_mov, data_info, main_mov_info, spec_mov_info):
         try:
-            self.wallet_instance.check_values(type_movement=self.manager.get_type_mov(),
-                                              date_mov=self.date_dict,
-                                              main_mov_dict=self.main_mov_dict,
-                                              spec_mov_dict=self.spec_mov_dict)
+            self.wallet_instance.check_values(type_mov=type_mov,
+                                              date_mov=data_info,
+                                              main_mov_dict=main_mov_info,
+                                              spec_mov_dict=spec_mov_info)
             self.wallet_instance.insert_movement()
-        except Wallet.FatalError as err:
+        except Wallet.FatalError as err:        # Nb why?
             raise err
 
     def drop_records(self, list_records, type_movement):

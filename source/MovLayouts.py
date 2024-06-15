@@ -3,121 +3,140 @@ from kivy.app import App
 import Tools
 
 
-class LayoutData(DefaultLayout, BKGrowLayout):
+class LayoutInfo(DefaultLayout, BKGrowLayout):
     """Schermata che permette di inserire una data nel formato giorno-mese-anno, salvati in 3 variabili indipendenti"""
-    pass
+    def get_data(self):
+        pass
+
+    def refresh_data(self):
+        pass
 
 
-class LayoutMainMov(DefaultLayout, BKGrowLayout):
+class LayoutData(LayoutInfo):
+    """Schermata che permette di inserire una data nel formato giorno-mese-anno, salvati in 3 variabili indipendenti"""
+
+    def get_data(self):
+        day = self.ids.input_day.text
+        month = self.ids.input_month.text
+        year = self.ids.input_year.text
+        return {"DAY": day, "MONTH": month, "YEAR": year}
+
+    def refresh_data(self):
+        self.ids.input_day.text = ""
+        self.ids.input_month.text = ""
+        self.ids.input_year.text = ""
+
+
+class LayoutMainMov(LayoutInfo):
     """Layout di inserimento delle informazioni generiche del movimento, il parametro _payments_dict è un dizionario che
     contiene tutti i possibili tipi di pagamento selezionabili nella forma id_pagamento: nome_pagamento, popolato
     in self.refresh_dynamic_objs()"""
     def __init__(self, type_payments, **kw):
         super().__init__(**kw)
-        self._payments_dict = type_payments
-        self.ids.input_payments.update_layout(type_payments.values())
+        self.type_payments = type_payments
+        self.ids.input_payments.update_layout(type_payments)
 
-    def get_importo(self):
-        return self.ids.input_import.text
+    def get_data(self):
+        data = {}
+        if self.ids.input_importo.text.strip() != "":
+            data["importo"] = self.ids.input_importo.text
+        if self.ids.input_payments.get_selected_value() != "":
+            data["tipo_pag"] = self.ids.input_payments.get_selected_value()
+        if self.ids.input_note.text.strip() != "":
+            data["note"] = self.ids.input_note.text
+        return data
 
-    def get_id_payment(self):
-        payment_name = self.ids.input_payments.get_selected_value()
-        id_pag = Tools.get_key_from_dict(self._payments_dict, payment_name)
-        return id_pag
-
-    def get_note(self):
-        return self.ids.input_note.text
+    def refresh_data(self):
+        self.ids.input_importo.text = ""
+        self.ids.input_payments.update_layout(self.type_payments)
+        self.ids.input_note.text = ""
 
     def set_payment(self, btn_instance):
-        """Aggiungo/rimuovo il pagmento selzionato a main_mov_dict"""
-        id_pag = Tools.get_key_from_dict(self._payments_dict, btn_instance.text)
-        if "ID_PAG" in App.get_running_app().main_mov_dict.keys() and id_pag == App.get_running_app().main_mov_dict["ID_PAG"]:
-            App.get_running_app().main_mov_dict.pop("ID_PAG")
-        else:
-            App.get_running_app().main_mov_dict["ID_PAG"] = id_pag
+        pass
+        # """Aggiungo/rimuovo il pagmento selzionato a main_mov_dict"""
+        # id_pag = Tools.get_key_from_dict(self._payments_dict, btn_instance.text)
+        # if "ID_PAG" in App.get_running_app().main_mov_dict.keys() and id_pag == App.get_running_app().main_mov_dict["ID_PAG"]:
+        #     App.get_running_app().main_mov_dict.pop("ID_PAG")
+        # else:
+        #     App.get_running_app().main_mov_dict["ID_PAG"] = id_pag
 
 
-class LayoutSpesaGenerica(DefaultLayout, BKGrowLayout):
+class LayoutSpesaGenerica(LayoutInfo):
     """Layout di inserimento delle informazioni del movimento di tipo spesa generica; _type_spec_movements_dict è un
     dizionario che contiene tutti i possibili tipi di tipi specifici di spesa selezionabili, nella forma
     id_spesa: nome_spesa, popolato in self.refresh_dynamic_objs()"""
-    def __init__(self, mov_list, **kw):
+    def __init__(self, type_spec_mov, **kw):
         super().__init__(**kw)
-        self._type_spec_movements_dict = mov_list
-        self.ids.input_tipo_spesa.update_layout(mov_list.values())
+        self.type_spec_mov = type_spec_mov
+        self.ids.input_tipo_spesa.update_layout(self.type_spec_mov)
 
     def set_spec_movement(self, btn_instance):
+        pass
         """Aggiungo/rimuovo il tipo di spesa selezionata a spec_mov_dict"""
-        id_spesa = Tools.get_key_from_dict(self._type_spec_movements_dict, btn_instance.text)
-        if "ID_TIPO_SPESA" in App.get_running_app().spec_mov_dict.keys() and id_spesa == App.get_running_app().spec_mov_dict["ID_TIPO_SPESA"]:
-            App.get_running_app().spec_mov_dict.pop("ID_TIPO_SPESA")
-        else:
-            App.get_running_app().spec_mov_dict["ID_TIPO_SPESA"] = id_spesa
+        # tipo_spesa = btn_instance.text
+        # if "TIPO_SPESA" in App.get_running_app().spec_mov_dict.keys() and tipo_spesa == App.get_running_app().spec_mov_dict["ID_TIPO_SPESA"]:
+        #     App.get_running_app().spec_mov_dict.pop("TIPO_SPESA")
+        # else:
+        #     App.get_running_app().spec_mov_dict["TIPO_SPESA"] = tipo_spesa
 
 
-class LayoutSpesaFissa(DefaultLayout, BKGrowLayout):
+class LayoutSpesaFissa(LayoutInfo):
     """Layout di inserimento delle informazioni del movimento di tipo spesa fissa (descrizione)"""
     pass
 
 
-class LayoutStipendio(DefaultLayout, BKGrowLayout):
+class LayoutStipendio(LayoutInfo):
     """Layout di inserimento delle informazioni del movimento di tipo stipendio"""
     pass
 
 
-class LayoutEntrata(DefaultLayout, BKGrowLayout):
+class LayoutEntrata(LayoutInfo):
     """Layout di inserimento delle informazioni del movimento di tipo entrata"""
     def __init__(self, type_entrate, **kw):
         super().__init__(**kw)
-        self._type_entrate_dict = type_entrate
-        self.ids.input_tipo_entrata.update_layout(type_entrate.values())
+        self.type_entrate = type_entrate
+        self.ids.input_tipo_entrata.update_layout(self.type_entrate)
 
     def set_tipo_entrata(self, btn_instance):
         """Aggiungo/rimuovo il tipo di entrata selezionata a spec_mov_dict"""
         id_ent = Tools.get_key_from_dict(self._type_entrate_dict, btn_instance.text)
-        if "ID_TIPO_ENTRATA" in App.get_running_app().spec_mov_dict.keys() and id_ent == App.get_running_app().spec_mov_dict["ID_TIPO_ENTRATA"]:
+        if "ID_TIPO_ENTRATA" in App.get_running_app().spec_mov_dict and id_ent == App.get_running_app().spec_mov_dict["ID_TIPO_ENTRATA"]:
             App.get_running_app().spec_mov_dict.pop("ID_TIPO_ENTRATA")
         else:
             App.get_running_app().spec_mov_dict["ID_TIPO_ENTRATA"] = id_ent
 
 
-class LayoutDebitoCredito(DefaultLayout, BKGrowLayout):
+class LayoutDebitoCredito(LayoutInfo):
     def __init__(self, **kw):
         super().__init__(**kw)
-        self._deb_cred_list = ["DEBITO", "CREDITO"]
-        self.ids.input_deb_cred.update_layout(self._deb_cred_list)
+        self._deb_cred_dict = {"DEBITO": 0, "CREDITO": 1}
+        self.ids.input_deb_cred.update_layout(self._deb_cred_dict.keys())
 
     def set_deb_cred(self, btn_instance):
-        """Aggiorno spec_mov_dict con il tipo scelto: debito o credito"""
-        deb_cred = btn_instance.text
-        if deb_cred in self._deb_cred_list:
-            App.get_running_app().spec_mov_dict["DEBCRED"] = "1" if deb_cred == "CREDITO" else "0"
+        pass
+
+    def get_data(self):
+        data = {}
+        if self._deb_cred_dict[self.ids.input_deb_cred.get_selected_value()] != "":
+            data["deb_cred"] = self._deb_cred_dict[self.ids.input_deb_cred.get_selected_value()]
+        if self.ids.input_origine.text.strip() != "":
+            data["origine"] = self.ids.input_origine.text
+        if self.ids.input_descrizione.text.strip() != "":
+            data["descrizione"] = self.ids.input_descrizione.text
+        return data
+
+    def refresh_data(self):
+        self.ids.input_deb_cred.update_layout(self._deb_cred_dict.keys())
+        self.ids.input_origine.text = ""
+        self.ids.input_descrizione.text = ""
 
 
-# class LayoutSaldoDebitoCredito(DefaultLayout, BKGrowLayout):
-#     """Layout di inserimento delle informazioni per saldare uno o più debiti/crediti esistenti; il parametro
-#     _payments_dict è un dizionario che contiene tutti i possibili tipi di pagamento selezionabili nella forma
-#     id_pagamento: nome_pagamento, popolato in self.refresh_dynamic_objs()"""
-#     def __init__(self, type_payments, **kw):
-#         super().__init__(**kw)
-#         self._payments_dict = type_payments
-#         self.ids.input_payments.update_layout(type_payments.values())
-#
-#     def set_payment(self, btn_instance):
-#         """Aggiungo/rimuovo il pagmento selzionato a main_mov_dict"""
-#         id_pag = Tools.get_key_from_dict(self._payments_dict, btn_instance.text)
-#         if "ID_PAG" in App.get_running_app().main_mov_dict.keys() and id_pag == App.get_running_app().main_mov_dict["ID_PAG"]:
-#             App.get_running_app().main_mov_dict.pop("ID_PAG")
-#         else:
-#             App.get_running_app().main_mov_dict["ID_PAG"] = id_pag
-
-
-class LayoutSpesaMantenimento(DefaultLayout, BKGrowLayout):
+class LayoutSpesaMantenimento(LayoutInfo):
     """Layout di inserimento delle informazioni del movimento di tipo spesa di mantenimento"""
     pass
 
 
-class LayoutSpesaViaggio(DefaultLayout, BKGrowLayout):
+class LayoutSpesaViaggio(LayoutInfo):
     """Layout di inserimento delle informazioni del movimento di tipo spesa di viaggio"""
     pass
 

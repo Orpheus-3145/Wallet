@@ -37,10 +37,12 @@ class DefaultButton(Button, Writable):
         super().__init__(**kw)
         self.parent_layout = parent_layout
 
+
+class SimpleButton(DefaultButton):
     def on_state(self, instance, pressed):
         if pressed == "down":
             if self.parent_layout:
-                self.parent_layout.btn_pressed(self)
+                self.parent_layout.update_state(self)
             self.background_color.pop()
             self.background_color.append(0.75)
         else:
@@ -48,30 +50,24 @@ class DefaultButton(Button, Writable):
             self.background_color.append(1)
 
 
-class DefaultSelectionButton(Button, Writable):
+class SelectionButton(DefaultButton):
     """Bottone che rimane attivo una volta premuto, self.activate segnala se esso è attivo o meno, vedi DefaultButton
     per self.parent_layout"""
     activate = ObjectProperty(False)
-    tmp_color = [1, 1, 1, 1]
 
-    def __init__(self, parent_layout=None, **kw):
-        super().__init__(**kw)
-        self.parent_layout = parent_layout
-
-    def on_activate(self, instance, activate):
+    def on_activate(self, instance, activate):      # NB muovere tutto in on_press()
         """Ad ogni pressione attivo il bottone se era disattivato o viceversa"""
         if activate is False:
             self.color = [1, 1, 1, 1]
-            self.background_color = self.tmp_color
+            self.background_color = self.bk_up
         else:
-            self.color = self.background_color
-            self.tmp_color = self.background_color
-            self.background_color = [0, 1, 0, 1]
+            self.color = self.bk_up
+            self.background_color = self.bk_down
 
     def on_press(self):
         """Eseguo l'evenetuale callback a self.parent_layout e modifico il parametro self.activate"""
         if self.parent_layout:
-            self.parent_layout.btn_pressed(self)
+            self.parent_layout.update_state(self)
         self.activate = not self.activate
 
 
