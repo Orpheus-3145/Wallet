@@ -336,7 +336,6 @@ class Wallet:
                                                proc_name="SALDA_DEB_CRED",
                                                proc_args_dict=proc_args_dict,
                                                varchar_values=varchar_values)
-            print(query_sql)
             try:
                 self.cursor.execute(query_sql)
             except pyodbc.Error as error:
@@ -460,7 +459,6 @@ class Wallet:
                                                   join_type="I",
                                                   join_table="DEBITI_CREDITI dc",
                                                   join_dict={"mv.id": "dc.ID_MOV"}) + "\nWHERE dc.id_mov IN ({})".format(Tools.list_to_str(id_records))
-        print(sql_string_total)
         try:
             logging.debug("[%-10s]: raccolta info dai deb_cred di id in %s - esecuzione della stringa SQL: %s", "Wallet", str(id_records), sql_string_total)
             self.cursor.execute(sql_string_total)
