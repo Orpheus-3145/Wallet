@@ -105,68 +105,52 @@ class InsertMovementScreen(Screen):
     def __init__(self, **kw):
         super().__init__(**kw)
         self.current_mov = ""
-        self.data_layouts = {}   # NB move pos_hint, size_hint in ogni definizione della relativa classe Layout*
-        self.data_layouts["Data"] = LayoutData(pos_hint={"x": .735, "y": .48}, size_hint=(.25, .28))
-        self.data_layouts["Main"] = LayoutMainMov(type_payments=App.get_running_app().get_type_payments(), pos_hint={"x": .015, "y": .1}, size_hint=[.35, .66])
-        self.data_layouts["Spesa Generica"] = LayoutSpesaGenerica(type_spec_mov=App.get_running_app().get_type_spec_movements(), pos_hint={"x": .375, "y": .1}, size_hint=[.35, .66])
-        self.data_layouts["Spesa Fissa"] = LayoutSpesaFissa(pos_hint={"x": .375, "y": .64}, size_hint=(.35, 0.12))
-        self.data_layouts["Stipendio"] = LayoutStipendio(pos_hint={"x": .375, "y": .1}, size_hint=(.35, .66))
-        self.data_layouts["Entrata"] = LayoutEntrata(type_entrate=App.get_running_app().get_type_entrate(), pos_hint={"x": .375, "y": .29}, size_hint=(.35, .47))
-        self.data_layouts["Debito - Credito"] = LayoutDebitoCredito(pos_hint={"x": .375, "y": .4}, size_hint=(.35, .36))
-        # self.data_layouts["Saldo Debito - Credito"] = LayoutMainMov(type_payments=App.get_running_app().get_type_payments(), pos_hint={"x": .015, "y": .1}, size_hint=[.35, .66])
-        self.data_layouts["Spesa di Mantenimento"] = LayoutSpesaMantenimento(pos_hint={"x": .375, "y": .64}, size_hint=(.35, 0.12))
-        self.data_layouts["Spesa di Viaggio"] = LayoutSpesaViaggio(pos_hint={"x": .375, "y": .52}, size_hint=(.35, .24))
-        self.add_widget(self.data_layouts["Data"])
-        self.add_widget(self.data_layouts["Main"])
-        self.add_widget(self.data_layouts["Spesa Generica"])
-        self.add_widget(self.data_layouts["Spesa Fissa"])
-        self.add_widget(self.data_layouts["Stipendio"])
-        self.add_widget(self.data_layouts["Entrata"])
-        self.add_widget(self.data_layouts["Debito - Credito"])
-        # self.add_widget(self.data_layouts["Saldo Debito - Credito"])
-        self.add_widget(self.data_layouts["Spesa di Mantenimento"])
-        self.add_widget(self.data_layouts["Spesa di Viaggio"])
-        self.data_layouts["Spesa Generica"].hide_widget()
-        self.data_layouts["Spesa Fissa"].hide_widget()
-        self.data_layouts["Stipendio"].hide_widget()
-        self.data_layouts["Entrata"].hide_widget()
-        self.data_layouts["Debito - Credito"].hide_widget()
-        # self.data_layouts["Saldo Debito - Credito"].hide_widget()
-        self.data_layouts["Spesa di Mantenimento"].hide_widget()
-        self.data_layouts["Spesa di Viaggio"].hide_widget()
+        self.ids_deb_cred = {}
+        self.data_layouts = {"date": LayoutDate(),
+                             "main": LayoutMainMov(),
+                             "Spesa Generica": LayoutSpesaGenerica(App.get_running_app().get_type_spec_movements()),
+                             "Spesa Fissa": LayoutSpesaFissa(),
+                             "Stipendio": LayoutStipendio(),
+                             "Entrata": LayoutEntrata(App.get_running_app().get_type_entrate()),
+                             "Debito - Credito": LayoutDebitoCredito(),
+                             "Spesa di Mantenimento": LayoutSpesaMantenimento(),
+                             "Spesa di Viaggio": LayoutSpesaViaggio()}
+        for layout in self.data_layouts.values():
+            self.add_widget(layout)
+            layout.hide_widget()
 
     def on_pre_enter(self):
         self.current_mov = self.manager.get_type_mov()
         self.ids.mov_name.text = self.current_mov.upper()
+        self.data_layouts["date"].show_widget()
+        self.data_layouts["date"].refresh_data()
         if self.current_mov == "Stipendio":
-            self.data_layouts["Main"].hide_widget()
-        if self.current_mov != "Saldo Debito - Credito":
+            self.data_layouts["main"].hide_widget()
+        else:
+            self.data_layouts["main"].show_widget()
+            self.data_layouts["main"].refresh_data(App.get_running_app().get_type_payments())
+        if self.current_mov == "Saldo Debito - Credito":
+            self.ids_deb_cred = self.manager.get_screen("open_deb_cred").get_ids()
+        else:
             self.data_layouts[self.current_mov].show_widget()
+            self.data_layouts[self.current_mov].refresh_data()
 
     def on_leave(self):
-        self.data_layouts["Data"].refresh_data()
-        if self.current_mov == "Stipendio":
-            self.data_layouts["Main"].show_widget()
-        else:
-            self.data_layouts["Main"].refresh_data()
         if self.current_mov != "Saldo Debito - Credito":
-            self.data_layouts[self.current_mov].refresh_data()
             self.data_layouts[self.current_mov].hide_widget()
-        self.current_mov = ""
 
     def insert_movement(self):
-        data_info = self.data_layouts["Data"].get_data()
-        if self.current_mov == "Stipendio":
-            main_mov_info = {}
-            spec_mov_info = self.data_layouts["Stipendio"].get_data()
-        elif self.current_mov == "Saldo Debito - Credito":
-            main_mov_info = self.data_layouts["Main"].get_data()
-            spec_mov_info = {"id_saldo_deb_cred": Tools.list_to_str(self.manager.get_screen("open_deb_cred").selected_ids)}
+        movement_data = {}
+        movement_data.update({"type_mov": self.current_mov})
+        movement_data.update(self.data_layouts["date"].get_data())
+        if self.current_mov != "Stipendio":
+            movement_data.update(self.data_layouts["main"].get_data())
+        if self.current_mov == "Saldo Debito - Credito":
+            movement_data.update({"id_saldo_deb_cred": Tools.list_to_str(self.ids_deb_cred)})
         else:
-            main_mov_info = self.data_layouts["Main"].get_data()
-            spec_mov_info = self.data_layouts[self.current_mov].get_data()
+            movement_data.update(self.data_layouts[self.current_mov].get_data())
         try:
-            App.get_running_app().insert_movement(self.current_mov, data_info, main_mov_info, spec_mov_info)
+            App.get_running_app().insert_movement(movement_data)
         except Exception as error:
             Factory.ErrorPopup(err_text=str(error)).open()
         else:
@@ -180,6 +164,9 @@ class PayOffScreen(Screen):
     def __init__(self, **kw):
         super().__init__(**kw)
         self.selected_ids = []  # lista degli id dei record selezionati da eliminare o da saldare, NB mettere membro non static
+
+    def get_ids(self):
+        return self.selected_ids
 
     def on_pre_enter(self):
         """Ogni volta che entro nello screen aggiorno la tabella visualizzata"""

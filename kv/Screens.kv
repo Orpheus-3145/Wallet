@@ -115,7 +115,6 @@
             pos_hint: {"x": 0.325, "y": 0.15}
             type_btn: "simple"
             f_to_launch: root.set_movement
-            selection_type: "single"
 
         DefaultLayout:
             id: deb_cred
@@ -144,6 +143,54 @@
             color: WHITE_RGBA
             background_color: BLUE_RGBA
             border_color: WHITE_RGBA
+
+#        LayoutDate:
+#            id: layout_date
+#            size_hint: 0.25, 0.28
+#            pos_hint: {"x": 0.735, "y": 0.48}
+#
+#        LayoutMainMov:
+#            id: layout_main
+#            size_hint: 0.35, 0.66
+#            pos_hint: {"x": 0.15, "y": 0.1}
+#            type_payments: app.get_type_payments()
+#
+#        LayoutSpesaGenerica:
+#            id: layout_s_varia
+#            size_hint: 0.35, 0.66
+#            pos_hint: {"x": 0.375, "y": 0.1}
+#            type_payments: app.get_type_spec_movements()
+#
+#        LayoutSpesaFissa:
+#            id: layout_s_fissa
+#            size_hint: 0.35, 0.12
+#            pos_hint: {"x": 0.375, "y": 0.64}
+#
+#        LayoutStipendio:
+#            id: layout_stipendio
+#            size_hint: 0.35, 0.66
+#            pos_hint: {"x": 0.375, "y": 0.1}
+#
+#        LayoutEntrata:
+#            id: layout_entrata
+#            size_hint: 0.35, 0.47
+#            pos_hint: {"x": 0.375, "y": 0.29}
+#            type_payments: app.get_type_entrate()
+#
+#        LayoutDebitoCredito:
+#            id: layout_deb_cred
+#            size_hint: 0.35, 0.36
+#            pos_hint: {"x": 0.375, "y": 0.4}
+#
+#        LayoutSpesaMantenimento:
+#            id: layout_s_mantenimento
+#            size_hint: 0.35, 0.12
+#            pos_hint: {"x": 0.375, "y": 0.64}
+#
+#        LayoutSpesaViaggio:
+#            id: layout_data_s_viaggio
+#            size_hint: 0.35, 0.24
+#            pos_hint: {"x": 0.375, "y": 0.52}
 
         BorderLayout:
             border_color: LIGHTGREY_RGBA
@@ -265,7 +312,6 @@
             pos_hint: {"x": 0.01, "y": 0.23}
             f_to_launch: root.set_movement
             font_size_chars: FONT_SIZE * 0.9
-            selection_type: "single"
 
         LabelDynamicLayout:      # list of field names
             id: mov_columns

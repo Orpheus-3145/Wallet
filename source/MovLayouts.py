@@ -8,20 +8,20 @@ class LayoutInfo(DefaultLayout, BKGrowLayout):
     def get_data(self):
         pass
 
-    def refresh_data(self):
+    def refresh_data(self, new_data=None):
         pass
 
 
-class LayoutData(LayoutInfo):
-    """Schermata che permette di inserire una data nel formato giorno-mese-anno, salvati in 3 variabili indipendenti"""
-
+class LayoutDate(LayoutInfo):
     def get_data(self):
-        day = self.ids.input_day.text
-        month = self.ids.input_month.text
-        year = self.ids.input_year.text
-        return {"DAY": day, "MONTH": month, "YEAR": year}
+        data = {}
+        if self.ids.input_day.text.strip() and self.ids.input_month.text.strip() and self.ids.input_year.text.strip():
+            data["str_data_mov"] = "{}/{}/{}".format(self.ids.input_day.text.strip(),
+                                                     self.ids.input_month.text.strip(),
+                                                     self.ids.input_year.text.strip())
+        return data
 
-    def refresh_data(self):
+    def refresh_data(self, new_data=None):
         self.ids.input_day.text = ""
         self.ids.input_month.text = ""
         self.ids.input_year.text = ""
@@ -31,24 +31,24 @@ class LayoutMainMov(LayoutInfo):
     """Layout di inserimento delle informazioni generiche del movimento, il parametro _payments_dict è un dizionario che
     contiene tutti i possibili tipi di pagamento selezionabili nella forma id_pagamento: nome_pagamento, popolato
     in self.refresh_dynamic_objs()"""
-    def __init__(self, type_payments, **kw):
-        super().__init__(**kw)
-        self.type_payments = type_payments
-        self.ids.input_payments.update_layout(type_payments)
+    # def __init__(self, type_payments, **kw):
+    #     super().__init__(**kw)
+    #     self.type_payments = type_payments
+    #     self.refresh_data()
 
     def get_data(self):
         data = {}
-        if self.ids.input_importo.text.strip() != "":
-            data["importo"] = self.ids.input_importo.text
-        if self.ids.input_payments.get_selected_value() != "":
-            data["tipo_pag"] = self.ids.input_payments.get_selected_value()
-        if self.ids.input_note.text.strip() != "":
-            data["note"] = self.ids.input_note.text
+        if self.ids.input_importo.text.strip():
+            data["importo"] = self.ids.input_importo.text.strip()
+        if self.ids.input_payments.get_selected_value():
+            data["type_pag"] = self.ids.input_payments.get_selected_value()
+        if self.ids.input_note.text.strip():
+            data["note"] = self.ids.input_note.text.strip()
         return data
 
-    def refresh_data(self):
+    def refresh_data(self, new_data=None):
         self.ids.input_importo.text = ""
-        self.ids.input_payments.update_layout(self.type_payments)
+        self.ids.input_payments.update_layout(new_data)
         self.ids.input_note.text = ""
 
     def set_payment(self, btn_instance):
@@ -107,26 +107,29 @@ class LayoutEntrata(LayoutInfo):
 
 
 class LayoutDebitoCredito(LayoutInfo):
-    def __init__(self, **kw):
-        super().__init__(**kw)
-        self._deb_cred_dict = {"DEBITO": 0, "CREDITO": 1}
-        self.ids.input_deb_cred.update_layout(self._deb_cred_dict.keys())
+    # def __init__(self, **kw):
+    #     super().__init__(**kw)
+    #     self._deb_cred_list = ["DEBITO", "CREDITO"]
+    #     self.refresh_data()
 
     def set_deb_cred(self, btn_instance):
         pass
 
     def get_data(self):
         data = {}
-        if self._deb_cred_dict[self.ids.input_deb_cred.get_selected_value()] != "":
-            data["deb_cred"] = self._deb_cred_dict[self.ids.input_deb_cred.get_selected_value()]
-        if self.ids.input_origine.text.strip() != "":
-            data["origine"] = self.ids.input_origine.text
-        if self.ids.input_descrizione.text.strip() != "":
-            data["descrizione"] = self.ids.input_descrizione.text
+        if self.ids.input_deb_cred.get_selected_value():
+            if self.ids.input_deb_cred.get_selected_value() == "DEBITO":
+                data["deb_cred"] = 0
+            else:
+                data["deb_cred"] = 1
+        if self.ids.input_origine.text.strip():
+            data["origine"] = self.ids.input_origine.text.strip()
+        if self.ids.input_descrizione.text.strip():
+            data["descrizione"] = self.ids.input_descrizione.text.strip()
         return data
 
-    def refresh_data(self):
-        self.ids.input_deb_cred.update_layout(self._deb_cred_dict.keys())
+    def refresh_data(self, new_data=None):
+        self.ids.input_deb_cred.update_layout(["DEBITO", "CREDITO"])
         self.ids.input_origine.text = ""
         self.ids.input_descrizione.text = ""
 

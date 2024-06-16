@@ -35,7 +35,7 @@ class InputLayout(DefaultLayout):
     premuto"""
     def __init__(self, type_selection="multiple", f_to_launch=None, **kw):
         super().__init__(**kw)
-        self.type_selection = type_selection        # tipi di selezione dei bottoni: 'single', 'multiple' o 'all' (vedi self.btn_pressed())
+        self.type_selection = type_selection        # tipi di selezione dei bottoni: 'single', 'multiple' (?) o 'all' (vedi self.btn_pressed())
         self.f_to_launch = f_to_launch              # funzione da eseguire alla pressione
         self.btn_pressed = None
 
@@ -57,7 +57,7 @@ class InputLayout(DefaultLayout):
 
     def get_selected_value(self):
         if self.btn_pressed:
-            return self.btn_pressed.text
+            return self.btn_pressed.text.strip()
         else:
             return ""
 
