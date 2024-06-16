@@ -17,7 +17,7 @@ def escape_sql_chars(string):
     return string.replace("'", "''")
 
 
-def list_to_str(container):     # NB sortare i valori
+def list_to_str(container):
     """Converte in stringa un contenitore passato (list, dict, ...)"""
     str_elements = ""
     if isinstance(container, list) or isinstance(container, set):

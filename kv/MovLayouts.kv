@@ -1,6 +1,4 @@
 <LayoutDate>:
-    size_hint: 0.25, 0.28
-    pos_hint: {"x": 0.735, "y": 0.48}
     GridLayout:
         rows: 1
         size_hint_y: 0.224
@@ -43,9 +41,8 @@
             id: input_year
             font_size_scale: 0.8
 
+
 <LayoutMainMov>:
-    size_hint: 0.35, 0.66
-    pos_hint: {"x": 0.015, "y": 0.1}
     GridLayout:
         rows: 1
         size_hint_y: 0.1
@@ -82,13 +79,11 @@
             font_size_scale: 0.8
             size_hint_x: 0.5
 
+
 <LayoutSpesaGenerica>:
-    size_hint: 0.35, 0.66
-    pos_hint: {"x": 0.375, "y": 0.1}
     ButtonDynamicInputLayout:
         id: input_tipo_spesa
         size_hint_y: 0.88
-        f_to_launch: root.set_spec_movement
         font_size_chars: FONT_SIZE * 0.8
 
     GridLayout:
@@ -102,9 +97,9 @@
             halign: "right"
 
         DefaultTextInput:
+            id: input_descrizione
             font_size_scale: 0.8
-            on_text:
-                if self.text != "": app.spec_mov_dict["DESCRIZIONE"] = self.text
+
 
 <LayoutSpesaFissa>:
     size_hint: 0.35, 0.12
@@ -119,31 +114,11 @@
             font_size_scale: 0.8
 
         DefaultTextInput:
+            id: input_descrizione
             font_size_scale: 0.8
-            on_text:
-                if self.text != "": app.spec_mov_dict["DESCRIZIONE"] = self.text
+
 
 <LayoutStipendio>:
-    size_hint: 0.35, 0.66
-    pos_hint: {"x": 0.375, "y": 0.1}
-    GridLayout:
-        rows: 1
-        size_hint_y: 0.17
-
-        DefaultLabel:
-            text: "Totale"
-            font_size_scale: 0.8
-            size_hint_y: 0.18
-            halign: "right"
-            valign: "top"
-
-        DefaultTextInput:
-            valign: "middle"
-            font_size_scale: 0.8
-            size_hint_y: 0.18
-            on_text:
-                if self.text != "": app.spec_mov_dict["TOTALE"] = self.text
-
     GridLayout:
         rows: 1
         size_hint_y: 0.17
@@ -156,11 +131,10 @@
             valign: "top"
 
         DefaultTextInput:
+            id: input_netto
             valign: "middle"
             font_size_scale: 0.8
             size_hint_y: 0.18
-            on_text:
-                if self.text != "": app.spec_mov_dict["NETTO"] = self.text
 
     GridLayout:
         rows: 1
@@ -174,11 +148,10 @@
             valign: "top"
 
         DefaultTextInput:
+            id: input_r_spese
             valign: "middle"
             font_size_scale: 0.8
             size_hint_y: 0.18
-            on_text:
-                if self.text != "": app.spec_mov_dict["RIMBORSO_SPESE"] = self.text
 
     GridLayout:
         rows: 1
@@ -192,37 +165,16 @@
             valign: "top"
 
         DefaultTextInput:
+            id: input_ddl
             valign: "middle"
             font_size_scale: 0.8
             size_hint_y: 0.28
-            on_text:
-                if self.text != "": app.spec_mov_dict["PROVENIENZA"] = self.text
 
-    GridLayout:
-        rows: 1
-        size_hint_y: 0.17
-
-        DefaultLabel:
-            text: "Note"
-            font_size_scale: 0.8
-            size_hint_y: 0.28
-            halign: "right"
-            valign: "top"
-
-        DefaultTextInput:
-            valign: "middle"
-            font_size_scale: 0.8
-            size_hint_y: 0.28
-            on_text:
-                if self.text != "": app.spec_mov_dict["NOTE"] = self.text
 
 <LayoutEntrata>:
-    pos_hint: {"x": 0.375, "y": 0.29}
-    size_hint: 0.35, 0.47
     ButtonDynamicInputLayout:
         id: input_tipo_entrata
         size_hint_y: 0.8
-        f_to_launch: root.set_tipo_entrata
         font_size_chars: FONT_SIZE * 0.8
 
     GridLayout:
@@ -235,15 +187,12 @@
             valign: "top"
             halign: "right"
 
-
         DefaultTextInput:
+            id: input_descrizione
             font_size_scale: 0.8
-            on_text:
-                if self.text != "": app.spec_mov_dict["DESCRIZIONE"] = self.text
+
 
 <LayoutDebitoCredito>:
-    size_hint: 0.35, 0.36
-    pos_hint: {"x": 0.375, "y": 0.4}
     ButtonDynamicInputLayout:
         id: input_deb_cred
         size_hint_y: 0.33
@@ -278,9 +227,8 @@
             id: input_descrizione
             font_size_scale: 0.8
 
+
 <LayoutSpesaMantenimento>:
-    pos_hint: {"x": 0.375, "y": 0.64}
-    size_hint: 0.35, 0.12
     GridLayout:
         rows: 1
         DefaultLabel:
@@ -290,13 +238,11 @@
             valign: "top"
 
         DefaultTextInput:
+            id: input_descrizione
             font_size_scale: 0.8
-            on_text:
-                if self.text != "": app.spec_mov_dict["DESCRIZIONE"] = self.text
+
 
 <LayoutSpesaViaggio>:
-    pos_hint: {"x": 0.375, "y": 0.52}
-    size_hint: 0.35, 0.24
     GridLayout:
         rows: 1
         size_hint_y: 0.5
@@ -308,9 +254,8 @@
             valign: "top"
 
         DefaultTextInput:
+            id: input_viaggio
             font_size_scale: 0.8
-            on_text:
-                if self.text != "": app.spec_mov_dict["VIAGGIO"] = self.text
 
     GridLayout:
         rows: 1
@@ -323,6 +268,5 @@
             valign: "top"
 
         DefaultTextInput:
+            id: input_descrizione
             font_size_scale: 0.8
-            on_text:
-                if self.text != "": app.spec_mov_dict["DESCRIZIONE"] = self.text

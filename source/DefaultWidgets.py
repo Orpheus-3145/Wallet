@@ -41,10 +41,10 @@ class DefaultButton(Button, Writable):
 class SimpleButton(DefaultButton):
     def on_state(self, instance, pressed):
         if pressed == "down":
-            if self.parent_layout:
-                self.parent_layout.update_state(self)
             self.background_color.pop()
             self.background_color.append(0.75)
+            if self.parent_layout:
+                self.parent_layout.update_state(self)
         else:
             self.background_color.pop()
             self.background_color.append(1)
@@ -66,9 +66,9 @@ class SelectionButton(DefaultButton):
 
     def on_press(self):
         """Eseguo l'evenetuale callback a self.parent_layout e modifico il parametro self.activate"""
+        self.activate = not self.activate
         if self.parent_layout:
             self.parent_layout.update_state(self)
-        self.activate = not self.activate
 
 
 class DefaultTextInput(TextInput, Writable):

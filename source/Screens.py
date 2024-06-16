@@ -7,8 +7,6 @@ from MovLayouts import *
 class ManagerScreen(ScreenManager):
     def __init__(self, **kw):
         super().__init__(**kw)
-        self._type_mov_dict = {}
-        self.type_mov = ""
         self.add_widget(LoginScreen(name="login"))
 
     def create_screens(self):
@@ -19,16 +17,8 @@ class ManagerScreen(ScreenManager):
                                             default_rows_to_show=App.get_running_app().get_default_rows_to_show(),
                                             name="show_movements"))
 
-    def set_movements(self, movements):
-        self._type_mov_dict = movements
-
-    def get_type_mov(self):
-        return self.type_mov
-
     def go_to_insert_screen(self, type_mov):
-        if type_mov == "":  # quando torno nella schermata principale setto type_movement = "" in questo caso non mi serve alcun automatismo
-            return
-        self.type_mov = type_mov
+        self.get_screen("insert").set_current_mov(type_mov)
         self.current = "insert"
         self.transition.direction = "left"
 
@@ -36,35 +26,35 @@ class ManagerScreen(ScreenManager):
         self.current = "open_deb_cred"
         self.transition.direction = "up"
 
+    def go_to_show_movements_screen(self):
+        self.current = "show_movements"
+        self.transition.direction = "up"
+
     def go_to_main_screen(self, direction="right"):
-        self.type_mov = ""
         self.current = "main"
         self.transition.direction = direction
 
 
 class LoginScreen(Screen):
-    def login(self, username, password, autologin=False):
-        login_status = True
+    def login(self, autologin=False):
+        username = self.ids.input_user.text.strip()
+        password = self.ids.input_pwd.text.strip()
         try:
-            if autologin is False:
-                login_status = App.get_running_app().login(username, password)
+            login_status = App.get_running_app().login(username, password, autologin)
         except Exception as error:
             Factory.ErrorPopup(err_text=str(error)).open()
         else:
             if login_status is False:
                 Factory.SingleChoicePopup(info="Login fallito").open()
             else:
-                self.manager.set_movements(App.get_running_app().get_movements())
                 self.manager.create_screens()
                 self.manager.go_to_main_screen()
 
 
 class MainScreen(Screen):
-    def on_kv_post(self, base_widget):      # NB move in a constructor?
+    def on_pre_enter(self, *args):
         movements_list = App.get_running_app().get_movements(type_mov="general")
         self.ids.general_mov.update_layout(movements_list)
-
-    def on_pre_enter(self, *args):
         self.ids.deb_cred.hide_widget()
         self.ids.general_mov.hide_widget()
 
@@ -80,8 +70,6 @@ class MainScreen(Screen):
 
     def show_last_movements(self):
         """Va allo screen ShowMovementsScreen"""
-        self.manager.current = "show_movements"
-        self.manager.transition.direction = "up"
 
     def open_bi(self):
         try:
@@ -89,8 +77,8 @@ class MainScreen(Screen):
         except Exception as error:
             Factory.ErrorPopup(err_text=str(error)).open()
 
-    def set_movement(self, type_mov):
-        self.manager.go_to_insert_screen(type_mov)
+    def insert_new_movement(self, btn_instance):
+        self.manager.go_to_insert_screen(btn_instance.text)
 
     def backup(self):
         try:
@@ -105,52 +93,52 @@ class InsertMovementScreen(Screen):
     def __init__(self, **kw):
         super().__init__(**kw)
         self.current_mov = ""
-        self.ids_deb_cred = {}
-        self.data_layouts = {"date": LayoutDate(),
-                             "main": LayoutMainMov(),
-                             "Spesa Generica": LayoutSpesaGenerica(App.get_running_app().get_type_spec_movements()),
-                             "Spesa Fissa": LayoutSpesaFissa(),
-                             "Stipendio": LayoutStipendio(),
-                             "Entrata": LayoutEntrata(App.get_running_app().get_type_entrate()),
-                             "Debito - Credito": LayoutDebitoCredito(),
-                             "Spesa di Mantenimento": LayoutSpesaMantenimento(),
-                             "Spesa di Viaggio": LayoutSpesaViaggio()}
+        self.data_layouts = {"date": self.ids.layout_date,
+                             "main": self.ids.layout_main,
+                             "Spesa Generica": self.ids.layout_s_varia,
+                             "Spesa Fissa": self.ids.layout_s_fissa,
+                             "Stipendio": self.ids.layout_stipendio,
+                             "Entrata": self.ids.layout_entrata,
+                             "Debito - Credito": self.ids.layout_deb_cred,
+                             "Spesa di Mantenimento": self.ids.layout_s_mantenimento,
+                             "Spesa di Viaggio": self.ids.layout_data_s_viaggio}
         for layout in self.data_layouts.values():
-            self.add_widget(layout)
             layout.hide_widget()
+        self.ids_deb_cred = {}
+
+    def set_current_mov(self, current_mov):
+        self.current_mov = current_mov
 
     def on_pre_enter(self):
-        self.current_mov = self.manager.get_type_mov()
         self.ids.mov_name.text = self.current_mov.upper()
         self.data_layouts["date"].show_widget()
         self.data_layouts["date"].refresh_data()
-        if self.current_mov == "Stipendio":
-            self.data_layouts["main"].hide_widget()
-        else:
-            self.data_layouts["main"].show_widget()
-            self.data_layouts["main"].refresh_data(App.get_running_app().get_type_payments())
-        if self.current_mov == "Saldo Debito - Credito":
-            self.ids_deb_cred = self.manager.get_screen("open_deb_cred").get_ids()
-        else:
+        self.data_layouts["main"].show_widget()
+        self.data_layouts["main"].refresh_data(App.get_running_app().get_type_payments())
+        if self.current_mov != "Saldo Debito - Credito":
             self.data_layouts[self.current_mov].show_widget()
-            self.data_layouts[self.current_mov].refresh_data()
+            if self.current_mov == "Spesa Generica":
+                self.data_layouts[self.current_mov].refresh_data(App.get_running_app().get_type_spec_movements())
+            elif self.current_mov == "Entrata":
+                self.data_layouts[self.current_mov].refresh_data(App.get_running_app().get_type_entrate())
+            else:
+                self.data_layouts[self.current_mov].refresh_data()
+        else:
+            self.ids_deb_cred = self.manager.get_screen("open_deb_cred").get_ids()
 
     def on_leave(self):
         if self.current_mov != "Saldo Debito - Credito":
             self.data_layouts[self.current_mov].hide_widget()
 
     def insert_movement(self):
-        movement_data = {}
-        movement_data.update({"type_mov": self.current_mov})
-        movement_data.update(self.data_layouts["date"].get_data())
-        if self.current_mov != "Stipendio":
-            movement_data.update(self.data_layouts["main"].get_data())
+        movement_data = self.data_layouts["date"].get_data()
+        movement_data.update(self.data_layouts["main"].get_data())
         if self.current_mov == "Saldo Debito - Credito":
             movement_data.update({"id_saldo_deb_cred": Tools.list_to_str(self.ids_deb_cred)})
         else:
             movement_data.update(self.data_layouts[self.current_mov].get_data())
         try:
-            App.get_running_app().insert_movement(movement_data)
+            App.get_running_app().insert_movement(self.current_mov, movement_data)
         except Exception as error:
             Factory.ErrorPopup(err_text=str(error)).open()
         else:
@@ -158,12 +146,9 @@ class InsertMovementScreen(Screen):
 
 
 class PayOffScreen(Screen):
-    """Schermata per gestire la selezione di uno o più debiti/crediti, essi possono essere eliminati o saldati
-    chiamando lo screen InsertMovementScreen; nb: è possibile fare saldi (o rimozioni) multipli, il segno finale
-    della somma determinerà se si tratta di una spesa o di un'entrata"""
     def __init__(self, **kw):
         super().__init__(**kw)
-        self.selected_ids = []  # lista degli id dei record selezionati da eliminare o da saldare, NB mettere membro non static
+        self.selected_ids = []  # lista degli id dei record selezionati da eliminare o da saldare
 
     def get_ids(self):
         return self.selected_ids

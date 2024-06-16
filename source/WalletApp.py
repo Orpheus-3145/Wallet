@@ -26,7 +26,6 @@ class AppException(Exception):
 class WalletApp(App):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.manager = None
         self.title = Config["wallet_app"]["app_name"]               # nome dell'app
         self.max_rows_to_show = Config.getint("wallet_app", "max_rows_to_show")            # max righe mostrate in SowMovementScreen
         self.default_rows_to_show = Config.getint("wallet_app", "default_rows_to_show")   # default righe mostrate in SowMovementScreen
@@ -44,12 +43,8 @@ class WalletApp(App):
         logging.info("[%-10s]: %s", "WalletApp", "#" * 80)
         logging.info("[%-10s]: avvio app - applicazione avviata" % "WalletApp")
         self._stopped = False                                       # proprietà di servizio, vedi self.on_stop()
-        # self.date_dict = {}                                         # data movimento
-        # self.main_mov_dict = {}                                     # informazioni generali (comuni ad ogni tipo di spesa/entrata)
-        # self.spec_mov_dict = {}                                     # informazioni specifiche della spesa/entrata
-        # self.manager = None                                         # istanza di ScreenManager per muoversi tra le schermate
-        self.wallet_instance = Wallet.Wallet(self.dsn)
-        self.qlik_app = Wallet.QlikViewApp(self.bi_file_path)
+        self.wallet_instance = None
+        self.qlik_app = None
 
     def create_logger(self, logger_name, log_level, log_name, log_path, fmt):
         """Crea un file di log con livello, percorso, nome e formattazione dei record passati come parametri, richiamando
@@ -70,25 +65,28 @@ class WalletApp(App):
             except Exception as error:
                 logging.error("[%-10s]: avvio app - errore file %s - trace: %s", "WalletApp", kv_file, str(error))
                 raise AppException(str(error))
-        self.manager = ManagerScreen()
         logging.info("[%-10s]: avvio app - caricati i file di stile .kv, creato ScreenManager e Screen di login" % "WalletApp")
-        return self.manager
+        return ManagerScreen()
 
-    def login(self, user, pwd):
-        if user.strip() == "" or pwd.strip() == "":
+    def login(self, user, pwd, autologin):
+        if autologin is True:
+            self.wallet_instance = Wallet.Wallet(self.dsn)
+            self.qlik_app = Wallet.QlikViewApp(self.bi_file_path)
+            return True
+        elif user == "" or pwd == "":
             raise AppException("Credenziali mancanti")
-        return self.wallet_instance.login_wallet(user.strip(), pwd.strip())
+        self.wallet_instance = Wallet.Wallet(self.dsn)
+        status = self.wallet_instance.login_wallet(user.strip(), pwd.strip())
+        if status is True:
+            self.qlik_app = Wallet.QlikViewApp(self.bi_file_path)
+        return status
 
     def open_BI(self):
         user, pwd = self.wallet_instance.get_bi_credentials()
         self.qlik_app.open(user, pwd)
 
-    def insert_movement(self, data_movement):
-        try:
-            self.wallet_instance.check_values(data_info=data_movement)
-            self.wallet_instance.insert_movement()
-        except Wallet.FatalError as err:        # Nb why?
-            raise err
+    def insert_movement(self, type_mov, data_movement):
+        self.wallet_instance.insert_movement(type_mov=type_mov, data_info=data_movement)
 
     def drop_records(self, list_records, type_movement):
         """Ricevo in argomento una lista di id, ciascuno corrispondente ad un movimento, da eliminare
