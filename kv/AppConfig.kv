@@ -1,20 +1,21 @@
-#:set ORANGE_RGBA       [0.9725490196078431, 0.615686274509804, 0.054901960784313725, 1]
-#:set RED_RGBA          [1, 0.2235294117647059, 0.16862745098039217, 1]
-#:set DARKGREY_RGBA     [0.23529411764705882, 0.23529411764705882, 0.23529411764705882, 1]
-#:set LIGHTGREY_RGBA    [0.8, 0.8, 0.8, 1]
-#:set BLUE_RGBA         [0.09019607843137255, 0.1568627450980392, 0.5882352941176471, 1]
-#:set LIGHTBLUE_RGBA    [0.09019607843137255, 0.50980392156862, 1, 1]
-#:set GREEN_RGBA        [0.20784313725490197, 0.9333333333333333, 0.09411764705882353, 1]
-#:set LIGHTGREEN_RGBA   [0.0, 1, 0.047058823529411764, 1]
-#:set YELLOW_RGBA       [1, 0.76078431372549, 0, 1]
-#:set LIGHTYELLOW_RGBA  [1, 0.8627450980392, 0, 1]
-#:set PURPLE_RGBA       [0.678431372549019, 0.30980392156862, 1, 1]
-#:set CYAN_RGBA         [0.145098039215686, 0.498039215686274, 0.7803921568627, 1]
-#:set WHITE_RGBA        [1, 1, 1, 1]
-#:set BLACK_RGBA        [0, 0, 0, 1]
-#:set BK_PATH       "../media/logos/3169475.jpg"
-#:set LOGO_PATH     "../media/logos/W_logo_3.jpg"
-#:set BI_LOGO_PATH  "../media/logos/qlik_logo.jpg"
+#:set BK_PATH           app.get_background_path()
+#:set LOGO_PATH         app.get_logo_path()
+#:set BI_LOGO_PATH      app.get_bi_logo_path()
+#:set FONT_NAME         app.get_font_name()
+#:set FONT_SIZE         app.get_font_size()
 
-#:set FONT_NAME "../media/font/militech/militech_r_2019-04-13.ttf"
-#:set FONT_SIZE 30
+#:set ORANGE_RGBA       app.get_color("orange_rgba")
+#:set DARKGREY_RGBA     app.get_color("darkgrey_rgba")
+#:set LIGHTGREY_RGBA    app.get_color("lightgrey_rgba")
+#:set RED_RGBA          app.get_color("red_rgba")
+#:set TURQUOISE_RGBA    app.get_color("turquoise_rgba")
+#:set PURPLE_RGBA       app.get_color("purple_rgba")
+#:set BLUE_RGBA         app.get_color("blue_rgba")
+#:set LIGHTBLUE_RGBA    app.get_color("lightblue_rgba")
+#:set GREEN_RGBA        app.get_color("green_rgba")
+#:set LIGHTGREEN_RGBA   app.get_color("lightgreen_rgba")
+#:set YELLOW_RGBA       app.get_color("yellow_rgba")
+#:set LIGHTYELLOW_RGBA  app.get_color("orange_rgba")
+#:set CYAN_RGBA         app.get_color("cyan_rgba")
+#:set WHITE_RGBA        app.get_color("white_rgba")
+#:set BLACK_RGBA        app.get_color("black_rgba")

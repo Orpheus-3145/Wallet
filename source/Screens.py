@@ -1,5 +1,7 @@
 from kivy.uix.screenmanager import Screen, ScreenManager
 from kivy.factory import Factory
+from kivy.app import App
+import Tools
 
 from MovLayouts import *
 
@@ -11,14 +13,15 @@ class ManagerScreen(ScreenManager):
 
     def create_screens(self):
         self.add_widget(MainScreen(name="main"))
-        self.add_widget(InsertMovementScreen(name="insert"))
+        self.add_widget(InsertMovementScreen(movements=App.get_running_app().get_movements(get_all=True),
+                                             name="insert"))
         self.add_widget(PayOffScreen(name="open_deb_cred"))
         self.add_widget(ShowMovementsScreen(max_rows_to_show=App.get_running_app().get_max_rows_to_show(),
                                             default_rows_to_show=App.get_running_app().get_default_rows_to_show(),
                                             name="show_movements"))
 
-    def go_to_insert_screen(self, type_mov):
-        self.get_screen("insert").set_current_mov(type_mov)
+    def go_to_insert_screen(self, id_mov):
+        self.get_screen("insert").set_current_mov(id_mov)
         self.current = "insert"
         self.transition.direction = "left"
 
@@ -53,23 +56,22 @@ class LoginScreen(Screen):
 
 class MainScreen(Screen):
     def on_pre_enter(self, *args):
-        movements_list = App.get_running_app().get_movements(type_mov="general")
-        self.ids.general_mov.update_layout(movements_list)
-        self.ids.deb_cred.hide_widget()
+        self.ids.general_mov.update_layout(App.get_running_app().get_movements())
+        # self.ids.deb_cred.hide_widget()
         self.ids.general_mov.hide_widget()
 
     def show_movements(self):
         """Attiva il layout per visualizzare i tipi di moviemento generici"""
         self.ids.general_mov.show_widget()
-        self.ids.deb_cred.hide_widget()
+        # self.ids.deb_cred.hide_widget()
 
-    def show_deb_cred(self):
-        """Attiva il layout per visualizzare i tipi di movimento deb/cred"""
-        self.ids.deb_cred.show_widget()
-        self.ids.general_mov.hide_widget()
+    # def show_deb_cred(self):
+    #     """Attiva il layout per visualizzare i tipi di movimento deb/cred"""
+    #     self.ids.deb_cred.show_widget()
+    #     self.ids.general_mov.hide_widget()
 
-    def show_last_movements(self):
-        """Va allo screen ShowMovementsScreen"""
+    # def show_last_movements(self):
+    #     """Va allo screen ShowMovementsScreen"""
 
     def open_bi(self):
         try:
@@ -78,7 +80,7 @@ class MainScreen(Screen):
             Factory.ErrorPopup(err_text=str(error)).open()
 
     def insert_new_movement(self, btn_instance):
-        self.manager.go_to_insert_screen(btn_instance.text)
+        self.manager.go_to_insert_screen(btn_instance.get_alt_id())
 
     def backup(self):
         try:
@@ -90,55 +92,50 @@ class MainScreen(Screen):
 
 
 class InsertMovementScreen(Screen):
-    def __init__(self, **kw):
+    def __init__(self, movements, **kw):
         super().__init__(**kw)
-        self.current_mov = ""
-        self.data_layouts = {"date": self.ids.layout_date,
-                             "main": self.ids.layout_main,
-                             "Spesa Generica": self.ids.layout_s_varia,
-                             "Spesa Fissa": self.ids.layout_s_fissa,
-                             "Stipendio": self.ids.layout_stipendio,
-                             "Entrata": self.ids.layout_entrata,
-                             "Debito - Credito": self.ids.layout_deb_cred,
-                             "Spesa di Mantenimento": self.ids.layout_s_mantenimento,
-                             "Spesa di Viaggio": self.ids.layout_data_s_viaggio}
+        self.id_mov = -1
+        self.movements = movements
+        self.ids_deb_cred = {}
+        self.data_layouts = {1: self.ids.layout_s_varia,
+                             2: self.ids.layout_s_fissa,
+                             3: self.ids.layout_stipendio,
+                             4: self.ids.layout_entrata,
+                             5: self.ids.layout_deb_cred,       # NB no 6th!
+                             7: self.ids.layout_s_mantenimento,
+                             8: self.ids.layout_data_s_viaggio}
         for layout in self.data_layouts.values():
             layout.hide_widget()
-        self.ids_deb_cred = {}
 
-    def set_current_mov(self, current_mov):
-        self.current_mov = current_mov
+    def set_current_mov(self, id_mov):
+        self.id_mov = id_mov
+        self.ids.mov_name.text = self.movements[self.id_mov].upper()
 
     def on_pre_enter(self):
-        self.ids.mov_name.text = self.current_mov.upper()
-        self.data_layouts["date"].show_widget()
-        self.data_layouts["date"].refresh_data()
-        self.data_layouts["main"].show_widget()
-        self.data_layouts["main"].refresh_data(App.get_running_app().get_type_payments())
-        if self.current_mov != "Saldo Debito - Credito":
-            self.data_layouts[self.current_mov].show_widget()
-            if self.current_mov == "Spesa Generica":
-                self.data_layouts[self.current_mov].refresh_data(App.get_running_app().get_type_spec_movements())
-            elif self.current_mov == "Entrata":
-                self.data_layouts[self.current_mov].refresh_data(App.get_running_app().get_type_entrate())
-            else:
-                self.data_layouts[self.current_mov].refresh_data()
-        else:
+        self.ids.layout_date.refresh_data()
+        self.ids.layout_main.refresh_data()
+        if self.movements[self.id_mov] == "Saldo Debito - Credito":
             self.ids_deb_cred = self.manager.get_screen("open_deb_cred").get_ids()
+        else:
+            self.data_layouts[self.id_mov].refresh_data()
+            self.data_layouts[self.id_mov].show_widget()
 
     def on_leave(self):
-        if self.current_mov != "Saldo Debito - Credito":
-            self.data_layouts[self.current_mov].hide_widget()
+        if self.movements[self.id_mov] != "Saldo Debito - Credito":
+            self.data_layouts[self.id_mov].hide_widget()
+        else:
+            self.ids.layout_main.show_widget()
+        self.id_mov = -1
 
     def insert_movement(self):
-        movement_data = self.data_layouts["date"].get_data()
-        movement_data.update(self.data_layouts["main"].get_data())
-        if self.current_mov == "Saldo Debito - Credito":
+        movement_data = self.ids.layout_date.get_data()
+        movement_data.update(self.ids.layout_main.get_data())
+        if self.movements[self.id_mov] == "Saldo Debito - Credito":
             movement_data.update({"id_saldo_deb_cred": Tools.list_to_str(self.ids_deb_cred)})
         else:
-            movement_data.update(self.data_layouts[self.current_mov].get_data())
+            movement_data.update(self.data_layouts[self.id_mov].get_data())
         try:
-            App.get_running_app().insert_movement(self.current_mov, movement_data)
+            App.get_running_app().insert_movement(self.id_mov, movement_data)
         except Exception as error:
             Factory.ErrorPopup(err_text=str(error)).open()
         else:
@@ -192,13 +189,13 @@ class PayOffScreen(Screen):
             self.ids.appearing_box.show_widget()
 
     def go_to_insert_screen(self):
-        self.manager.go_to_insert_screen("Saldo Debito - Credito")    # vado allo screen InsertMovementScreen
+        self.manager.go_to_insert_screen(6)
 
     def remove_records(self):
         """Rimuove i record (cioè i movimenti), aggiorna la tabella e nasconde il box per la rimozione dei record
         selezionati"""
         try:
-            App.get_running_app().drop_records(self.selected_ids, "Debito - Credito")
+            App.get_running_app().drop_records(self.selected_ids)
         except Exception as error:
             Factory.ErrorPopup(err_text=str(error)).open()
         else:
@@ -230,7 +227,7 @@ class ShowMovementsScreen(Screen):
         visionare"""
         self.ids.info_no_rows.text = "Record visualizzati [max: {}]".format(self.max_rows_to_show)
         self.ids.input_no_rows.text = str(self.current_rows_shown)
-        list_movements = App.get_running_app().get_movements(type_mov="general")       # lista dei possibili movimenti da selezionare
+        list_movements = App.get_running_app().get_movements()       # lista dei possibili movimenti da selezionare
         self.ids.box_movements.update_layout(list_movements)                      # aggiorno il relativo layout
         self.ids.remove_record_btn.hide_widget()
 
@@ -294,7 +291,7 @@ class ShowMovementsScreen(Screen):
 
     def remove_records(self):
         try:
-            App.get_running_app().drop_records(self.records_to_drop, self.type_movement)
+            App.get_running_app().drop_records(self.records_to_drop)
         except Exception as error:
             Factory.ErrorPopup(err_text=str(error)).open()
         else:

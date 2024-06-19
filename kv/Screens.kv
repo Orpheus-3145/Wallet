@@ -73,11 +73,11 @@
                     root.show_movements()
 
             DefaultButton:
-                text: "Debiti - Crediti"
+                text: "Saldo debito - credito"
                 font_size_scale: 1.2
                 background_color: YELLOW_RGBA
-                on_release:
-                    root.show_deb_cred()
+                on_press:
+                    root.manager.go_to_payoff_screen()
 
             DefaultButton:
                 text: "Movimenti inseriti"
@@ -111,25 +111,8 @@
             id: general_mov
             size_hint: 0.4, 0.55
             pos_hint: {"x": 0.325, "y": 0.15}
-            type_btn: "simple"
             f_to_launch: root.insert_new_movement
 
-        DefaultLayout:
-            id: deb_cred
-            size_hint: 0.4, 0.225
-            pos_hint: {"x": 0.325, "y": 0.315}
-
-            DefaultButton:
-                text: "Debito - Credito"
-                background_color: LIGHTYELLOW_RGBA
-                on_release:
-                    root.manager.go_to_insert_screen(self.text)
-
-            DefaultButton:
-                text: "Saldo debito - credito"
-                background_color: LIGHTYELLOW_RGBA
-                on_release:
-                    root.manager.go_to_payoff_screen()
 
 <InsertMovementScreen>:
     FloatLayout:
@@ -151,11 +134,13 @@
             id: layout_main
             size_hint: 0.35, 0.66
             pos_hint: {"x": 0.015, "y": 0.1}
+            feeder: app.get_type_payments
 
         LayoutSpesaGenerica:
             id: layout_s_varia
             size_hint: 0.35, 0.66
             pos_hint: {"x": 0.375, "y": 0.1}
+            feeder: app.get_type_spec_movements
 
         LayoutSpesaFissa:
             id: layout_s_fissa
@@ -171,6 +156,7 @@
             id: layout_entrata
             size_hint: 0.35, 0.47
             pos_hint: {"x": 0.375, "y": 0.29}
+            feeder: app.get_type_entrate
 
         LayoutDebitoCredito:
             id: layout_deb_cred

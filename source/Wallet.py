@@ -87,271 +87,242 @@ class Wallet:
 
     def __init__(self, dsn):
         """Creo la connessione al database tramite il dsn"""
-        logging.info("[%-10s]: %s", "Wallet", "*" * 80)
+        self.name = "Wallet"
+        self._dsn = dsn
         try:
-            self._dsn = dsn
-            self.connection = pyodbc.connect(self._dsn, autocommit=True)
+            self.connection = pyodbc.connect(self._dsn)
             self.cursor = self.connection.cursor()
         except pyodbc.Error as error:
-            logging.error("[%-10s]: avvio istanza - errore - trace: %s", "Wallet", str(error))
+            logging.error("[%-10s]: avvio istanza - errore - trace: %s", self.name, str(error))
             raise FatalError("Errore nella connessione al database, consulta il log per maggiori dettagli")
         else:
-            logging.info("[%-10s]: avvio istanza - creazione di un'istanza di Wallet e connessione al database riuscita" % "Wallet")
+            logging.info("[%-10s]: %s", self.name, "*" * 80)
+            logging.info("[%-10s]: avvio istanza - creazione di un'istanza di Wallet e connessione al database riuscita" % self.name)
+            self.mov_info = {}
+            self.fill_movements()
+
+    def fill_movements(self):
+        sql_string = self.format_sql_string(suide="S",
+                                            table_name="MAP_MOVIMENTI",
+                                            field_select_list=["ID", "DESCRIZIONE", "STORED_PROCEDURE"],
+                                            order_by_dict={"ID": "DESC"})
+        self.exec_query_sql(sql_string)
+        for row in self.cursor:
+            self.mov_info[int(row.ID)] = (row.DESCRIZIONE, row.STORED_PROCEDURE)
 
     def login_wallet(self, username, password):
         """Tenta il login con user e pwd"""
         hash_pwd_db = self.get_password_from_username(username)
-        if hash_pwd_db is None:
-            return False
         hash_pwd_input = sha256(str(password).encode()).hexdigest()
+        return hash_pwd_input == hash_pwd_db
 
-        if hash_pwd_input == hash_pwd_db:  # pwd corretta
-            logging.info("[%-10s]: login nell'app - password corretta, login effettuato" % "Wallet")
-            return True
-
-        else:
-            logging.debug("[%-10s]: login nell'app - password non corretta, login fallito" % "Wallet")
-            return False
-
-    def insert_movement(self, type_mov, data_info):
-        if "str_data_mov" in data_info:
-            self.check_date(data_info["str_data_mov"])
+    def insert_movement(self, id_mov, data_info):
+        if self.mov_info == {}:
+            logging.error("[%-10s]: movimenti mancanti, chiamare fill_movements()", self.name)
+            raise FatalError("Errore interno, consulta il log per maggiori dettagli")
+        elif id_mov not in self.mov_info:
+            raise WrongValueInsert("Unknown movement ID: {}".format(id_mov))
+        type_mov = self.mov_info[id_mov][0]
+        sp_name = self.mov_info[id_mov][1]
+        keys_to_check = ["importo", "id_tipo_pag"]
+        keys_date_to_check = ["str_data_mov"]
+        keys_float_to_check = ["importo"]
+        keys_id_to_check = ["id_tipo_pag"]
+        keys_varchar = ["str_data_mov", "note"]
         if type_mov == "Spesa Generica":
-            self.insert_spesa_varia(data_info)
+            keys_to_check.extend(["id_tipo_s_varia", "descrizione"])
+            keys_id_to_check.append("id_tipo_s_varia")
+            keys_varchar.append("descrizione")
         elif type_mov == "Spesa Fissa":
-            self.insert_spesa_fissa(data_info)
+            keys_to_check.append("descrizione")
+            keys_varchar.append("descrizione")
         elif type_mov == "Stipendio":
-            self.insert_stipendio(data_info)
+            keys_to_check.append("ddl")
+            keys_varchar.append("ddl")
+            keys_float_to_check.extend(["netto", "rimborso_spese"])
         elif type_mov == "Entrata":
-            self.insert_entrata(data_info)
+            keys_to_check.extend(["id_tipo_entrata", "descrizione"])
+            keys_id_to_check.append("id_tipo_entrata")
+            keys_varchar.append("descrizione")
         elif type_mov == "Debito - Credito":
-            self.insert_deb_cred(data_info)
+            keys_to_check.extend(["deb_cred", "origine", "descrizione"])
+            keys_id_to_check.append("deb_cred")
+            keys_varchar.extend(["origine", "descrizione"])
         elif type_mov == "Saldo Debito - Credito":
-            self.insert_saldo_deb_cred(data_info)
+            keys_to_check.append("id_saldo_deb_cred")
+            keys_to_check.remove("importo")
+            keys_varchar.append("id_saldo_deb_cred")
         elif type_mov == "Spesa di Mantenimento":
-            self.insert_spesa_mantenimento(data_info)
+            keys_to_check.append("descrizione"),
+            keys_varchar.append("descrizione")
         elif type_mov == "Spesa di Viaggio":
-            self.insert_spesa_viaggio(data_info)
+            keys_to_check.extend(["viaggio", "descrizione"]),
+            keys_varchar.extend(["viaggio", "descrizione"])
+
+        self.check_movement(type_mov, data_info, keys_to_check, keys_date_to_check, keys_float_to_check, keys_id_to_check)
+        self.run_sp(sp_name, data_info, keys_varchar)
         time.sleep(0.1)  # metto in pausa per 0.1 secondi per evitare che la (bassa) precisione di DATETIME di SQL scriva valori uguali
+        logging.info("[%-10s]: inserito nuovo movimento", self.name)
 
-    def insert_spesa_varia(self, data_info):
-        if "importo" not in data_info:
-            raise WrongValueInsert("Importo mancante")
-        self.check_float(data_info["importo"])
-        if "type_pag" not in data_info:
-            raise WrongValueInsert("Tipo di pagamento mancante")
-        elif "descrizione" not in data_info or data_info["descrizione"].strip() == "":
-            raise WrongValueInsert("Descrizione non inserita")
-        varchar_values = []
-        if "str_data_mov" in data_info:
-            varchar_values.append(data_info["str_data_mov"])
-        varchar_values.append(data_info["type_pag"])
-        if "note" in data_info:
-            varchar_values.append(data_info["note"])
-        varchar_values.append(data_info["type_s_varia"])
-        varchar_values.append(data_info["descrizione"])
-        self.run_sp(sp_name="INSERISCI_S_VARIA", sp_args=data_info, varchar_values=varchar_values)
+    def check_movement(self, type_mov, movement, keys_to_check, keys_date_to_check, keys_float_to_check, keys_id_to_check):
+        for key_to_check in keys_to_check:
+            if key_to_check not in movement or movement[key_to_check].strip() == "":
+                raise WrongValueInsert("Informazioni mancanti")
+        for date_key in keys_date_to_check:
+            if date_key in movement:
+                try:
+                    datetime.strptime(movement[date_key], "%d/%m/%Y")
+                except (KeyError, ValueError):
+                    raise WrongValueInsert("Data non valida")
+        for numeric_key in keys_float_to_check:
+            if numeric_key in movement:
+                try:
+                    if Tools.convert_to_float(movement[numeric_key]) <= 0:
+                        raise WrongValueInsert("Importo nullo o negativo")
+                except (TypeError, ValueError):
+                    raise WrongValueInsert("Importo non valido")
+        for id_key in keys_id_to_check:
+            if id_key in movement:
+                try:
+                    int(movement[id_key])
+                except ValueError:
+                    raise WrongValueInsert("ID non valido" + movement[id_key])
 
-    def insert_spesa_fissa(self, data_info):
-        if "importo" not in data_info:
-            raise WrongValueInsert("Importo mancante")
-        self.check_float(data_info["importo"])
-        if "type_pag" not in data_info:
-            raise WrongValueInsert("Tipo di pagamento mancante")
-        elif "descrizione" not in data_info or data_info["descrizione"].strip() == "":
-            raise WrongValueInsert("Descrizione mancante")
-        varchar_values = []
-        if "str_data_mov" in data_info:
-            varchar_values.append(data_info["str_data_mov"])
-        varchar_values.append(data_info["type_pag"])
-        if "note" in data_info:
-            varchar_values.append(data_info["note"])
-        varchar_values.append(data_info["descrizione"])
-        self.run_sp(sp_name="INSERISCI_S_FISSA", sp_args=data_info, varchar_values=varchar_values)
+    def run_sp(self, sp_name, sp_args=None, keys_varchar=None):
+        sql_query = self.format_sql_string(suide='E',
+                                           sp_name=sp_name,
+                                           sp_args=sp_args,
+                                           keys_varchar=keys_varchar)
+        self.exec_query_sql(sql_query)
+        self.cursor.commit()
 
-    def insert_stipendio(self, data_info):
-        if "importo" not in data_info:
-            raise WrongValueInsert("Importo mancante")
-        elif "type_pag" not in data_info:
-            raise WrongValueInsert("Tipo di pagamento mancante")
-        elif "ddl" not in data_info or data_info["ddl"].strip() == "":
-            raise WrongValueInsert("DDL non inserito")
-        for type_t in ["importo", "netto", "rimborso_spese"]:
-            if type_t in data_info:
-                self.check_float(data_info[type_t])
-        varchar_values = []
-        if "str_data_mov" in data_info:
-            varchar_values.append(data_info["str_data_mov"])
-        varchar_values.append(data_info["type_pag"])
-        if "note" in data_info:
-            varchar_values.append(data_info["note"])
-        varchar_values.append(data_info["ddl"])
-        self.run_sp(sp_name="INSERISCI_STIPENDIO", sp_args=data_info, varchar_values=varchar_values)
-
-    def insert_entrata(self, data_info):
-        if "importo" not in data_info:
-            raise WrongValueInsert("Importo mancante")
-        self.check_float(data_info["importo"])
-        if "type_pag" not in data_info:
-            raise WrongValueInsert("Tipo di pagamento mancante")
-        elif "type_entrata" not in data_info:
-            raise WrongValueInsert("Tipo di entrata mancante")
-        elif "descrizione" not in data_info or data_info.get("descrizione").strip() == "":
-            raise WrongValueInsert("Descrizione mancante")
-        varchar_values = []
-        if "str_data_mov" in data_info:
-            varchar_values.append(data_info["str_data_mov"])
-        varchar_values.append(data_info["type_pag"])
-        if "note" in data_info:
-            varchar_values.append(data_info["note"])
-        varchar_values.append(data_info["type_entrata"])
-        varchar_values.append(data_info["descrizione"])
-        self.run_sp(sp_name="INSERISCI_ENTRATA", sp_args=data_info, varchar_values=varchar_values)
-
-    def insert_deb_cred(self, data_info):
-        if "importo" not in data_info:
-            raise WrongValueInsert("Importo mancante")
-        self.check_float(data_info["importo"])
-        if "type_pag" not in data_info:
-            raise WrongValueInsert("Tipo di pagamento mancante")
-        elif "deb_cred" not in data_info:
-            raise WrongValueInsert("Specificare debito o credito")
-        elif "origine" not in data_info or data_info["origine"].strip() == "":
-            raise WrongValueInsert("Origine non inserita")
-        elif "descrizione" not in data_info or data_info["descrizione"].strip() == "":
-            raise WrongValueInsert("Descrizione non inserita")
-        varchar_values = []
-        if "str_data_mov" in data_info:
-            varchar_values.append(data_info["str_data_mov"])
-        varchar_values.append(data_info["type_pag"])
-        if "note" in data_info:
-            varchar_values.append(data_info["note"])
-        varchar_values.append(data_info["origine"])
-        varchar_values.append(data_info["descrizione"])
-        self.run_sp(sp_name="INSERISCI_DEB_CRED", sp_args=data_info, varchar_values=varchar_values)
-
-    def insert_saldo_deb_cred(self, data_info):
-        if "importo" in data_info:
-            self.check_float(data_info["importo"])
-        if "type_pag" not in data_info:
-            raise WrongValueInsert("Tipo di pagamento mancante")
-        elif "id_saldo_deb_cred" not in data_info:
-            raise WrongValueInsert("Nessun entità selezionata")
-        varchar_values = []
-        if "str_data_mov" in data_info:
-            varchar_values.append(data_info["str_data_mov"])
-        varchar_values.append(data_info["type_pag"])
-        if "note" in data_info:
-            varchar_values.append(data_info["note"])
-        varchar_values.append(data_info["id_saldo_deb_cred"])
-        self.run_sp(sp_name="SALDA_DEB_CRED", sp_args=data_info, varchar_values=varchar_values)
-
-    def insert_spesa_mantenimento(self, data_info):
-        if "importo" not in data_info:
-            raise WrongValueInsert("Importo mancante")
-        self.check_float(data_info["importo"])
-        if "type_pag" not in data_info:
-            raise WrongValueInsert("Tipo di pagamento mancante")
-        elif "descrizione" not in data_info or data_info["descrizione"].strip() == "":
-            raise WrongValueInsert("Descrizione non inserita")
-        varchar_values = []
-        if "str_data_mov" in data_info:
-            varchar_values.append(data_info["str_data_mov"])
-        varchar_values.append(data_info["type_pag"])
-        if "note" in data_info:
-            varchar_values.append(data_info["note"])
-        varchar_values.append(data_info["descrizione"])
-        self.run_sp(sp_name="INSERISCI_S_VARIA", sp_args=data_info, varchar_values=varchar_values)
-
-    def insert_spesa_viaggio(self, data_info):
-        if "importo" not in data_info:
-            raise WrongValueInsert("Importo mancante")
-        self.check_float(data_info["importo"])
-        if "type_pag" not in data_info:
-            raise WrongValueInsert("Tipo di pagamento mancante")
-        elif "descrizione" not in data_info or data_info["descrizione"].strip() == "":
-            raise WrongValueInsert("Descrizione non inserita")
-        elif "viaggio" not in data_info or data_info.get("viaggio").strip() == "":
-            raise WrongValueInsert("Viaggio mancante")
-        varchar_values = []
-        if "str_data_mov" in data_info:
-            varchar_values.append(data_info["str_data_mov"])
-        varchar_values.append(data_info["type_pag"])
-        if "note" in data_info:
-            varchar_values.append(data_info["note"])
-        varchar_values.append(data_info["viaggio"])
-        varchar_values.append(data_info["descrizione"])
-        self.run_sp(sp_name="INSERISCI_S_VIAGGIO", sp_args=data_info, varchar_values=varchar_values)
-
-    def check_date(self, input_date):
-        """Verifica che il dizionario in input contenga una data e la restituisce come istanza di datetime"""
+    def exec_query_sql(self, sql_query):
         try:
-            datetime.strptime(input_date, "%d/%m/%Y")
-        except (KeyError, ValueError):
-            raise WrongValueInsert("Data non valida")
-
-    def check_float(self, number):
-        try:
-            number = Tools.convert_to_float(number)
-            if number <= 0:
-                raise WrongValueInsert("Importo nullo o negativo")
-        except (TypeError, ValueError):
-            raise WrongValueInsert("Importo non valido")
-
-    def run_sp(self, sp_name, sp_args=None, varchar_values=None):
-        if sp_args is None:
-            sp_args = []
-        if varchar_values is None:
-            varchar_values = []
-        sp_exec = self.format_sql_string(suide="E",
-                                         sp_name=sp_name,
-                                         proc_args_dict=sp_args,
-                                         varchar_values=varchar_values)
-        print(sp_exec)
-        try:
-            logging.debug("[%-10s]: esecuzione della query: %s", "Wallet", sp_exec)
-            self.cursor.execute(sp_exec)
+            print(sql_query)
+            logging.debug("[%-10s]: esecuzione della query: %s", self.name, sql_query)
+            self.cursor.execute(sql_query)
         except pyodbc.Error as err:
-            logging.error("[%-10s]: errore - trace: %s", "Wallet", str(err))
+            logging.error("[%-10s]: errore - trace: %s", self.name, str(err))
+            self.cursor.rollback()
             raise FatalError("Errore nel database, consulta il log per maggiori dettagli")
-        else:
-            logging.debug("[%-10s]: esecuzione riuscita", "Wallet")
 
     def close_wallet(self):
         """concludo il log"""
         self.cursor.close()
         self.connection.close()
-        logging.info("[%-10s]: chiusura di wallet e del collegamento al database... " % "Wallet")
-        logging.info("[%-10s]: %s", "Wallet", "*" * 80)
+        logging.info("[%-10s]: chiusura di wallet" % self.name)
+        logging.info("[%-10s]: %s", self.name, "*" * 80)
 
-    def backup_database(self, db_name, backup_path):
-        backup_name = "{}_{}.bak".format(db_name, datetime.now().strftime("%d-%m-%Y"))
+    def backup_database(self, backup_path):
+        backup_name = "{}_{}.bak".format(self.name, datetime.now().strftime("%d-%m-%Y"))
         if not os.path.isabs(backup_path):
             backup_path = os.path.normpath(os.path.join(os.getcwd(), backup_path))
         count = 1
         while os.path.exists(os.path.join(backup_path, backup_name)):
-            backup_name = "{}_{}_{}.bak".format(db_name, datetime.now().strftime("%d-%m-%Y"), count)
+            backup_name = "{}_{}_{}.bak".format(self.name, datetime.now().strftime("%d-%m-%Y"), count)
             count += 1
         backup_path = os.path.join(backup_path, backup_name)
-        sp_args = {"bk_path": backup_path, "db_to_backup": db_name}
-        varchar_values = [backup_path, db_name]
-        self.run_sp(sp_name="BK_DATABASE", sp_args=sp_args, varchar_values=varchar_values)
-        logging.info("[%-10s]: creato backup database %s in %s", "Wallet", db_name, backup_path)
+        sp_args = {"bk_path": backup_path, "db_to_backup": self.name}
+        keys_varchar = [backup_path, self.name]
+        self.run_sp(sp_name="BK_DATABASE", sp_args=sp_args, keys_varchar=keys_varchar)
+        logging.info("[%-10s]: creato backup database %s in %s", self.name, self.name, backup_path)
 
-    def get_open_deb_creds(self):
+    # SELECTs
+    def get_movements(self, get_all):
+        movements = {}
+        for id_mov, name_mov in self.mov_info.items():
+            if get_all is True or "Saldo Debito - Credito" not in name_mov[0]:
+                movements[id_mov] = name_mov[0]
+        return movements
+
+    def get_info_db(self, info_type):
+        """Restituisce un dizionario sui tipi di pagamento nel formato {id_pagamento: nome_pagamento}"""
+        _types = {"pagamenti": "MAP_PAGAMENTI", "spese_varie": "MAP_SPESE_VARIE", "entrate": "MAP_ENTRATE"}
+        sql_string = self.format_sql_string(suide="S",
+                                            table_name=_types[info_type],
+                                            field_select_list=["ID", "DESCRIZIONE"],
+                                            order_by_dict={"ID": "DESC"})
+        self.exec_query_sql(sql_string)
+        info_data = {}
+        for row in self.cursor:
+            info_data[int(row.ID)] = row.DESCRIZIONE
+        return info_data
+
+    def get_bi_credentials(self, role="ADMIN"):
+        """Recupera username e password per accedere alla BI, parametro role per un ruolo diverso da ADMIN"""
+        sql_string = self.format_sql_string(suide="S",
+                                            table_name="QLIK_USERS",
+                                            field_select_list=["username", "password"],
+                                            where_dict={"RUOLO": role},
+                                            keys_varchar=[role])
+        try:
+            logging.debug("[%-10s]: recupero credenziali BI - esecuzione della stringa SQL: %s", self.name, sql_string)
+            self.cursor.execute(sql_string)
+        except pyodbc.Error as error:
+            logging.error("[%-10s]: recupero credenziali BI - errore -  trace: %s", self.name, str(error))
+            raise FatalError("Errore nel recupero delle credenziali della BI, consulta il log per maggiori dettagli")
+        else:
+            row = self.cursor.fetchone()
+            if self.cursor.fetchone() is None:
+                logging.debug("[%-10s]: recupero credenziali BI - esecuzione riuscita" % self.name)
+                return row.username, row.password
+            else:
+                logging.error("[%-10s]: recupero credenziali BI - errore - trovato più di un record per il ruolo: %s", self.name, role)
+                raise FatalError("Errore nel recupero delle credenziali della BI, consulta il log per maggiori dettagli")
+
+    def get_password_from_username(self, username):
+        """Resituisce la password (sha256) relativa all'utente dato in input"""
+        sql_str = self.format_sql_string(suide="S",
+                                         table_name="WALLET_USERS",
+                                         field_select_list=["PASSWORD"],
+                                         where_dict={"USERNAME": username},
+                                         keys_varchar=[username])
+        try:
+            logging.debug("[%-10s]: recupero password da username - esecuzione della stringa SQL: %s", self.name, sql_str)
+            self.cursor.execute(sql_str)
+        except pyodbc.Error as error:
+            logging.error("[%-10s]: recupero password da username - errore - trace: %s", self.name, str(error))
+            raise FatalError("Errore nel login, consulta il log per maggiori dettagli")
+        else:
+            password = self.cursor.fetchval()
+            if password is not None:
+                logging.debug("[%-10s]: recupero password da username - esecuzione riuscita" % self.name)
+                return password
+            else:
+                logging.debug("[%-10s]: recupero password da username - username non esistente" % self.name)
+                return None
+
+    def get_table_name_from_type_mov(self, type_movement):
+        """A seconda del movimento passato restituisce il relativo nome della tabella"""
+        sql_string = self.format_sql_string(suide="S",
+                                            table_name="MAP_MOVIMENTI",
+                                            field_select_list=["NOME_TABELLA"],
+                                            where_dict={"DESCRIZIONE": type_movement},
+                                            keys_varchar=[type_movement])
+        try:
+            logging.debug("[%-10s]: recupero nome tabella - esecuzione della stringa SQL: %s", self.name, sql_string)
+            self.cursor.execute(sql_string)
+        except pyodbc.Error as error:
+            logging.error("[%-10s]: recupero nome tabella - errore - trace: %s", self.name, str(error))
+            raise FatalError("Errore nel recupero del nome della tabella del movimento {}, consulta il log per maggiori dettagli".format(type_movement))
+        else:
+            logging.debug("[%-10s]: recupero nome tabella - esecuzione riuscita" % self.name)
+            return self.cursor.fetchval()
+
+    def get_open_deb_creds(self):           # NB stessa di get_last_n_records()
         """Ottiene tutti i debiti-crediti non ancora saldati, leggendo dalla vista V_DEBITI_CREDITI_APERTI restituise
          una lista contente i nomi dei campi e una matrice di tutte le righe raccolte"""
         sql_string = self.format_sql_string(suide="S",
                                             table_name="V_DEBITI_CREDITI_APERTI",
                                             order_by_dict={"convert(date, DATA, 103)": "DESC"})
         try:
-            logging.debug("[%-10s]: raccolta debiti/crediti aperti - esecuzione della stringa SQL: %s", "Wallet", sql_string)
+            logging.debug("[%-10s]: raccolta debiti/crediti aperti - esecuzione della stringa SQL: %s", self.name, sql_string)
             self.cursor.execute(sql_string)
         except pyodbc.Error as error:
-            logging.error("[%-10s]: raccolta debiti/crediti aperti - errore - trace: %s", "Wallet", str(error))
+            logging.error("[%-10s]: raccolta debiti/crediti aperti - errore - trace: %s", self.name, str(error))
             raise FatalError("Errore nella raccolta dei debiti/crediti aperti, consulta il log per maggiori dettagli")
         else:
-            logging.debug("[%-10s]: raccolta debiti/crediti aperti - esecuzione riuscita" % "Wallet")
+            logging.debug("[%-10s]: raccolta debiti/crediti aperti - esecuzione riuscita" % self.name)
             matrix_deb_cred = []            # matrice contenente i vari debiti/crediti aperti
             column_list = []                # lista dei nomi delle colonne
 
@@ -363,141 +334,30 @@ class Wallet:
                 matrix_deb_cred.append([elem for elem in row])
             return column_list, matrix_deb_cred
 
-    def get_movements(self, type_mov=None, name_mov=None):
-        partial_sql = partial(self.format_sql_string,
-                              suide="S",
-                              table_name="MAP_MOVIMENTI",
-                              field_select_list=["DESCRIZIONE"],
-                              order_by_dict={"DESCRIZIONE": "ASC"})
-        if type_mov:    # filtro nel caso cerchi il tipo di movimento (deb/cred o general)
-            sql_string = partial_sql(where_dict={"TIPO_MOVIMENTO": type_mov}, varchar_values=[type_mov])
-        elif name_mov:  # oppure il nome preciso
-            sql_string = partial_sql(where_dict={"DESCRIZIONE": name_mov}, varchar_values=[name_mov])
-        else:           # oppure per tutti i movimenti
-            sql_string = partial_sql()
-        try:
-            logging.debug("[%-10s]: raccolta tipi di movimenti - esecuzione della stringa SQL: %s", "Wallet", sql_string)
-            self.cursor.execute(sql_string)
-        except pyodbc.Error as error:
-            logging.error("[%-10s]: raccolta tipi di movimenti - errore - trace: %s", "Wallet", str(error))
-            raise FatalError("Errore nella raccolta dei tipi di movimenti, consulta il log per maggiori dettagli")
-        else:
-            movement_list = []
-            for row in self.cursor:
-                movement_list.append(row.DESCRIZIONE)
-            logging.debug("[%-10s]: raccolta tipi di movimenti - esecuzione riuscita, valori trovati - %s", "Wallet",
-                          Tools.list_to_str(movement_list))
-            return movement_list
-
-    def get_info_db(self, info_type):
-        """Restituisce un dizionario sui tipi di pagamento nel formato {id_pagamento: nome_pagamento}"""
-        _types = {"pagamenti": "MAP_PAGAMENTI", "spese_varie": "MAP_SPESE_VARIE", "entrate": "MAP_ENTRATE"}
-        try:
-            sql_string = self.format_sql_string(suide="S",
-                                                table_name=_types[info_type],
-                                                field_select_list=["DESCRIZIONE"],
-                                                order_by_dict={"DESCRIZIONE": "ASC"})
-            logging.debug("[%-10s]: raccolta tipi di %s - esecuzione della stringa SQL: %s", "Wallet", info_type, sql_string)
-            self.cursor.execute(sql_string)
-        except pyodbc.Error as error:
-            logging.error("[%-10s]:  raccolta tipi di %s - errore - trace: {}", "Wallet", info_type, str(error))
-            raise FatalError("Errore database, consulta il log per maggiori dettagli")
-        except ValueError:
-            logging.error("[%-10s]:  errore - chiave sconosciuta: %s", "Wallet", info_type)
-            raise FatalError("Errore interno, consulta il log per maggiori dettagli")
-        else:
-            info_data = []
-            for row in self.cursor:
-                info_data.append(row.DESCRIZIONE)
-            logging.debug("[%-10s]: raccolta tipi di %s - esecuzione riuscita", "Wallet", info_type)
-            return info_data
-
-    def get_bi_credentials(self, role="ADMIN"):
-        """Recupera username e password per accedere alla BI, parametro role per un ruolo diverso da ADMIN"""
-        sql_string = self.format_sql_string(suide="S",
-                                            table_name="QLIK_USERS",
-                                            field_select_list=["username", "password"],
-                                            where_dict={"RUOLO": role},
-                                            varchar_values=[role])
-        try:
-            logging.debug("[%-10s]: recupero credenziali BI - esecuzione della stringa SQL: %s", "Wallet", sql_string)
-            self.cursor.execute(sql_string)
-        except pyodbc.Error as error:
-            logging.error("[%-10s]: recupero credenziali BI - errore -  trace: %s", "Wallet", str(error))
-            raise FatalError("Errore nel recupero delle credenziali della BI, consulta il log per maggiori dettagli")
-        else:
-            row = self.cursor.fetchone()
-            if self.cursor.fetchone() is None:
-                logging.debug("[%-10s]: recupero credenziali BI - esecuzione riuscita" % "Wallet")
-                return row.username, row.password
-            else:
-                logging.error("[%-10s]: recupero credenziali BI - errore - trovato più di un record per il ruolo: %s", "Wallet", role)
-                raise FatalError("Errore nel recupero delle credenziali della BI, consulta il log per maggiori dettagli")
-
-    def get_password_from_username(self, username):
-        """Resituisce la password (sha256) relativa all'utente dato in input"""
-        sql_str = self.format_sql_string(suide="S",
-                                         table_name="WALLET_USERS",
-                                         field_select_list=["PASSWORD"],
-                                         where_dict={"USERNAME": username},
-                                         varchar_values=[username])
-        try:
-            logging.debug("[%-10s]: recupero password da username - esecuzione della stringa SQL: %s", "Wallet", sql_str)
-            self.cursor.execute(sql_str)
-        except pyodbc.Error as error:
-            logging.error("[%-10s]: recupero password da username - errore - trace: %s", "Wallet", str(error))
-            raise FatalError("Errore nel login, consulta il log per maggiori dettagli")
-        else:
-            password = self.cursor.fetchval()
-            if password is not None:
-                logging.debug("[%-10s]: recupero password da username - esecuzione riuscita" % "Wallet")
-                return password
-            else:
-                logging.debug("[%-10s]: recupero password da username - username non esistente" % "Wallet")
-                return None
-
-    def get_table_name_from_type_mov(self, type_movement):
-        """A seconda del movimento passato restituisce il relativo nome della tabella"""
-        sql_string = self.format_sql_string(suide="S",
-                                            table_name="MAP_MOVIMENTI",
-                                            field_select_list=["NOME_TABELLA"],
-                                            where_dict={"DESCRIZIONE": type_movement},
-                                            varchar_values=[type_movement])
-        try:
-            logging.debug("[%-10s]: recupero nome tabella - esecuzione della stringa SQL: %s", "Wallet", sql_string)
-            self.cursor.execute(sql_string)
-        except pyodbc.Error as error:
-            logging.error("[%-10s]: recupero nome tabella - errore - trace: %s", "Wallet", str(error))
-            raise FatalError("Errore nel recupero del nome della tabella del movimento {}, consulta il log per maggiori dettagli".format(type_movement))
-        else:
-            logging.debug("[%-10s]: recupero nome tabella - esecuzione riuscita" % "Wallet")
-            return self.cursor.fetchval()
-
     def get_last_n_records(self, no_rows, type_movement):
         """Restituisce i primi n valori di una tabella e l'elenco dei campi che la compongono
         - no_rows -> numero di record da restituire
         - type_movement -> tipo di movimento, da cui si ricava il nome della tabella"""
         table_name = self.get_table_name_from_type_mov(type_movement)
         v_table_name = "V_{}".format(table_name)
-
         try:
             sql_string = self.format_sql_string(suide="S",
                                                 table_name=v_table_name,
                                                 top=no_rows,
-                                                order_by_dict={"convert(date, DATA, 103)": "DESC"})
-            logging.debug("[%-10s]: raccolta record movimenti - esecuzione della stringa SQL: %s", "Wallet", sql_string)
+                                                order_by_dict={"ID": "DESC"})
+            logging.debug("[%-10s]: raccolta record movimenti - esecuzione della stringa SQL: %s", self.name, sql_string)
             self.cursor.execute(sql_string)
         except WrongValueInsert as error:  # ho inserito un valore non valido nella stringa (nello specifico il numero di record da visualizzare che viene dato grezzo in input) segnalo
-            logging.error("[%-10s]: raccolta record movimenti - errore - trace: %s", "Wallet", str(error))
+            logging.error("[%-10s]: raccolta record movimenti - errore - trace: %s", self.name, str(error))
             raise WrongValueInsert(str(error))
         except pyodbc.Error as error:
-            logging.error("[%-10s]: raccolta record movimenti - errore - trace: %s", "Wallet", str(error))
+            logging.error("[%-10s]: raccolta record movimenti - errore - trace: %s", self.name, str(error))
             raise FatalError(
                 "Errore nella raccolta dei record del movimento tipo {}, consulta il log per maggiori dettagli".format(
                     type_movement))
 
         else:
-            logging.debug("[%-10s]: raccolta record movimenti - esecuzione riuscita" % "Wallet")
+            logging.debug("[%-10s]: raccolta record movimenti - esecuzione riuscita" % self.name)
             column_list = []  # lista dei nomi delle colonne
             matrix_mov = []  # matrice contenente i vari x movimenti di tipo y
 
@@ -509,67 +369,18 @@ class Wallet:
                 matrix_mov.append([elem for elem in row])
             return column_list, matrix_mov
 
-    def drop_records(self, list_records, type_movement):
-        """Riceve una lista di ID (appartenenti alla tabella movimenti) cancella la relativa riga della tabella generica
-        movimenti, e specifica tramite il campo ID_MOV"""
-        if not list_records:
-            raise WrongValueInsert("Non è stato selezionato nessun record")
-
-        for record in list_records:
-            sql_string_delete_spec = self.format_sql_string(suide="D",
-                                                            table_name=self.get_table_name_from_type_mov(type_movement),
-                                                            where_dict={"ID_MOV": record})
-            sql_string_delete_main = self.format_sql_string(suide="D",
-                                                            table_name="MOVIMENTI",
-                                                            where_dict={"ID": record})
-            try:
-                self.cursor.execute(sql_string_delete_spec)
-                logging.debug("[%-10s]: eliminazione movimento id: %s - esecuzione della stringa SQL: %s", "Wallet", record, sql_string_delete_spec)
-                self.cursor.execute(sql_string_delete_main)
-                logging.debug("[%-10s]: eliminazione movimento id: %s - esecuzione della stringa SQL: %s", "Wallet", record, sql_string_delete_main)
-
-            except pyodbc.Error as error:
-                logging.error("[%-10s]: eliminazione movimento id: %s - errore - trace: %s", "Wallet", record, str(error))
-                self.cursor.rollback()
-                raise FatalError("Errore nella rimozione del movimento id: {}, consulta il log per maggiori dettagli".format(record))
-
-            else:
-                logging.info("[%-10s]: eliminazione movimento id: %s - movimento rimosso", "Wallet", record)
-
-        self.cursor.commit()
+    def drop_record(self, id_record):
+        self.run_sp(sp_name="REMOVE_MOVEMENT", sp_args={"id_mov_to_drop": id_record})
+        logging.info("[%-10s]: rimosso movimento id %s", self.name, id_record)
 
     def turn_deb_cred_into_mov(self, list_records):
-        """Riceve una lista di ID (appartenenti alla tabella movimenti) cancella la relativa riga della tabella generica
-        movimenti, e specifica tramite il campo ID_MOV"""
-        if not list_records:
-            raise WrongValueInsert("Non è stato selezionato nessun record")
         for id_record in list_records:
-            sql_string = self.format_sql_string(suide="E",
-                                                sp_name="TURN_INTO_MOVEMENT",
-                                                proc_args_dict={"id_record": id_record})
-            try:
-                logging.debug("[%-10s]: conversione deb/cred id: %s- esecuzione della stringa SQL: %s", "Wallet", id_record, sql_string)
-                self.cursor.execute(sql_string)
-            except pyodbc.Error as error:
-                logging.error("[%-10s]: conversione deb/cred id: %s - errore - trace: %s", "Wallet", id_record, str(error))
-                raise FatalError("Errore nella conversione, consulta il log per maggiori dettagli")
-            else:
-                logging.info("[%-10s]: conversione deb/cred id: %s - record convertito ", "Wallet", id_record)
+            self.run_sp(sp_name="TURN_INTO_MOVEMENT", sp_args={"id_record": id_record})
+            logging.info("[%-10s]: convertito record id %s", self.name, id_record)
 
-    def format_sql_string(self, suide,
-                          table_name=None,
-                          field_select_list=None,
-                          where_dict=None,
-                          update_dict=None,
-                          insert_dict=None,
-                          join_type=None,
-                          join_table=None,
-                          join_dict=None,
-                          varchar_values=None,
-                          order_by_dict=None,
-                          top=None,
-                          sp_name=None,
-                          proc_args_dict=None):
+    def format_sql_string(self, suide, table_name=None, field_select_list=None, where_dict=None, update_dict=None,
+                          insert_dict=None, join_type=None, join_table=None, join_dict=None, keys_varchar=None,
+                          order_by_dict=None, top=None, sp_name=None, sp_args=None):
         """Crea e formatta un'instruzione SQL di tipo suid (SELECT, UPDATE, INSERT, DELETE)
             - suide -> ha come valore 'S' SELECT, 'U' UPDATE, 'I' INSERT, 'D' DELETE, 'E' EXEC
             - table_name -> nome tabella,
@@ -580,11 +391,11 @@ class Wallet:
             - join -> tipo di join da eseguire -> 'I' inner, 'L' left, 'R' right, 'C' cross
             - join_table -> tabella da joinare, NB per ora non sono previsti join multipli
             - join_fields -> dizionario di campi da uguagliare per il join
-            - varchar_values -> lista di valori varchar da inserire in select, where, insert o update, restituisce il valore nello statement SQL racchiuso da singoli apici
+            - keys_varchar -> lista di valori varchar da inserire in select, where, insert o update, restituisce il valore nello statement SQL racchiuso da singoli apici
             - order_by_dict -> coppie CAMPO: DESC/ASC
             - top -> se diverso da None mostra le prime top (int) righe
             - sp_name -> nome procedura da eseguire
-            - proc_args_dict -> dizionario nella forma {nome_argomento: valore_argomento}"""
+            - sp_args -> dizionario nella forma {nome_argomento: valore_argomento}"""
         sql_string = ""
         join_types_dict = {"I": "INNER JOIN", "L": "LEFT JOIN", "R": "RIGHT JOIN", "C": "CROSS JOIN"}
 
@@ -620,10 +431,9 @@ class Wallet:
                         "Nel caso di un join deve essere fornita sia la tabella da legare, sia l'elenco "
                         "dei cambi da uguagliare, sia il parametro corretto per il tipo di join")
 
-            if isinstance(where_dict,
-                          dict):  # se where_dict <> da None aggiungo anche le restrizioni tramite WHERE statement
+            if isinstance(where_dict, dict):  # se where_dict <> da None aggiungo anche le restrizioni tramite WHERE statement
                 fields_to_filter = " AND ".join("{} = {}".format(key, "'{}'".format(
-                    Tools.escape_sql_chars(value)) if varchar_values and value in varchar_values else value) for
+                    Tools.escape_sql_chars(value)) if keys_varchar and value in keys_varchar else value) for
                                                 key, value in
                                                 where_dict.items())
                 sql_string = " ".join([sql_string, "WHERE", fields_to_filter])
@@ -644,7 +454,7 @@ class Wallet:
 
             if isinstance(update_dict, dict):
                 fields_to_update = ", ".join("{} = {}".format(key, "'{}'".format(
-                    Tools.escape_sql_chars(value)) if varchar_values and value in varchar_values else value) for
+                    Tools.escape_sql_chars(value)) if keys_varchar and value in keys_varchar else value) for
                                              key, value in
                                              update_dict.items())
                 sql_string = " ".join([sql_string, fields_to_update])
@@ -656,7 +466,7 @@ class Wallet:
             if isinstance(where_dict,
                           dict):  # se where_dict è tipo dict aggiungo anche le restrizioni tramite WHERE statement
                 fields_to_filter = " AND ".join("{} = {}".format(key, "'{}'".format(
-                    Tools.escape_sql_chars(value)) if varchar_values and value in varchar_values else value) for
+                    Tools.escape_sql_chars(value)) if keys_varchar and value in keys_varchar else value) for
                                                 key, value in
                                                 where_dict.items())
                 sql_string = " ".join([sql_string, "WHERE", fields_to_filter])
@@ -673,7 +483,7 @@ class Wallet:
                 sql_string = "INSERT INTO {}".format(table_name)
                 fields_to_insert = "({})".format(", ".join(insert_dict.keys()))  # elenco campi da inserire
                 values_to_insert = "({})".format(", ".join(["'{}'".format(
-                    Tools.escape_sql_chars(value)) if varchar_values and value in varchar_values else str(value) for
+                    Tools.escape_sql_chars(value)) if keys_varchar and value in keys_varchar else str(value) for
                                                             value in
                                                             insert_dict.values()]))  # elenco valori da inserire
 
@@ -691,7 +501,7 @@ class Wallet:
             if isinstance(where_dict,
                           dict):  # non voglio mai cancellare per intero la tabella, faccio sì che debbano esserci sempre clausole WHERE
                 fields_to_filter = " AND ".join("{} = {}".format(key, "'{}'".format(
-                    Tools.escape_sql_chars(value)) if varchar_values and value in varchar_values else value) for
+                    Tools.escape_sql_chars(value)) if keys_varchar and value in keys_varchar else value) for
                                                 key, value in
                                                 where_dict.items())
                 sql_string = " ".join([sql_string, "WHERE", fields_to_filter])
@@ -703,13 +513,15 @@ class Wallet:
             else:
                 raise WrongValueInsert("Non è possibile eliminare per intero una tabella!")
         elif suide == "E":
-            sql_string = "exec {}".format(sp_name)
-            if isinstance(proc_args_dict, dict):  # se proc_args_dict <> da None aggiungo anche la lista di argomenti
-                args = ", ".join("@{} = {}".format(key, "'{}'".format(
-                    Tools.escape_sql_chars(value)) if varchar_values and value in varchar_values else value) for
-                                 key, value in
-                                 proc_args_dict.items())
-                sql_string = " ".join([sql_string, args])
+            sql_string = "exec {} ".format(sp_name)
+            if sp_args is not None:
+                str_args = []
+                for arg_name, arg_value in sp_args.items():
+                    if keys_varchar and arg_name in keys_varchar:
+                        str_args.append("@{} = '{}'".format(arg_name, Tools.escape_sql_chars(arg_value)))
+                    else:
+                        str_args.append("@{} = {}".format(arg_name, arg_value))
+                sql_string = sql_string + ", ".join(str_args)
         return sql_string
 
 

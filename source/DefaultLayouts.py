@@ -55,9 +55,9 @@ class InputLayout(DefaultLayout):
                 if btn != btn_instance:
                     btn.activate = not btn_instance.activate  # il not è perchè btn_instance.activate è già stato modificato, quindi mi serve il valore opposto
 
-    def get_selected_value(self):
+    def id_active_btn(self):
         if self.btn_pressed:
-            return self.btn_pressed.text.strip()
+            return self.btn_pressed.get_alt_id()
         else:
             return ""
 
@@ -76,7 +76,6 @@ class DynamicLayout(DefaultLayout):
 
 
 class LabelDynamicLayout(DynamicLayout):
-    """Layout dinamico, crea una serie di label per ogni elemento della lista passata"""
     def update_layout(self, field_list):
         self.clear_widgets()
         for label_name in field_list:
@@ -89,28 +88,19 @@ class LabelDynamicLayout(DynamicLayout):
 
 
 class ButtonDynamicInputLayout(DynamicLayout, InputLayout):
-    """Layout popolato dinamicamente con dei bottoni e che gestisce l'input se viene premuto un bottone"""
-    _type_btns = {"simple": SimpleButton, "selection": SelectionButton}  # dict dei tipi possibili di btn da inserire nel box
-
-    def __init__(self, type_btn="selection", **kw):
-        super().__init__(**kw)
-        self.type_btn = type_btn            # tipo di bottone: "selection" --> MySelectionButton, "simple" --> DefaultButton
-        self.type_selection = "single"      # metto single di default: non può esserci più di un bottone attivo in contemporanea
-
-    def update_layout(self, field_list):
-        """Creo un bottone per ogni elemento della lista field_list, la classe (DefaultButton o DefaultSelectionButton) dipende
-        dal parametro self.type_btn"""
+    def update_layout(self, field_map):
         self.clear_widgets()
-        btn_class = self._type_btns[self.type_btn]
-        for field in field_list:
-            btn = btn_class(text=field,
-                            font_size=self.font_size_chars,
-                            background_color=self.color_widgets,
-                            parent_layout=self)
+        self.btn_pressed = None
+        for field_id, field_name in field_map.items():
+            btn = SelectionButton(text=field_name,
+                                  font_size=self.font_size_chars,
+                                  alt_id=field_id,
+                                  background_color=self.color_widgets,
+                                  parent_layout=self)
             self.add_widget(btn)
 
 
-class RowDynamicInputLayout(DynamicLayout, InputLayout):        # NB put RowDynamicInout... inside Table
+class RowDynamicInputLayout(DynamicLayout, InputLayout):        # NB put RowDynamicInput inside Table...
     def __init__(self, id_record, **kw):
         super().__init__(**kw)
         self.id_record = id_record      # id del record
@@ -119,6 +109,7 @@ class RowDynamicInputLayout(DynamicLayout, InputLayout):        # NB put RowDyna
     def update_layout(self, field_list):
         """Creo un bottone di tipo DefaultSelectionButton per ogni elemento della lista field_list"""
         self.clear_widgets()
+        self.btn_pressed = None
         for btn_name in field_list:
             label_field = SelectionButton(text=str(btn_name),
                                           font_size=self.font_size_chars,
@@ -128,13 +119,8 @@ class RowDynamicInputLayout(DynamicLayout, InputLayout):        # NB put RowDyna
 
 
 class TableDynamicInputLayout(DynamicLayout, InputLayout):
-    """Istanza di DynamicLayout pensata per contenere una tabella, ogni riga-record è un'istanza di RowDynamicInputLayout la quale
-    contiene un bottone per ogni campo, gestisce inoltre l'input se viene premuto un bottone (una riga i questo caso);
-    parametri da valorizzare nel file .kv:
-        - size_records: altezza (in pixel) di ogni riga che compone la tabella"""
     def update_layout(self, field_list):
-        """Aggiorna la tabella con la lista field_list, crea n righe di RowDynamicInputLayout ciascuna composta da m bottoni,
-         questi vengono inseriti con il metodo RowDynamicInputLayout.update_row(list)"""
+        """Aggiorna la tabella con la lista field_list, crea n righe di RowDynamicInputLayout ciascuna composta da m bottoni"""
         self.clear_widgets()
         self.height = len(field_list) * self.size_records
         for record in field_list:
@@ -154,6 +140,3 @@ class TableDynamicInputLayout(DynamicLayout, InputLayout):
         """è necessario fare questo passaggio intermedio: pressione bottone --> attivazione/disattivazione della riga
         che lo contiene"""
         btn_instance.parent_layout.btn_pressed(btn_instance)
-
-    def get_selected_value(self):
-        pass

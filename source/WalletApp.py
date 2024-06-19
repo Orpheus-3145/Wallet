@@ -3,14 +3,17 @@ import os
 from datetime import date
 from win32api import GetSystemMetrics
 import Wallet
+# import Tools
 
 from kivy.config import Config
-Config.read(os.path.join(os.getcwd(), "..\\settings\\config_wallet.ini"))
+
+SETTINGS_INI = os.path.join(os.getcwd(), "..\\settings\\config_wallet.ini")
+Config.read(SETTINGS_INI)
+
 from kivy.lang import Builder
 from Screens import *
+from kivy.core.window import Window
 from Popups import *
-
-log_levels = {10: logging.DEBUG, 20: logging.INFO, 30: logging.WARNING, 40: logging.ERROR, 50: logging.CRITICAL}
 
 
 class AppException(Exception):
@@ -26,40 +29,65 @@ class AppException(Exception):
 class WalletApp(App):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.title = Config["wallet_app"]["app_name"]               # nome dell'app
-        self.max_rows_to_show = Config.getint("wallet_app", "max_rows_to_show")            # max righe mostrate in SowMovementScreen
-        self.default_rows_to_show = Config.getint("wallet_app", "default_rows_to_show")   # default righe mostrate in SowMovementScreen
-        self.dsn = Config["database"]["dsn_name"].strip("'")        # istanza di wallet per accedere al database
-        self.bi_file_path = Config["bi"]["qlik_file_path"]          # istanza dell'app di QlikView
-        self.kv_files = Config["kivy_files"].values()               # file di stile .kv
-        self.db_name = Config["database"]["database_name"]
-        self.backup_path = Config["database"]["backup_path"]
-        self.create_logger(logger_name="wallet_logger",
-                           log_level=log_levels[Config.getint("log", "level")],
-                           log_path=Config["log"]["path_log_file"],
-                           log_name=Config["log"]["name_log_file"],
-                           fmt=Config["log"]["format_log_file"])
-        self.set_center_app()
-        logging.info("[%-10s]: %s", "WalletApp", "#" * 80)
-        logging.info("[%-10s]: avvio app - applicazione avviata" % "WalletApp")
-        self._stopped = False                                       # proprietà di servizio, vedi self.on_stop()
+        self._stopped = False
         self.wallet_instance = None
         self.qlik_app = None
+        self.config_info = {}
+        self.read_config(Config)
+        self.create_logger()
+        self.stored_procs = {}
 
-    def create_logger(self, logger_name, log_level, log_name, log_path, fmt):
-        """Crea un file di log con livello, percorso, nome e formattazione dei record passati come parametri, richiamando
-        poi il modulo logging sarà possibile scrivere su di esso"""
-        logger = logging.getLogger(logger_name)
+    def read_config(self, config):
+        log_levels = {10: logging.DEBUG, 20: logging.INFO, 30: logging.WARNING, 40: logging.ERROR, 50: logging.CRITICAL}
+        try:
+            self.config_info["kv_files"] = config["kivy_files"].values()
+            self.config_info["bi_file_path"] = config["bi"]["bi_file_path"]
+            self.config_info["backup_path"] = config["database"]["backup_path"]
+            self.config_info["bi_logo_path"] = config["graphics"]["bi_logo_path"]
+            self.config_info["background_img_path"] = config["graphics"]["background_img_path"]
+            self.config_info["logo_path"] = config["graphics"]["logo_path"]
+            self.config_info["log_path"] = config["log"]["log_path"]
+            for item in self.config_info.keys():
+                if item.endswith("_path") and os.path.exists(self.config_info[item]) is False:
+                    raise AppException("file {} non trovato".format(self.config_info[item]))
+            self.config_info["dsn"] = config["database"]["dsn_name"].strip("'")
+            self.config_info["log_name"] = config["log"]["log_name"]
+            self.config_info["log_format"] = config["log"]["log_format"]
+            self.config_info["log_level"] = log_levels[config.getint("log", "log_level")]
+            self.config_info["width_app"] = config.getint("graphics", "width")
+            self.config_info["height_app"] = config.getint("graphics", "height")
+            self.config_info["font_name"] = config["kivy"]["font_name"]
+            self.config_info["font_size"] = config.getint("kivy", "font_size")
+            self.config_info["max_rows_to_show"] = config.getint("widgets", "max_rows_to_show")  # max righe mostrate in SowMovementScreen
+            self.config_info["default_rows_to_show"] = config.getint("widgets", "default_rows_to_show")  # default righe mostrate in SowMovementScreen
+            self.config_info["colors"] = {}
+            for color_rgba in config["colors"].keys():
+                self.config_info["colors"][color_rgba] = Tools.str_to_list(config["colors"][color_rgba])
+        except (KeyError, ValueError) as error:
+            raise AppException("errore nel file .ini - trace: " + str(error))
+
+    def create_logger(self):
+        logger = logging.getLogger(self.config_info["log_name"])
         logging.root = logger
-        logger.setLevel(log_level)
-        file_handler = logging.FileHandler(filename=os.path.join(log_path, log_name.format(date.today().strftime("%d-%m-%Y"))))
-        log_formatter = logging.Formatter(fmt=fmt)
+        logger.setLevel(self.config_info["log_level"])
+        log_path = self.config_info["log_path"]
+        log_name = self.config_info["log_name"].format(date.today().strftime("%d-%m-%Y"))
+        file_handler = logging.FileHandler(filename=os.path.join(log_path, log_name))
+        log_formatter = logging.Formatter(fmt=self.config_info["log_format"])
         file_handler.setFormatter(log_formatter)
-        file_handler.setLevel(log_level)
+        file_handler.setLevel(self.config_info["log_level"])
         logger.addHandler(file_handler)
+        logging.info("[%-10s]: %s", "WalletApp", "#" * 80)
 
     def build(self):
-        for kv_file in self.kv_files:
+        width_screen = GetSystemMetrics(0)
+        height_screen = GetSystemMetrics(1)
+        Window.left = (width_screen - self.config_info["width_app"]) // 2
+        Window.top = (height_screen - self.config_info["height_app"]) // 2
+        for kv_file in self.config_info["kv_files"]:
+            if not os.path.exists(kv_file):
+                logging.error("[%-10s]: avvio app errore - file %s non trovato", "WalletApp", kv_file)
+                raise AppException("file .kv %s non trovato" + kv_file)
             try:
                 Builder.load_file(kv_file)
             except Exception as error:
@@ -68,31 +96,29 @@ class WalletApp(App):
         logging.info("[%-10s]: avvio app - caricati i file di stile .kv, creato ScreenManager e Screen di login" % "WalletApp")
         return ManagerScreen()
 
+    def connect(self):
+        self.wallet_instance = Wallet.Wallet(self.config_info["dsn"])
+        self.qlik_app = Wallet.QlikViewApp(self.config_info["bi_file_path"])
+
     def login(self, user, pwd, autologin):
         if autologin is True:
-            self.wallet_instance = Wallet.Wallet(self.dsn)
-            self.qlik_app = Wallet.QlikViewApp(self.bi_file_path)
+            self.connect()
             return True
         elif user == "" or pwd == "":
             raise AppException("Credenziali mancanti")
-        self.wallet_instance = Wallet.Wallet(self.dsn)
-        status = self.wallet_instance.login_wallet(user.strip(), pwd.strip())
-        if status is True:
-            self.qlik_app = Wallet.QlikViewApp(self.bi_file_path)
-        return status
+        self.connect()
+        return self.wallet_instance.login_wallet(user.strip(), pwd.strip())
 
     def open_BI(self):
         user, pwd = self.wallet_instance.get_bi_credentials()
         self.qlik_app.open(user, pwd)
 
-    def insert_movement(self, type_mov, data_movement):
-        self.wallet_instance.insert_movement(type_mov=type_mov, data_info=data_movement)
+    def insert_movement(self, id_mov, data_movement):
+        self.wallet_instance.insert_movement(id_mov=id_mov, data_info=data_movement)
 
-    def drop_records(self, list_records, type_movement):
-        """Ricevo in argomento una lista di id, ciascuno corrispondente ad un movimento, da eliminare
-            - list_records -> lista di id di movimenti da rimuovere
-            - type_movement -> tipo di movimento a cui gli id appartengono (a cui corrisponde la relativa tabella nel db"""
-        self.wallet_instance.drop_records(list_records, type_movement)
+    def drop_records(self, list_records):
+        for record_to_drop in list_records:
+            self.wallet_instance.drop_record(record_to_drop)
 
     def turn_deb_cred_into_mov(self, list_records):
         self.wallet_instance.turn_deb_cred_into_mov(list_records)
@@ -100,7 +126,7 @@ class WalletApp(App):
     def backup_database(self):
         """Crea un backup del database al percorso inserito nel file .ini, il formato del nome del backup viene
         stabilito più a basso livello (metodo Wallet.backup_database)"""
-        self.wallet_instance.backup_database(self.db_name, self.backup_path)
+        self.wallet_instance.backup_database(self.config_info["backup_path"])
 
     def on_stop(self):
         """Non è chiaro perchè ma il metodo app.stop() viene chiamato due volte, per evitare di scrivere due volte sul log
@@ -114,24 +140,14 @@ class WalletApp(App):
             logging.info("[%-10s]: chiusura app - applicazione chiusa" % "WalletApp")
             logging.info("[%-10s]: %s", "WalletApp",  "#" * 80)
 
-    def set_center_app(self):
-        """A seconda dello schermo che uso, centro l'app nel monitor"""
-        width_app = Config.getint("graphics", "width")
-        height_app = Config.getint("graphics", "height")
-        width_screen = GetSystemMetrics(0)
-        height_screen = GetSystemMetrics(1)
-        Config.set("graphics", "top", str((height_screen - height_app) // 2))
-        Config.set("graphics", "left", str((width_screen - width_app) // 2))
-        Config.write()
-
     def get_max_rows_to_show(self):
-        return self.max_rows_to_show
+        return self.config_info["max_rows_to_show"]
 
     def get_default_rows_to_show(self):
-        return self.default_rows_to_show
+        return self.config_info["default_rows_to_show"]
 
-    def get_movements(self, type_mov=None):
-        return self.wallet_instance.get_movements(type_mov, None)
+    def get_movements(self, get_all=False):
+        return self.wallet_instance.get_movements(get_all)
 
     def get_type_payments(self):
         return self.wallet_instance.get_info_db("pagamenti")
@@ -141,6 +157,24 @@ class WalletApp(App):
 
     def get_type_entrate(self):
         return self.wallet_instance.get_info_db("entrate")
+
+    def get_color(self, color_name):
+        return self.config_info["colors"][color_name]
+
+    def get_font_name(self):
+        return self.config_info["font_name"]
+
+    def get_font_size(self):
+        return self.config_info["font_size"]
+
+    def get_background_path(self):
+        return self.config_info["background_img_path"]
+
+    def get_logo_path(self):
+        return self.config_info["logo_path"]
+
+    def get_bi_logo_path(self):
+        return self.config_info["bi_logo_path"]
 
 
 if __name__ == "__main__":
