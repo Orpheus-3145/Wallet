@@ -73,6 +73,7 @@ class WalletApp(App):
             self.config_info["background_img_path"] = config["graphics"]["background_img_path"]
             self.config_info["logo_path"] = config["graphics"]["logo_path"]
             self.config_info["log_path"] = config["log"]["log_path"]
+            self.config_info["log_name"] = config["log"]["log_name"]
             self.config_info["log_level"] = config.getint("log", "log_level")
             self.config_info["width_app"] = config.getint("graphics", "width")
             self.config_info["height_app"] = config.getint("graphics", "height")
@@ -91,14 +92,16 @@ class WalletApp(App):
 
     def create_logger(self):
         log_levels = {10: logging.DEBUG, 20: logging.INFO, 30: logging.WARNING, 40: logging.ERROR, 50: logging.CRITICAL}
-        log_level = log_levels[self.config_info["log_level"]]
-        log_name = "Logfile_{}.log".format(date.today().strftime("%d-%m-%Y"))
         log_path = self.config_info["log_path"]
-
+        try:
+            log_level = log_levels[self.config_info["log_level"]]
+            log_name = self.config_info["log_name"].format(date=date.today().strftime("%d-%m-%Y"))
+        except KeyError:
+            raise AppException("Valore di log non valido o nome mal formattato ['{date}' required]")
         logger = logging.getLogger(__name__)
         logging.root = logger
         logger.setLevel(log_level)
-        file_handler = logging.FileHandler(filename=os.path.join(log_path, log_name))
+        file_handler = logging.FileHandler(filename=os.path.join(log_path, log_name), encoding='utf-8')
         log_formatter = logging.Formatter(fmt="%(asctime)s | %(levelname)-9s | %(message)s", datefmt='%m/%d/%Y %H:%M:%S')
         file_handler.setFormatter(log_formatter)
         file_handler.setLevel(log_level)
@@ -124,7 +127,7 @@ class WalletApp(App):
     def connect(self):
         dsn = self.config_info["dsn"]
         try:
-            logging.debug("connessione al database con dsn: %s", dsn)
+            logging.debug("connessione al database dsn: '%s'", dsn)
             self.wallet_instance = Wallet.Wallet(dsn)
         except SqlError as db_err:
             logging.error("errore connessione - %s", str(db_err))
@@ -210,16 +213,16 @@ class WalletApp(App):
                 break
             backup_name = "Wallet_{}_{}.bak".format(datetime.now().strftime("%d-%m-%Y"), i)
         else:
-            logging.error("più di 100 file di log uguali a %s in %s", backup_name, backup_path)
-            raise AppException("Troppi file di log giornalieri esistenti in {}".format(backup_path))
+            logging.error("max 100 backup al giorno", os.path.dirname(backup_path))
+            raise AppException("Raggiunto limite numero backup in {}".format(os.path.dirname(backup_path)))
         backup_path = os.path.join(backup_path, backup_name)
         try:
             self.wallet_instance.backup_database(backup_path)
         except SqlError as error:
-            logging.error("creazione backup %s in %s fallita - %s", backup_name, backup_path, str(error))
+            logging.error("creazione backup %s in %s fallita - %s", os.path.basename(backup_path), os.path.dirname(backup_path), str(error))
             raise AppException("Backup fallito, consulta il log per ulteriori dettagli")
         else:
-            logging.info("creato backup %s in %s", backup_name, backup_path)
+            logging.info("creato backup in %s", os.path.dirname(backup_path))
 
     def on_stop(self):
         """Non è chiaro perchè ma il metodo app.stop() viene chiamato due volte, per evitare di scrivere due volte sul log

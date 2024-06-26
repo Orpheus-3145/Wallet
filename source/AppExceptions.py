@@ -23,16 +23,12 @@ class SqlError(Exception):
     """Errore generico di natura fatale, non riconducibile all'errore di un utente ma ad un errore del programma
     (esclusi quelli relativi al database e SQL)."""
 
-    def __init__(self, sql_trace, sql_query=""):
+    def __init__(self, sql_trace):
         super().__init__()
         self.sql_trace = sql_trace
-        self.sql_query = sql_query      # query SQL che ha causato l'errore
 
     def __str__(self):
-        sql_string_info = ""
-        if self.sql_query:
-            sql_string_info = "nell'esecuzione stringa SQL: {} ".format(self.sql_query)
-        return "Errore database {}- trace: ".format(sql_string_info, self.sql_query)
+        return "Errore database - trace: {}".format(self.sql_trace)
 
 
 class InternalError(Exception):

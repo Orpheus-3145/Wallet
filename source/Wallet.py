@@ -1,4 +1,5 @@
 from datetime import datetime
+import logging
 import pyodbc                           # per la connessione al db SQL Server
 import Tools                            # funzioni generiche di supporto
 from hashlib import sha256              # per creare l'hash di una pwd in input e verificare con quella salvata nel db
@@ -109,10 +110,11 @@ class Wallet:
 
     def exec_query_sql(self, sql_query):
         try:
+            logging.debug("esecuzione query SQL: '%s'", sql_query)
             self.cursor.execute(sql_query)
         except pyodbc.Error as err:
             self.cursor.rollback()
-            raise SqlError(str(err), sql_query)
+            raise SqlError(str(err))
 
     def close_wallet(self):
         """concludo il log"""
@@ -121,7 +123,7 @@ class Wallet:
 
     def backup_database(self, backup_path):
         sp_args = {"bk_path": backup_path, "db_to_backup": self.db_name}
-        keys_varchar = [backup_path, self.db_name]
+        keys_varchar = sp_args.keys()
         self.run_sp(sp_name="BK_DATABASE", sp_args=sp_args, keys_varchar=keys_varchar)
 
     # READ DATABASE
