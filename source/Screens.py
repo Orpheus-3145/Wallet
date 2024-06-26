@@ -1,5 +1,4 @@
 from kivy.uix.screenmanager import Screen, ScreenManager
-from kivy.factory import Factory
 from kivy.app import App
 import Tools
 
@@ -12,13 +11,17 @@ class ManagerScreen(ScreenManager):
         self.add_widget(LoginScreen(name="login"))
 
     def create_screens(self):
-        self.add_widget(MainScreen(name="main"))
-        self.add_widget(InsertMovementScreen(movements=App.get_running_app().get_movements(get_all=True),
-                                             name="insert"))
-        self.add_widget(PayOffScreen(name="open_deb_cred"))
-        self.add_widget(ShowMovementsScreen(max_rows_to_show=App.get_running_app().get_max_rows_to_show(),
-                                            default_rows_to_show=App.get_running_app().get_default_rows_to_show(),
-                                            name="show_movements"))
+        try:
+            db_movs = App.get_running_app().get_movements()
+        except AppException as error:
+            Factory.ErrorPopup(err_text=str(error)).open()
+        else:
+            self.add_widget(MainScreen(name="main"))
+            self.add_widget(InsertMovementScreen(movements=db_movs, name="insert"))
+            self.add_widget(PayOffScreen(name="open_deb_cred"))
+            self.add_widget(ShowMovementsScreen(max_rows_to_show=App.get_running_app().get_max_rows_to_show(),
+                                                default_rows_to_show=App.get_running_app().get_default_rows_to_show(),
+                                                name="show_movements"))
 
     def go_to_insert_screen(self, id_mov):
         self.get_screen("insert").set_current_mov(id_mov)
@@ -44,7 +47,7 @@ class LoginScreen(Screen):
         password = self.ids.input_pwd.text.strip()
         try:
             login_status = App.get_running_app().login(username, password, autologin)
-        except Exception as error:
+        except AppException as error:
             Factory.ErrorPopup(err_text=str(error)).open()
         else:
             if login_status is False:
@@ -55,37 +58,32 @@ class LoginScreen(Screen):
 
 
 class MainScreen(Screen):
-    def on_pre_enter(self, *args):
-        self.ids.general_mov.update_layout(App.get_running_app().get_movements())
-        # self.ids.deb_cred.hide_widget()
-        self.ids.general_mov.hide_widget()
+    def on_pre_enter(self):
+        try:
+            mov_list = App.get_running_app().get_movements(movs_to_drop=["Saldo Debito - Credito"])
+        except AppException as error:
+            Factory.ErrorPopup(err_text=str(error)).open()
+        else:
+            self.ids.general_mov.update_layout(mov_list)
+            self.ids.general_mov.hide_widget()
 
     def show_movements(self):
         """Attiva il layout per visualizzare i tipi di moviemento generici"""
         self.ids.general_mov.show_widget()
-        # self.ids.deb_cred.hide_widget()
-
-    # def show_deb_cred(self):
-    #     """Attiva il layout per visualizzare i tipi di movimento deb/cred"""
-    #     self.ids.deb_cred.show_widget()
-    #     self.ids.general_mov.hide_widget()
-
-    # def show_last_movements(self):
-    #     """Va allo screen ShowMovementsScreen"""
 
     def open_bi(self):
         try:
             App.get_running_app().open_BI()
-        except Exception as error:
+        except AppException as error:
             Factory.ErrorPopup(err_text=str(error)).open()
 
-    def insert_new_movement(self, btn_instance):
-        self.manager.go_to_insert_screen(btn_instance.get_alt_id())
+    def set_movement(self, new_id_mov):
+        self.manager.go_to_insert_screen(new_id_mov)
 
     def backup(self):
         try:
             App.get_running_app().backup_database()
-        except Exception as err:
+        except AppException as err:
             Factory.ErrorPopup(err_text=str(err)).open()
         else:
             Factory.SingleChoicePopup(info="Backup creato con successo").open()
@@ -96,35 +94,43 @@ class InsertMovementScreen(Screen):
         super().__init__(**kw)
         self.id_mov = -1
         self.movements = movements
+        self.is_saldo_deb_cred = False
         self.ids_deb_cred = {}
         self.data_layouts = {1: self.ids.layout_s_varia,
                              2: self.ids.layout_s_fissa,
                              3: self.ids.layout_stipendio,
                              4: self.ids.layout_entrata,
-                             5: self.ids.layout_deb_cred,       # NB no 6th!
+                             5: self.ids.layout_deb_cred,       # NB no 6th! there's no layout for type 6
                              7: self.ids.layout_s_mantenimento,
                              8: self.ids.layout_data_s_viaggio}
         for layout in self.data_layouts.values():
             layout.hide_widget()
 
     def set_current_mov(self, id_mov):
+        if id_mov not in self.movements:
+            raise AppException("ID movimento non esistente: {}".format(id_mov))
         self.id_mov = id_mov
         self.ids.mov_name.text = self.movements[self.id_mov].upper()
+        if self.movements[self.id_mov] == "Saldo Debito - Credito":
+            self.is_saldo_deb_cred = True
 
     def on_pre_enter(self):
+        if self.id_mov == -1:
+            raise AppException("ID movimento non impostato")
         self.ids.layout_date.refresh_data()
         self.ids.layout_main.refresh_data()
-        if self.movements[self.id_mov] == "Saldo Debito - Credito":
-            self.ids_deb_cred = self.manager.get_screen("open_deb_cred").get_ids()
-        else:
+        if self.is_saldo_deb_cred is False:
             self.data_layouts[self.id_mov].refresh_data()
             self.data_layouts[self.id_mov].show_widget()
+        else:
+            self.ids_deb_cred = self.manager.get_screen("open_deb_cred").get_ids()
 
     def on_leave(self):
-        if self.movements[self.id_mov] != "Saldo Debito - Credito":
+        if self.is_saldo_deb_cred is False:
             self.data_layouts[self.id_mov].hide_widget()
         else:
             self.ids.layout_main.show_widget()
+            self.is_saldo_deb_cred = False
         self.id_mov = -1
 
     def insert_movement(self):
@@ -136,7 +142,7 @@ class InsertMovementScreen(Screen):
             movement_data.update(self.data_layouts[self.id_mov].get_data())
         try:
             App.get_running_app().insert_movement(self.id_mov, movement_data)
-        except Exception as error:
+        except AppException as error:
             Factory.ErrorPopup(err_text=str(error)).open()
         else:
             Factory.SingleChoicePopup(info="MOVIMENTO INSERITO", func_to_exec=self.manager.go_to_main_screen).open()
@@ -161,24 +167,20 @@ class PayOffScreen(Screen):
         self.ids.deb_cred_tab.clear_widgets()           # svuoto la tabella
         self.ids.appearing_box.hide_widget()           # faccio sparire il box di eliminazione/saldo
 
-    def update_rows(self):
-        """Aggiorna i record della tabella e i nomi dei campi leggendoli dal db"""
-        self.selected_ids.clear()
+    def update_rows(self):      # NB add exception and popup handling
         try:
-            cols, rows = App.get_running_app().wallet_instance.get_open_deb_creds()
-        except Exception as error:
-            Factory.ErrorPopup(err_text=str(error)).open()
+            cols, rows = App.get_running_app().get_open_deb_creds()
+        except AppException as err:
+            Factory.ErrorPopup(err_text=str(err)).open()
         else:
-            deb_cred_box_col = self.ids.deb_cred_columns        # contenitore dei vari nomi di colonna
-            deb_cred_view = self.ids.deb_cred_tab               # tabella dei record
-            deb_cred_box_col.update_layout(cols)                # aggiorno i due widget
-            deb_cred_view.update_layout(rows)
+            self.selected_ids.clear()
+            self.ids.deb_cred_columns.update_layout(cols)
+            self.ids.deb_cred_tab.update_layout(rows)
 
-    def add_new_id(self, btn_instance):
+    def add_new_id(self, id_record):
         """Aggiunge un nuovo id di movimento da saldare alla lista in spec_mov_dict o lo rimuove se già presente,
             gestisce poi la comparsa o meno del bottone SALDA/ELIMINA a seconda del fatto che tale lista sia vuota o
             meno"""
-        id_record = btn_instance.parent_layout.id_record
         if id_record not in self.selected_ids:      # se non c'è, aggiungo l'id e visualizzo il btn SALDA/RIMUOVI
             self.selected_ids.append(id_record)
         else:                                       # in caso contrario lo rimuovo
@@ -196,16 +198,17 @@ class PayOffScreen(Screen):
         selezionati"""
         try:
             App.get_running_app().drop_records(self.selected_ids)
-        except Exception as error:
+        except AppException as error:
             Factory.ErrorPopup(err_text=str(error)).open()
         else:
             self.update_rows()
+            self.selected_ids.clear()
             self.ids.appearing_box.hide_widget()
 
     def turn_deb_cred_into_mov(self):
         try:
             App.get_running_app().turn_deb_cred_into_mov(self.selected_ids)
-        except Exception as error:
+        except AppException as error:
             Factory.ErrorPopup(err_text=str(error)).open()
         else:
             self.update_rows()
@@ -215,71 +218,72 @@ class PayOffScreen(Screen):
 class ShowMovementsScreen(Screen):
     def __init__(self, max_rows_to_show, default_rows_to_show, **kw):
         super().__init__(**kw)
-        self.type_movement = ""                 # tipo di movimento scelto da esporre
-        self._selected_records_to_show = True   # flag t/f se ho impostato quante righe visualizzare (di default è sempre valorizzato)
-        self._selected_movement = False         # flag t/f se ho selezionato il movimento
-        self.records_to_drop = []               # lista contenente gli id dei record da eliminare
         self.max_rows_to_show = max_rows_to_show
         self.current_rows_shown = default_rows_to_show
+        self.curr_mov_id = -1                   # movimento corrente selzionato
+        self.records_to_drop = []               # lista contenente gli id dei record da eliminare
 
     def on_pre_enter(self):
         """Quando entro nello screen aggiorno il layout contenete i tipi di movimenti (entrata, spesa generica, ...) da
         visionare"""
-        self.ids.info_no_rows.text = "Record visualizzati [max: {}]".format(self.max_rows_to_show)
-        self.ids.input_no_rows.text = str(self.current_rows_shown)
-        list_movements = App.get_running_app().get_movements()       # lista dei possibili movimenti da selezionare
-        self.ids.box_movements.update_layout(list_movements)                      # aggiorno il relativo layout
-        self.ids.remove_record_btn.hide_widget()
+        try:
+            mov_list = App.get_running_app().get_movements(movs_to_drop=["Debito - Credito", "Saldo Debito - Credito"])
+        except AppException as error:
+            Factory.ErrorPopup(err_text=str(error)).open()
+        else:
+            self.ids.info_no_rows.text = "Record visualizzati [max: {}]".format(self.max_rows_to_show)
+            self.ids.input_no_rows.text = str(self.current_rows_shown)
+            self.ids.box_movements.update_layout(mov_list)
+            self.ids.remove_record_btn.hide_widget()
+            self.ids.refresh_mov_btn.hide_widget()
+            self.curr_mov_id = -1
 
     def on_leave(self):
-        self.type_movement = ""                     # movimento scelto
-        self.records_to_drop.clear()                # svuoto la lista di eventuali record selezionati
         self.ids.mov_columns.clear_widgets()        # svuoto il contenitore dei nomi dei campi
         self.ids.rows_box.clear_widgets()           # svuoto la tabella
-        self.ids.box_movements.clear_widgets()      # svuoto il contenitore dei movimenti
         self.ids.remove_record_btn.hide_widget()    # faccio sparire il bottone per rimuovere i record
+        self.records_to_drop.clear()                # svuoto la lista di eventuali record selezionati
+        self.ids.refresh_mov_btn.hide_widget()
+        self.curr_mov_id = -1
 
     def set_new_number(self, new_number):
         try:
             self.current_rows_shown = int(new_number)
-            if self.current_rows_shown < 0:
+            if self.current_rows_shown <= 0:
                 raise ValueError()
         except ValueError:
             self.ids.info_no_rows.text = "[color=cb4335][i]non valido[/i][/color]"
-            self._selected_records_to_show = False
+            self.current_rows_shown = -1
         else:
             self.ids.info_no_rows.text = "Record visualizzati [max: {}]".format(self.max_rows_to_show)
-            if self.current_rows_shown > self.max_rows_to_show:  # per evitare troppi rallentamenti
+            if self.current_rows_shown > self.max_rows_to_show:
                 self.current_rows_shown = self.max_rows_to_show
                 self.ids.input_no_rows.text = str(self.max_rows_to_show)
-            self._selected_records_to_show = True
-            if self._selected_movement is True:  # la tabella è già attiva, la aggiorno
-                self.update_rows()
+            self.ids.refresh_mov_btn.show_widget()
 
-    def set_movement(self, btn_instance):
-        self.type_movement = btn_instance.text
-        self._selected_movement = True
+    def set_movement(self, new_id_mov):
+        self.curr_mov_id = new_id_mov
         self.records_to_drop.clear()
         self.ids.remove_record_btn.hide_widget()
-        if self._selected_records_to_show is True:
-            self.update_rows()
+        self.ids.refresh_mov_btn.show_widget()
 
     def update_rows(self):
-        self.records_to_drop.clear()                # svuoto eventuali id selezionati in precedenza
-        field_name_box = self.ids.mov_columns       # box contenente i nomi dei campi
-        rows_box = self.ids.rows_box                # tabella contenente i vari record
         try:
-            col_names, rows = App.get_running_app().wallet_instance.get_last_n_records(self.current_rows_shown, self.type_movement)
-        except Exception as error:
+            if self.current_rows_shown == -1:
+                raise AppException("Movimento non inserito")
+            elif self.curr_mov_id == -1:
+                raise AppException("Numero di righe non valido")
+            col_names, rows = App.get_running_app().get_last_n_records(self.curr_mov_id, self.current_rows_shown)
+        except AppException as error:
             Factory.ErrorPopup(err_text=str(error)).open()
         else:
-            field_name_box.update_layout(col_names)     # aggiorno l'header (i.e. nomi dei campi)
-            rows_box.update_layout(rows)                # aggiorno la tabella
+            self.ids.mov_columns.update_layout(col_names)
+            self.ids.rows_box.update_layout(rows)
+            self.ids.refresh_mov_btn.hide_widget()
 
-    def add_record_to_remove(self, btn_instance):
+    def add_record_to_remove(self, id_record):
         """Aggiunge/rimuove l'id corrispondente alla riga selezionata nella tabella, di conseguenza attiva/disattiva
         il bottone a comparsa che permette di rimuovere i record selezionati"""
-        id_record = btn_instance.parent_layout.id_record
         if id_record not in self.records_to_drop:
             self.records_to_drop.append(id_record)
         else:
@@ -292,8 +296,9 @@ class ShowMovementsScreen(Screen):
     def remove_records(self):
         try:
             App.get_running_app().drop_records(self.records_to_drop)
-        except Exception as error:
+        except AppException as error:
             Factory.ErrorPopup(err_text=str(error)).open()
         else:
             self.update_rows()
+            self.records_to_drop.clear()
             self.ids.remove_record_btn.hide_widget()

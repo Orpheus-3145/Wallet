@@ -1,4 +1,5 @@
 from DefaultLayouts import *
+from kivy.factory import Factory
 
 
 class LayoutInfo(DefaultLayout, BKGrowLayout):
@@ -44,9 +45,14 @@ class LayoutMainMov(LayoutInfo):
         return data
 
     def refresh_data(self):
-        self.ids.input_importo.text = ""
-        self.ids.input_payments.update_layout(self.feeder())
-        self.ids.input_note.text = ""
+        try:
+            dynamic_content = self.feeder()
+        except AppException as error:
+            Factory.ErrorPopup(err_text=str(error)).open()
+        else:
+            self.ids.input_importo.text = ""
+            self.ids.input_payments.update_layout(dynamic_content)
+            self.ids.input_note.text = ""
 
 
 class LayoutSpesaGenerica(LayoutInfo):
@@ -62,8 +68,13 @@ class LayoutSpesaGenerica(LayoutInfo):
         return data
 
     def refresh_data(self):
-        self.ids.input_tipo_spesa.update_layout(self.feeder())
-        self.ids.input_descrizione.text = ""
+        try:
+            dynamic_content = self.feeder()
+        except AppException as error:
+            Factory.ErrorPopup(err_text=str(error)).open()
+        else:
+            self.ids.input_tipo_spesa.update_layout(dynamic_content)
+            self.ids.input_descrizione.text = ""
 
 
 class LayoutSpesaFissa(LayoutInfo):
@@ -106,8 +117,13 @@ class LayoutEntrata(LayoutInfo):
         return data
 
     def refresh_data(self):
-        self.ids.input_tipo_entrata.update_layout(self.feeder())
-        self.ids.input_descrizione.text = ""
+        try:
+            dynamic_content = self.feeder()
+        except AppException as error:
+            Factory.ErrorPopup(err_text=str(error)).open()
+        else:
+            self.ids.input_tipo_entrata.update_layout(dynamic_content)
+            self.ids.input_descrizione.text = ""
 
 
 class LayoutDebitoCredito(LayoutInfo):

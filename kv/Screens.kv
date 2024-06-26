@@ -87,7 +87,7 @@
                     root.manager.go_to_show_movements_screen()
 
             DefaultButton:
-                text: "Backup DB"
+                text: "Backup"
                 font_size_scale: 1.2
                 background_color: LIGHTGREEN_RGBA
                 on_release:
@@ -111,7 +111,7 @@
             id: general_mov
             size_hint: 0.4, 0.55
             pos_hint: {"x": 0.325, "y": 0.15}
-            f_to_launch: root.insert_new_movement
+            f_to_launch: root.set_movement
 
 
 <InsertMovementScreen>:
@@ -181,7 +181,7 @@
             padding: 5
 
             DefaultButton:
-                text: "Inserisci".upper()
+                text: "INSERISCI"
                 font_size_scale: 1.1
                 background_color: LIGHTGREEN_RGBA
                 color: WHITE_RGBA
@@ -233,21 +233,21 @@
             padding: 7
 
             DefaultButton:
-                text: "Salda".upper()
+                text: "SALDA"
                 background_color: LIGHTGREEN_RGBA
                 color: DARKGREY_RGBA
                 on_release:
                     root.go_to_insert_screen()
 
             DefaultButton:
-                text: "Converti in movimento".upper()
+                text: "CONVERTI IN MOVIMENTO"
                 background_color: LIGHTBLUE_RGBA
                 color: WHITE_RGBA
                 on_release:
                     root.turn_deb_cred_into_mov()
 
             DefaultButton:
-                text: "Elimina".upper()
+                text: "ELIMINA"
                 background_color: RED_RGBA
                 color: WHITE_RGBA
                 on_release:
@@ -317,12 +317,26 @@
             border_color: LIGHTGREY_RGBA
 
             DefaultButton:
-                text: "Elimina".upper()
+                text: "ELIMINA"
                 color: WHITE_RGBA
                 background_color: RED_RGBA
                 font_size_scale: 1.2
                 on_release:
                     root.remove_records()
+
+        BorderLayout:
+            id: refresh_mov_btn
+            size_hint: 0.18, 0.1
+            pos_hint: {"x": 0.02, "y": 0.1}
+            border_color: LIGHTGREY_RGBA
+
+            DefaultButton:
+                text: "AGGIORNA"
+                color: WHITE_RGBA
+                background_color: PURPLE_RGBA
+                font_size_scale: 1.2
+                on_release:
+                    root.update_rows()
 
         DefaultButton:
             text: "HOME"

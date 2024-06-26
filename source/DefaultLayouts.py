@@ -1,5 +1,6 @@
 from kivy.uix.boxlayout import BoxLayout
 from DefaultWidgets import *
+from AppExceptions import *
 
 
 class Showable(Widget):
@@ -45,7 +46,7 @@ class InputLayout(DefaultLayout):
         parametro self.type_selection"""
         self.btn_pressed = btn_instance
         if self.f_to_launch:
-            self.f_to_launch(btn_instance)
+            self.f_to_launch(btn_instance.get_alt_id())
         if self.type_selection == "single":     # 'single' = soltanto un bottone puà rimanere attivo nello stesso momento
             for btn in [selection_btn for selection_btn in self.children if isinstance(selection_btn, SelectionButton)]:
                 if btn != btn_instance and btn.activate is True:
@@ -101,39 +102,34 @@ class ButtonDynamicInputLayout(DynamicLayout, InputLayout):
 
 
 class RowDynamicInputLayout(DynamicLayout, InputLayout):        # NB put RowDynamicInput inside Table...
-    def __init__(self, id_record, **kw):
-        super().__init__(**kw)
-        self.id_record = id_record      # id del record
-        self.type_selection = "all"     # all di default: alla pressione attivo/disattivo tutti i bottoni della riga
-
-    def update_layout(self, field_list):
+    def update_layout(self, row_info):
         """Creo un bottone di tipo DefaultSelectionButton per ogni elemento della lista field_list"""
         self.clear_widgets()
         self.btn_pressed = None
-        for btn_name in field_list:
-            label_field = SelectionButton(text=str(btn_name),
-                                          font_size=self.font_size_chars,
-                                          background_color=self.color_widgets,
-                                          parent_layout=self)
-            self.add_widget(label_field)
+        id_row = row_info[0]
+        row = row_info[1]
+        for field in row:
+            button = SelectionButton(text=str(field),
+                                     font_size=self.font_size_chars,
+                                     alt_id=id_row,
+                                     background_color=self.color_widgets,
+                                     parent_layout=self)
+            self.add_widget(button)
 
 
 class TableDynamicInputLayout(DynamicLayout, InputLayout):
-    def update_layout(self, field_list):
-        """Aggiorna la tabella con la lista field_list, crea n righe di RowDynamicInputLayout ciascuna composta da m bottoni"""
+    def update_layout(self, records):
+        """Aggiorna la tabella con la lista records, crea n righe di RowDynamicInputLayout ciascuna composta da m bottoni"""
         self.clear_widgets()
-        self.height = len(field_list) * self.size_records
-        for record in field_list:
+        self.height = len(records) * self.size_records
+        for record in records:
             id_record = record[-1]
             record.pop()
             row = RowDynamicInputLayout(font_size_chars=self.font_size_chars,
-                                        id_record=id_record,
                                         f_to_launch=self.f_to_launch,
                                         height=self.size_records,
-                                        orientation="horizontal",
-                                        spacing=2,
-                                        padding=0)
-            row.update_layout(record)
+                                        orientation="horizontal")
+            row.update_layout([id_record, record])
             self.add_widget(row)
 
     def btn_pressed(self, btn_instance):
