@@ -24,7 +24,8 @@ class ManagerScreen(ScreenManager):
                                                 name="show_movements"))
 
     def go_to_insert_screen(self, id_mov):
-        self.get_screen("insert").set_current_mov(id_mov)
+
+        self.get_screen("insert").set_id_mov(id_mov)
         self.current = "insert"
         self.transition.direction = "left"
 
@@ -93,9 +94,8 @@ class InsertMovementScreen(Screen):
     def __init__(self, movements, **kw):
         super().__init__(**kw)
         self.id_mov = -1
-        self.movements = movements
-        self.is_saldo_deb_cred = False
-        self.ids_deb_cred = {}
+        self.movements = movements          # dict {id_mov: name_mov}
+        self.ids_deb_cred = []
         self.data_layouts = {1: self.ids.layout_s_varia,
                              2: self.ids.layout_s_fissa,
                              3: self.ids.layout_stipendio,
@@ -106,32 +106,33 @@ class InsertMovementScreen(Screen):
         for layout in self.data_layouts.values():
             layout.hide_widget()
 
-    def set_current_mov(self, id_mov):
-        if id_mov not in self.movements:
-            raise AppException("ID movimento non esistente: {}".format(id_mov))
+    def set_id_mov(self, id_mov):
         self.id_mov = id_mov
-        self.ids.mov_name.text = self.movements[self.id_mov].upper()
-        if self.movements[self.id_mov] == "Saldo Debito - Credito":
-            self.is_saldo_deb_cred = True
 
     def on_pre_enter(self):
-        if self.id_mov == -1:
-            raise AppException("ID movimento non impostato")
+        if self.id_mov not in self.movements:
+            if self.id_mov == -1:
+                App.get_running_app().update_log("internal app fault - ID movimento non settato [metodo set_current_mov() non chiamato]", 50)
+            else:
+                App.get_running_app().update_log("internal app fault - ID movimento non esistente", 50)
+            Factory.ErrorPopup(err_text="errore interno, consulta log per ulteriori dettagli", func_to_exec=self.manager.go_to_main_screen).open()
+            return
+        self.ids.mov_name.text = self.movements[self.id_mov]
         self.ids.layout_date.refresh_data()
         self.ids.layout_main.refresh_data()
-        if self.is_saldo_deb_cred is False:
+        if self.movements[self.id_mov] == "Saldo Debito - Credito":
+            self.ids_deb_cred = self.manager.get_screen("open_deb_cred").get_ids()
+        else:
             self.data_layouts[self.id_mov].refresh_data()
             self.data_layouts[self.id_mov].show_widget()
-        else:
-            self.ids_deb_cred = self.manager.get_screen("open_deb_cred").get_ids()
 
     def on_leave(self):
-        if self.is_saldo_deb_cred is False:
-            self.data_layouts[self.id_mov].hide_widget()
-        else:
-            self.ids.layout_main.show_widget()
-            self.is_saldo_deb_cred = False
-        self.id_mov = -1
+        if self.id_mov in self.movements:
+            if self.movements[self.id_mov] == "Saldo Debito - Credito":
+                self.ids.layout_main.show_widget()
+            else:
+                self.data_layouts[self.id_mov].hide_widget()
+            self.id_mov = -1
 
     def insert_movement(self):
         movement_data = self.ids.layout_date.get_data()
@@ -269,10 +270,10 @@ class ShowMovementsScreen(Screen):
 
     def update_rows(self):
         try:
-            if self.current_rows_shown == -1:
-                raise AppException("Movimento non inserito")
-            elif self.curr_mov_id == -1:
-                raise AppException("Numero di righe non valido")
+            if self.current_rows_shown == -1 or self.curr_mov_id == -1:
+                App.get_running_app().update_log("parametri invalidi per interrogazione db, n records: %s, id tipo mov: %s", 50, self.current_rows_shown, self.curr_mov_id)
+                Factory.ErrorPopup(err_text="errore interno, consulta log per ulteriori dettagli").open()
+                return
             col_names, rows = App.get_running_app().get_last_n_records(self.curr_mov_id, self.current_rows_shown)
         except AppException as error:
             Factory.ErrorPopup(err_text=str(error)).open()

@@ -5,13 +5,17 @@ from win32api import GetSystemMetrics
 import win32com.client as win32         # per aprire applicazioni win
 import pywintypes                       # per gestire alcune eccezioni legate al modulo di cui sopra
 
+import Tools
 import Wallet
 from AppExceptions import *
 
 from kivy.config import Config
 
-SETTINGS_INI = os.path.join(os.getcwd(), "..\\settings\\config_wallet.ini")
-Config.read(SETTINGS_INI)
+DEF_LOG_LVL = 20
+LOG_PATH = Tools.get_abs_path("..\\logs")
+CONFIG_PATH = Tools.get_abs_path("..\\settings\\config_wallet.ini")
+
+Config.read(CONFIG_PATH)
 
 from kivy.lang import Builder
 from Screens import *
@@ -58,54 +62,69 @@ class WalletApp(App):
         self.qlik_app = None
         self.config_info = {}
         self.stored_procs = {}
+        self.create_logger(LOG_PATH, Config.get("log", "log_level", fallback=DEF_LOG_LVL))
         self.read_config(Config)
-        self.create_logger()
-        logging.info("#" * 80)
-        logging.info("app avviata")
 
     def read_config(self, config):
         try:
-            self.config_info["kv_files"] = config["kivy_files"].values()
+            self.config_info["kv_files"] = [Tools.get_abs_path(kv_file) for kv_file in config["kivy_files"].values()]
+            self.config_info["bi_file_path"] = Tools.get_abs_path(config["bi"]["bi_file_path"])
             self.config_info["dsn"] = config["database"]["dsn_name"].strip("'")
-            self.config_info["bi_file_path"] = config["bi"]["bi_file_path"]
-            self.config_info["backup_path"] = config["database"]["backup_path"]
-            self.config_info["bi_logo_path"] = config["graphics"]["bi_logo_path"]
-            self.config_info["background_img_path"] = config["graphics"]["background_img_path"]
-            self.config_info["logo_path"] = config["graphics"]["logo_path"]
-            self.config_info["log_path"] = config["log"]["log_path"]
-            self.config_info["log_name"] = config["log"]["log_name"]
-            self.config_info["log_level"] = config.getint("log", "log_level")
-            self.config_info["width_app"] = config.getint("graphics", "width")
-            self.config_info["height_app"] = config.getint("graphics", "height")
+            self.config_info["backup_path"] = Tools.get_abs_path(config["database"]["backup_path"])
+            self.config_info["bi_logo_path"] = Tools.get_abs_path(config["graphics"]["bi_logo_path"])
+            self.config_info["background_img_path"] = Tools.get_abs_path(config["graphics"]["background_img_path"])
+            self.config_info["logo_path"] = Tools.get_abs_path(config["graphics"]["logo_path"])
             self.config_info["font_name"] = config["kivy"]["font_name"]
             self.config_info["font_size"] = config.getint("kivy", "font_size")
+            self.config_info["width_app"] = config.getint("graphics", "width")
+            self.config_info["height_app"] = config.getint("graphics", "height")
             self.config_info["max_rows_to_show"] = config.getint("widgets", "max_rows_to_show")  # max righe mostrate in SowMovementScreen
             self.config_info["default_rows_to_show"] = config.getint("widgets", "default_rows_to_show")  # default righe mostrate in SowMovementScreen
             self.config_info["colors"] = {}
-            for item in self.config_info.keys():
-                if item.endswith("_path") and os.path.exists(self.config_info[item]) is False:
-                    raise AppException("file {} non trovato".format(self.config_info[item]))
             for color_rgba in config["colors"].keys():
-                self.config_info["colors"][color_rgba] = Tools.str_to_list(config["colors"][color_rgba])
+                self.config_info["colors"][color_rgba] = Tools.str_to_list_float(config["colors"][color_rgba])
         except (KeyError, ValueError) as error:
-            raise AppException("errore nel file .ini - trace: " + str(error))
+            self.update_log("errore nel file .ini - trace: %s", 40, str(error))
+            raise AppException("errore nel file .ini - trace: {}".format(str(error)))
 
-    def create_logger(self):
+    def create_logger(self, log_path, log_level):
+        log_name = "Logfile_{}.log".format(date.today().strftime("%d-%m-%Y"))
+        log_path = os.path.join(log_path, log_name)
         log_levels = {10: logging.DEBUG, 20: logging.INFO, 30: logging.WARNING, 40: logging.ERROR, 50: logging.CRITICAL}
-        log_path = self.config_info["log_path"]
+        log_level_is_wrong = False
         try:
-            log_level = log_levels[self.config_info["log_level"]]
-            log_name = self.config_info["log_name"].format(date=date.today().strftime("%d-%m-%Y"))
+            log_level = int(log_level)
+            if log_level not in log_levels:
+                raise KeyError()
         except KeyError:
-            raise AppException("Valore di log non valido o nome mal formattato ['{date}' required]")
+            log_level_is_wrong = True
+            log_level = 20
+        finally:
+            log_level = log_levels[log_level]
+        log_encoding = "utf-8"
+        log_format = "%(asctime)s | %(levelname)-9s | %(message)s"
+        log_date_format = "%m/%d/%Y %H:%M:%S"
+
         logger = logging.getLogger(__name__)
         logging.root = logger
         logger.setLevel(log_level)
-        file_handler = logging.FileHandler(filename=os.path.join(log_path, log_name), encoding='utf-8')
-        log_formatter = logging.Formatter(fmt="%(asctime)s | %(levelname)-9s | %(message)s", datefmt='%m/%d/%Y %H:%M:%S')
+        file_handler = logging.FileHandler(filename=log_path, encoding=log_encoding)
+        log_formatter = logging.Formatter(fmt=log_format, datefmt=log_date_format)
         file_handler.setFormatter(log_formatter)
         file_handler.setLevel(log_level)
         logger.addHandler(file_handler)
+
+        self.update_log("#" * 80, 20)
+        self.update_log("app avviata", 20)
+        if log_level_is_wrong is True:
+            self.update_log("livello log in .ini file non valido [usage: 10, 20, 30, 40, 50]", 30)
+
+    def update_log(self, message, level, *args):
+        log_alerts = {10: logging.debug, 20: logging.info, 30: logging.warning, 40: logging.error, 50: logging.critical}
+        try:
+            log_alerts[level](message, *args)
+        except KeyError:
+            self.update_log("invalid log level provided: {}, original message: '{}'".format(level, message), 30, *args)
 
     def build(self):
         width_screen = GetSystemMetrics(0)
@@ -113,36 +132,33 @@ class WalletApp(App):
         Window.left = (width_screen - self.config_info["width_app"]) // 2
         Window.top = (height_screen - self.config_info["height_app"]) // 2
         for kv_file in self.config_info["kv_files"]:
-            if not os.path.exists(kv_file):
-                logging.error("caricamento front-end - %s non trovato", kv_file)
-                raise AppException("file di stile {} non trovato".format(kv_file))
             try:
                 Builder.load_file(kv_file)
             except Exception as error:
-                logging.error("caricamento front-end - errore in %s - %s", kv_file, str(error))
-                raise AppException("caricamento front-end, errore: ".format(str(error)))
-            logging.debug("caricamento front-end - %s letto", kv_file)
+                self.update_log("caricamento front-end - errore in %s - %s", 40, kv_file, str(error))
+                raise AppException("Caricamento front-end, errore: ".format(str(error)))
+            self.update_log("caricamento front-end - %s", 10, kv_file)
         return ManagerScreen()
 
     def connect(self):
         dsn = self.config_info["dsn"]
         try:
-            logging.debug("connessione al database dsn: '%s'", dsn)
+            self.update_log("connessione al database con dsn: '%s'", 10, dsn)
             self.wallet_instance = Wallet.Wallet(dsn)
         except SqlError as db_err:
-            logging.error("errore connessione - %s", str(db_err))
+            self.update_log("errore connessione - %s", 40, str(db_err))
             raise AppException("Connessione al database fallita, consulta il log per ulteriori dettagli")
         else:
-            logging.debug("connessione al database effettuata")
+            self.update_log("connessione al database effettuata", 10)
         bi_file = self.config_info["bi_file_path"]
         try:
-            logging.debug("creazione app BI (pywin32) con file: %s", bi_file)
+            self.update_log("creazione app BI (pywin32) con file: %s", 10, bi_file)
             self.qlik_app = BusIntApp(bi_file)
         except AppException as bi_error:
-            logging.error("errore app BI (pywin32) - %s", str(bi_error))
+            self.update_log("errore app BI (pywin32) - %s", 40, str(bi_error))
             raise AppException("Errore app BI, consulta il log per ulteriori dettagli")
         else:
-            logging.debug("app BI creata")
+            self.update_log("app BI creata", 10)
 
     def login(self, user, pwd, autologin):
         if autologin is True:
@@ -151,31 +167,31 @@ class WalletApp(App):
         elif user == "" or pwd == "":
             raise AppException("Credenziali mancanti")
         self.connect()
-        login_done = self.wallet_instance.login_wallet(user.strip(), pwd.strip())
-        if login_done is True:
-            logging.debug("utente %s ha effettuato l'accesso", user)
-        return login_done
+        login_success = self.wallet_instance.login_wallet(user.strip(), pwd.strip())
+        if login_success is True:
+            self.update_log("utente %s ha effettuato l'accesso", 20, user)
+        return login_success
 
     def open_BI(self):
         try:
             user, pwd = self.wallet_instance.get_bi_credentials()
             self.qlik_app.open(user, pwd)
         except SqlError as db_err:
-            logging.error("errore apertura BI - %s", str(db_err))
-            raise AppException("Errore apertura BI, consulta il log per ulteriori dettagli")
+            self.update_log("errore apertura BI - %s", 40, str(db_err))
+            raise AppException()
         except AppException as bi_error:
-            logging.error("errore apertura BI - %s", str(bi_error))
+            self.update_log("errore apertura BI - %s", 40, str(bi_error))
             raise AppException("Errore apertura BI, consulta il log per ulteriori dettagli")
 
     def insert_movement(self, id_mov, data_movement):
         try:
-            logging.debug("inserimento nuovo movimento tipo: %s", id_mov)
+            self.update_log("inserimento nuovo movimento tipo %s", 10, id_mov)
             self.wallet_instance.insert_movement(id_mov=id_mov, data_info=data_movement)
         except (InternalError, SqlError) as int_err:
-            logging.error("errore inserimento - %s", str(int_err))
+            self.update_log("errore inserimento - %s", 40, str(int_err))
             raise AppException("Movimento non inserito, consulta il log per ulteriori dettagli")
         else:
-            logging.info("inserimento nuovo movimento tipo: %s riuscito", id_mov)
+            self.update_log("inserimento nuovo movimento tipo %s riuscito", 20, id_mov)
 
     def drop_records(self, list_records):
         count_errs = 0
@@ -183,10 +199,10 @@ class WalletApp(App):
             try:
                 self.wallet_instance.drop_record(record_to_drop)
             except SqlError as error:
-                logging.error("rimozione movimento id: %s fallita - %s", record_to_drop, str(error))
+                self.update_log("rimozione movimento id: %s fallita - trace: %s", 40, str(error))
                 count_errs = count_errs + 1
             else:
-                logging.info("movimento id: %s rimosso", record_to_drop)
+                self.update_log("movimento id: %s rimosso", 20, record_to_drop)
         if count_errs > 0:
             raise AppException("Errore nella rimozione record(s), consulta il log per ulteriori dettagli")
 
@@ -196,6 +212,7 @@ class WalletApp(App):
             try:
                 self.wallet_instance.turn_deb_cred_into_mov(record_to_turn)
             except SqlError as error:
+                self.update_log("trasformazione deb/cred id: %s in movimento fallita - trace: ", 40, record_to_drop)
                 logging.error("trasformazione deb/cred id: %s in movimento fallita - %s", record_to_turn, str(error))
                 count_errs = count_errs + 1
             else:

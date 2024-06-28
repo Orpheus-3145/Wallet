@@ -4,30 +4,52 @@ from kivy.properties import ObjectProperty
 
 
 class ErrorPopup(Popup):
-    err_text = ObjectProperty("")
+    def __init__(self, err_text, func_to_exec=None, **kw):
+        super().__init__(**kw)
+        self.err_text = err_text
+        self.func_to_exec = func_to_exec
 
-
-class InfoPopup(ModalView):  # ModalView e non Popup perchè in questo caso non uso non mi serve il titolo
-    info = ObjectProperty("")
-    func_to_exec = ObjectProperty(None)
+    def on_pre_open(self):
+        self.ids.lbl_error.text = self.err_text
 
     def exec_function(self):
-        self.dismiss()
         if self.func_to_exec:
             self.func_to_exec()
+        self.dismiss()
 
 
-class SingleChoicePopup(InfoPopup):
-    """solo un bottone da premere, oltre alla descrizione"""
-    pass
+class SingleChoicePopup(ModalView):
+    def __init__(self, info, func_to_exec=None, **kw):
+        super().__init__(**kw)
+        self.info = info
+        self.func_to_exec = func_to_exec
+
+    def on_pre_open(self):
+        self.ids.lbl_info.text = self.info
+
+    def exec_function(self):
+        if self.func_to_exec:
+            self.func_to_exec()
+        self.dismiss()
 
 
-class DoubleChoicePopup(InfoPopup):
-    """scelta del tipo 'annulla'/'procedi'"""
-    second_func_to_exec = ObjectProperty(None)
+class DoubleChoicePopup(ModalView):
+    def __init__(self, info, func_to_exec=None, second_func_to_exec=None, **kw):
+        super().__init__(**kw)
+        self.info = info
+        self.func_to_exec = func_to_exec
+        self.second_func_to_exec = second_func_to_exec
+
+    def on_pre_open(self):
+        self.ids.lbl_info.text = self.info
+
+    def exec_function(self):
+        if self.func_to_exec:
+            self.func_to_exec()
+        self.dismiss()
 
     def exec_second_function(self):
-        self.dismiss()
         if self.second_func_to_exec:
             self.second_func_to_exec()
+        self.dismiss()
 
