@@ -85,7 +85,7 @@ class WalletApp(App):
                 self.config_info["colors"][color_rgba] = Tools.str_to_list_float(config["colors"][color_rgba])
         except (KeyError, ValueError) as error:
             self.update_log("errore nel file .ini - trace: %s", 40, str(error))
-            raise AppException("errore nel file .ini - trace: {}".format(str(error)))
+            raise AppException("Errore nel file .ini - trace: {}".format(str(error)))
 
     def create_logger(self, log_path, log_level):
         log_name = "Logfile_{}.log".format(date.today().strftime("%d-%m-%Y"))

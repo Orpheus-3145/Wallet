@@ -7,16 +7,13 @@ from AppExceptions import *
 
 
 class Wallet:
-    """Gestisce le comunicazioni tra dati in input e il loro inserimento nel database, oltre ad azioni secondarie
-    quali recuperare le credenziali dell'app, della BI, oppure di aggiornare un log su tutte le operazioni fatte sul
-    db"""
     def __init__(self, dsn):
         """Creo la connessione al database tramite il dsn"""
         try:
             self.connection = pyodbc.connect(dsn)
             self.cursor = self.connection.cursor()
         except pyodbc.Error as error:
-            raise SqlError(str(error), "")
+            raise SqlError(str(error))
         else:
             self.db_name = "Wallet"
             self.movements = self.get_info_db("movimenti")

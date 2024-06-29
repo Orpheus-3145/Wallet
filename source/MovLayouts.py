@@ -38,8 +38,8 @@ class LayoutMainMov(LayoutInfo):
         data = {}
         if self.ids.input_importo.text.strip():
             data["importo"] = self.ids.input_importo.text.strip()
-        if self.ids.input_payments.id_active_btn():
-            data["id_tipo_pag"] = str(self.ids.input_payments.id_active_btn())
+        if self.ids.input_payments.id_active_widgets():
+            data["id_tipo_pag"] = str(self.ids.input_payments.id_active_widgets())
         if self.ids.input_note.text.strip():
             data["note"] = self.ids.input_note.text.strip()
         return data
@@ -61,8 +61,8 @@ class LayoutSpesaGenerica(LayoutInfo):
     id_spesa: nome_spesa, popolato in self.refresh_dynamic_objs()"""
     def get_data(self):
         data = {}
-        if self.ids.input_tipo_spesa.id_active_btn():
-            data["id_tipo_s_varia"] = str(self.ids.input_tipo_spesa.id_active_btn())
+        if self.ids.input_tipo_spesa.id_active_widgets():
+            data["id_tipo_s_varia"] = str(self.ids.input_tipo_spesa.id_active_widgets())
         if self.ids.input_descrizione.text.strip():
             data["descrizione"] = self.ids.input_descrizione.text.strip()
         return data
@@ -110,8 +110,8 @@ class LayoutEntrata(LayoutInfo):
     """Layout di inserimento delle informazioni del movimento di tipo entrata"""
     def get_data(self):
         data = {}
-        if self.ids.input_tipo_entrata.id_active_btn():
-            data["id_tipo_entrata"] = str(self.ids.input_tipo_entrata.id_active_btn())
+        if self.ids.input_tipo_entrata.id_active_widgets():
+            data["id_tipo_entrata"] = str(self.ids.input_tipo_entrata.id_active_widgets())
         if self.ids.input_descrizione.text.strip():
             data["descrizione"] = self.ids.input_descrizione.text.strip()
         return data
@@ -129,8 +129,8 @@ class LayoutEntrata(LayoutInfo):
 class LayoutDebitoCredito(LayoutInfo):
     def get_data(self):
         data = {}
-        if self.ids.input_deb_cred.id_active_btn():
-            data["deb_cred"] = self.ids.input_deb_cred.id_active_btn()
+        if self.ids.input_deb_cred.id_active_widgets():
+            data["deb_cred"] = self.ids.input_deb_cred.id_active_widgets()
         if self.ids.input_origine.text.strip():
             data["origine"] = self.ids.input_origine.text.strip()
         if self.ids.input_descrizione.text.strip():

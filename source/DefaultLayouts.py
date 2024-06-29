@@ -32,35 +32,21 @@ class BorderLayout(DefaultLayout, BKGrowLayout):
 
 
 class InputLayout(DefaultLayout):
-    """Questo Layout contiene il comportamento per eseguire una determinata azione se uno dei sui widget figli viene
-    premuto"""
-    def __init__(self, type_selection="multiple", f_to_launch=None, **kw):
+    def __init__(self, f_to_launch=None, **kw):
         super().__init__(**kw)
-        self.type_selection = type_selection        # tipi di selezione dei bottoni: 'single', 'multiple' (?) o 'all' (vedi self.btn_pressed())
-        self.f_to_launch = f_to_launch              # funzione da eseguire alla pressione
-        self.btn_pressed = None
+        self.f_to_launch = f_to_launch
+        self.active_widgets = []
 
-    def update_state(self, btn_instance):    # NB se premo per due volte sullo stesso bottone viene correttamente gestito?
-        """self.btn_pressed() viene chiamata sia da DefaultButton sia da DefaultSelectionButton nei metodi on_state() o on_press()
-        rispettivamente, lancia la funzione, se essa è definita, e modifica l'attivazione dei bottoni a seconda del
-        parametro self.type_selection"""
-        self.btn_pressed = btn_instance
+    def update_state(self, active_widget):
+        self.active_widgets.append(active_widget)
         if self.f_to_launch:
-            self.f_to_launch(btn_instance.get_alt_id())
-        if self.type_selection == "single":     # 'single' = soltanto un bottone puà rimanere attivo nello stesso momento
-            for btn in [selection_btn for selection_btn in self.children if isinstance(selection_btn, SelectionButton)]:
-                if btn != btn_instance and btn.activate is True:
-                    btn.activate = False        # quindi disattivo ogni altro bottone precedentemente attivo
-        elif self.type_selection == "all":      # 'all' = alla pressione attivo tutti i bottoni contenuti nel widget (vedi RowInputLayout)
-            for btn in [selection_btn for selection_btn in self.children if isinstance(selection_btn, SelectionButton)]:
-                if btn != btn_instance:
-                    btn.activate = not btn_instance.activate  # il not è perchè btn_instance.activate è già stato modificato, quindi mi serve il valore opposto
+            self.f_to_launch(active_widget.get_alt_id())
 
-    def id_active_btn(self):
-        if self.btn_pressed:
-            return self.btn_pressed.get_alt_id()
+    def id_active_widgets(self):
+        if self.active_widgets:
+            return [active_widget.get_alt_id() for active_widget in self.active_widgets]
         else:
-            return ""
+            return []
 
 
 class DynamicLayout(DefaultLayout):
@@ -91,7 +77,7 @@ class LabelDynamicLayout(DynamicLayout):
 class ButtonDynamicInputLayout(DynamicLayout, InputLayout):
     def update_layout(self, field_map):
         self.clear_widgets()
-        self.btn_pressed = None
+        self.active_widgets.clear()
         for field_id, field_name in field_map.items():
             btn = SelectionButton(text=field_name,
                                   font_size=self.font_size_chars,
@@ -100,24 +86,26 @@ class ButtonDynamicInputLayout(DynamicLayout, InputLayout):
                                   parent_layout=self)
             self.add_widget(btn)
 
+    def update_state(self, btn_instance):
+        if btn_instance not in self.active_widgets:
+            for active_widget in self.active_widgets:
+                active_widget.active = False
+            self.active_widgets.clear()
+            self.active_widgets.append(btn_instance)
+        else:
+            self.active_widgets.clear()
+        if self.f_to_launch:
+            self.f_to_launch(btn_instance.get_alt_id())
 
-class RowDynamicInputLayout(DynamicLayout, InputLayout):        # NB put RowDynamicInput inside Table...
-    def update_layout(self, row_info):
-        """Creo un bottone di tipo DefaultSelectionButton per ogni elemento della lista field_list"""
-        self.clear_widgets()
-        self.btn_pressed = None
-        id_row = row_info[0]
-        row = row_info[1]
-        for field in row:
-            button = SelectionButton(text=str(field),
-                                     font_size=self.font_size_chars,
-                                     alt_id=id_row,
-                                     background_color=self.color_widgets,
-                                     parent_layout=self)
-            self.add_widget(button)
+    def id_active_widgets(self):
+        if self.active_widgets:     # this class can have the list of only 0 or 1 active btn at the same time
+            return self.active_widgets[0].get_alt_id()
+        else:
+            return ""
 
 
 class TableDynamicInputLayout(DynamicLayout, InputLayout):
+
     def update_layout(self, records):
         """Aggiorna la tabella con la lista records, crea n righe di RowDynamicInputLayout ciascuna composta da m bottoni"""
         self.clear_widgets()
@@ -125,14 +113,32 @@ class TableDynamicInputLayout(DynamicLayout, InputLayout):
         for record in records:
             id_record = record[-1]
             record.pop()
-            row = RowDynamicInputLayout(font_size_chars=self.font_size_chars,
-                                        f_to_launch=self.f_to_launch,
-                                        height=self.size_records,
-                                        orientation="horizontal")
-            row.update_layout([id_record, record])
+            row = DefaultLayout(
+                                font_size_chars=self.font_size_chars,
+                                spacing=2,
+                                padding=0,
+                                height=self.size_records,
+                                orientation="horizontal")
+            for field in record:
+                button = SelectionButton(text=str(field),
+                                         font_size=self.font_size_chars,
+                                         alt_id=id_record,
+                                         background_color=self.color_widgets,
+                                         bk_inactive=self.color_widgets,
+                                         parent_layout=self)
+                row.add_widget(button)
             self.add_widget(row)
 
-    def btn_pressed(self, btn_instance):
-        """è necessario fare questo passaggio intermedio: pressione bottone --> attivazione/disattivazione della riga
-        che lo contiene"""
-        btn_instance.parent_layout.btn_pressed(btn_instance)
+    def update_state(self, btn_selected):       # multiple rows selection is allowed
+        for row in self.children:
+            if btn_selected in row.children:
+                if row in self.active_widgets:
+                    for btn in row.children:
+                        btn.active = False
+                    self.active_widgets.remove(row)
+                else:
+                    for btn in row.children:
+                        btn.active = True
+                    self.active_widgets.append(row)
+        if self.f_to_launch:
+            self.f_to_launch(btn_selected.get_alt_id())

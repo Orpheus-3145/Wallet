@@ -195,7 +195,7 @@
             pos_hint: {"x": 0.83, "y": 0.03}
             background_color: RED_RGBA
             on_press:
-                root.manager.go_to_main_screen("down")
+                root.manager.go_to_main_screen()
 
 
 <PayOffScreen>:
@@ -260,7 +260,7 @@
             pos_hint: {"x": 0.83, "y": 0.03}
             background_color: RED_RGBA
             on_press:
-                root.manager.go_to_main_screen()
+                root.manager.go_to_main_screen(direction="down")
 
 
 <ShowMovementsScreen>:

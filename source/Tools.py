@@ -1,9 +1,3 @@
-# def get_key_from_dict(dictionary, value):
-#     """Restituisce la chiave del dizionario tramite il valore passato"""
-#     key_list = list(dictionary.keys())
-#     value_list = list(dictionary.values())
-#
-#     return key_list[value_list.index(value)]
 import os.path
 
 
