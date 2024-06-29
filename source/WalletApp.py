@@ -207,17 +207,16 @@ class WalletApp(App):
             raise AppException("Errore nella rimozione record(s), consulta il log per ulteriori dettagli")
 
     def turn_deb_cred_into_mov(self, list_records):
-        count_errs = 0
+        failed = False
         for record_to_turn in list_records:
             try:
                 self.wallet_instance.turn_deb_cred_into_mov(record_to_turn)
             except SqlError as error:
-                self.update_log("trasformazione deb/cred id: %s in movimento fallita - trace: ", 40, record_to_drop)
-                logging.error("trasformazione deb/cred id: %s in movimento fallita - %s", record_to_turn, str(error))
-                count_errs = count_errs + 1
+                self.update_log("trasformazione deb/cred id %s fallita - %s", 40,  record_to_turn, str(error))
+                failed = True
             else:
-                logging.info("deb/cred id: %s trasformato in movimento", record_to_turn)
-        if count_errs > 0:
+                self.update_log("deb/cred id %s trasformato", 20, record_to_turn)
+        if failed is True:
             raise AppException("Errore nella trasformazione record(s), consulta il log per ulteriori dettagli")
 
     def backup_database(self):
@@ -230,16 +229,16 @@ class WalletApp(App):
                 break
             backup_name = "Wallet_{}_{}.bak".format(datetime.now().strftime("%d-%m-%Y"), i)
         else:
-            logging.error("max 100 backup al giorno", os.path.dirname(backup_path))
+            self.update_log("max 100 backup al giorno", 40, os.path.dirname(backup_path))
             raise AppException("Raggiunto limite numero backup in {}".format(os.path.dirname(backup_path)))
         backup_path = os.path.join(backup_path, backup_name)
         try:
             self.wallet_instance.backup_database(backup_path)
         except SqlError as error:
-            logging.error("creazione backup %s in %s fallita - %s", os.path.basename(backup_path), os.path.dirname(backup_path), str(error))
+            self.update_log("creazione backup %s in %s fallita - %s", 40, os.path.basename(backup_path), os.path.dirname(backup_path), str(error))
             raise AppException("Backup fallito, consulta il log per ulteriori dettagli")
         else:
-            logging.info("creato backup in %s", os.path.dirname(backup_path))
+            self.update_log("creato backup in %s", 20, os.path.dirname(backup_path))
 
     def on_stop(self):
         """Non è chiaro perchè ma il metodo app.stop() viene chiamato due volte, per evitare di scrivere due volte sul log
@@ -250,8 +249,8 @@ class WalletApp(App):
                 self.wallet_instance.close_wallet()
             if self.qlik_app:
                 self.qlik_app.close()
-        logging.info("app chiusa")
-        logging.info("#" * 80)
+        self.update_log("app chiusa", 20)
+        self.update_log("#" * 80, 20)
 
     # db interrogations
     def get_movements(self, movs_to_drop=None):
@@ -269,35 +268,35 @@ class WalletApp(App):
         try:
             return self.wallet_instance.get_info_db("pagamenti")
         except SqlError as db_err:
-            logging.error(str(db_err))
+            self.update_log("errore nella lettura del database - trace: %s", 40, str(db_err))
             raise AppException("Errore database, consulta il log per ulteriori dettagli")
 
     def get_type_spec_movements(self):
         try:
             return self.wallet_instance.get_info_db("spese_varie")
         except SqlError as db_err:
-            logging.error(str(db_err))
+            self.update_log("errore nella lettura del database - trace: %s", 40, str(db_err))
             raise AppException("Errore database, consulta il log per ulteriori dettagli")
 
     def get_type_entrate(self):
         try:
             return self.wallet_instance.get_info_db("entrate")
         except SqlError as db_err:
-            logging.error(str(db_err))
+            self.update_log("errore nella lettura del database - trace: %s", 40, str(db_err))
             raise AppException("Errore database, consulta il log per ulteriori dettagli")
 
     def get_open_deb_creds(self):
         try:
             return self.wallet_instance.get_open_deb_creds()
         except SqlError as db_err:
-            logging.error(str(db_err))
+            self.update_log("errore nella lettura del database - trace: %s", 40, str(db_err))
             raise AppException("Errore database, consulta il log per ulteriori dettagli")
 
     def get_last_n_records(self, id_mov, n_records):
         try:
             return self.wallet_instance.get_last_n_records(id_mov, n_records)
         except SqlError as db_err:
-            logging.error(str(db_err))
+            self.update_log("errore nella lettura del database - trace: %s", 40, str(db_err))
             raise AppException("Errore database, consulta il log per ulteriori dettagli")
 
     # getters from settings file
