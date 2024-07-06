@@ -306,3 +306,7 @@ class ShowMovementsScreen(Screen):
             self.update_rows()
             self.records_to_drop.clear()
             self.ids.remove_record_btn.hide_widget()
+
+
+if __name__ == "__main__":
+    pass

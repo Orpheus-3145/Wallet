@@ -42,3 +42,6 @@ class InternalError(Exception):
     def __str__(self):
         return self.error_text
 
+
+if __name__ == "__main__":
+    pass

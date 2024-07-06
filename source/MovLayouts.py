@@ -172,3 +172,6 @@ class LayoutSpesaViaggio(LayoutInfo):
         self.ids.input_viaggio.text = ""
         self.ids.input_descrizione.text = ""
 
+
+if __name__ == "__main__":
+    pass

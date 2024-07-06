@@ -142,3 +142,7 @@ class TableDynamicInputLayout(DynamicLayout, InputLayout):
                     self.active_widgets.append(row)
         if self.f_to_launch:
             self.f_to_launch(btn_selected.get_alt_id())
+
+
+if __name__ == "__main__":
+    pass

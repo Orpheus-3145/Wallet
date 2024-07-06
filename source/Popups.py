@@ -53,3 +53,6 @@ class DoubleChoicePopup(ModalView):
             self.second_func_to_exec()
         self.dismiss()
 
+
+if __name__ == "__main__":
+    pass

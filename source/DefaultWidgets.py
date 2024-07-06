@@ -77,3 +77,7 @@ class DefaultTextInput(TextInput, Writable):
 
 class DefaultScrollView(ScrollView):
     pass
+
+
+if __name__ == "__main__":
+    pass
