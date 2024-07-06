@@ -1,6 +1,6 @@
 import logging
 import os
-from datetime import date, datetime
+from datetime import date
 from win32api import GetSystemMetrics
 import win32com.client as win32         # per aprire applicazioni win
 import pywintypes                       # per gestire alcune eccezioni legate al modulo di cui sopra
@@ -10,10 +10,15 @@ import Wallet
 from AppExceptions import *
 
 from kivy.config import Config
-
 DEF_LOG_LVL = 20
-LOG_PATH = Tools.get_abs_path("..\\logs")
-CONFIG_PATH = Tools.get_abs_path("..\\settings\\config_wallet.ini")
+
+if os.environ.get("WalletAppPath") == os.getcwd():
+    os.chdir("_internal")
+else:
+    os.chdir("..")
+
+LOG_PATH = Tools.get_abs_path("logs")
+CONFIG_PATH = Tools.get_abs_path("settings\\config_wallet.ini")
 
 Config.read(CONFIG_PATH)
 
@@ -67,9 +72,9 @@ class WalletApp(App):
 
     def read_config(self, config):
         try:
+            self.config_info["dsn"] = config["database"]["dsn_name"].strip("'")
             self.config_info["kv_files"] = [Tools.get_abs_path(kv_file) for kv_file in config["kivy_files"].values()]
             self.config_info["bi_file_path"] = Tools.get_abs_path(config["bi"]["bi_file_path"])
-            self.config_info["dsn"] = config["database"]["dsn_name"].strip("'")
             self.config_info["backup_path"] = Tools.get_abs_path(config["database"]["backup_path"])
             self.config_info["bi_logo_path"] = Tools.get_abs_path(config["graphics"]["bi_logo_path"])
             self.config_info["background_img_path"] = Tools.get_abs_path(config["graphics"]["background_img_path"])
