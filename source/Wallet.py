@@ -10,10 +10,10 @@ class Wallet:
     def __init__(self, dsn):
         """Creo la connessione al database tramite il dsn"""
         try:
-            self.connection = pyodbc.connect(dsn)
+            self.connection = pyodbc.connect(dsn)       # autocommit = False default
             self.cursor = self.connection.cursor()
         except pyodbc.Error as error:
-            raise SqlError(str(error))
+            raise SqlError(error.args[1])
         else:
             self.db_name = "Wallet"
             self.movements = self.get_info_db("movimenti")
@@ -27,12 +27,12 @@ class Wallet:
         if id_mov not in self.movements:
             raise InternalError("ID {} movimento sconosciuto".format(id_mov))
         sp_name = ""
-        keys_to_check = ["importo", "id_tipo_pag"]
-        keys_date_to_check = ["str_data_mov"]
+        keys_to_check = ["importo", "id_conto"]
+        keys_date_to_check = ["data_mov"]
         keys_float_to_check = ["importo"]
-        keys_id_to_check = ["id_tipo_pag"]
-        keys_varchar = ["str_data_mov", "note"]
-        if self.movements[id_mov] == "Spesa Generica":
+        keys_id_to_check = ["id_conto"]
+        keys_varchar = ["data_mov", "note"]
+        if self.movements[id_mov] == "Spesa Varia":
             keys_to_check.extend(["id_tipo_s_varia", "descrizione"])
             keys_id_to_check.append("id_tipo_s_varia")
             keys_varchar.append("descrizione")
@@ -79,7 +79,7 @@ class Wallet:
         for date_key in keys_date_to_check:
             if date_key in movement:
                 try:
-                    datetime.strptime(movement[date_key], "%d/%m/%Y")
+                    datetime.strptime(movement[date_key], "%Y-%m-%d")
                 except (KeyError, ValueError):
                     raise WrongValueInsert("Data non valida")
         for numeric_key in keys_float_to_check:
@@ -101,17 +101,18 @@ class Wallet:
                                            sp_name=sp_name,
                                            sp_args=sp_args,
                                            keys_varchar=keys_varchar)
-        self.exec_query_sql(sql_query)
-        if do_commit is True:
-            self.cursor.commit()
+        self.exec_query_sql(sql_query, do_commit)
 
-    def exec_query_sql(self, sql_query):
+    def exec_query_sql(self, sql_query, do_commit=False):
+        logging.debug("esecuzione query SQL: '%s'", sql_query)
         try:
-            logging.debug("esecuzione query SQL: '%s'", sql_query)
             self.cursor.execute(sql_query)
         except pyodbc.Error as err:
             self.cursor.rollback()
-            raise SqlError(str(err))
+            raise SqlError(err.args[1])
+        else:
+            if do_commit is True:
+                self.cursor.commit()
 
     def close_wallet(self):
         """concludo il log"""
@@ -121,13 +122,16 @@ class Wallet:
     def backup_database(self, backup_path):
         sp_args = {"bk_path": backup_path, "db_to_backup": self.db_name}
         keys_varchar = sp_args.keys()
-        self.run_sp(sp_name="BK_DATABASE", sp_args=sp_args, keys_varchar=keys_varchar)
+        try:        # running a sp that creates the backup always fails the first time even though is outside a transaction and autocommit is False
+            self.run_sp(sp_name="BK_DATABASE", sp_args=sp_args, keys_varchar=keys_varchar, do_commit=False)
+        except SqlError:    # the second time the backup is created (?)
+            self.run_sp(sp_name="BK_DATABASE", sp_args=sp_args, keys_varchar=keys_varchar, do_commit=False)
 
     # READ DATABASE
     def get_info_db(self, info_type):
         """Restituisce un dizionario sui tipi di pagamento nel formato {id_pagamento: nome_pagamento}"""
         _types = {"movimenti": "MAP_MOVIMENTI",
-                  "pagamenti": "MAP_PAGAMENTI",
+                  "conti": "MAP_CONTI",
                   "spese_varie": "MAP_SPESE_VARIE",
                   "entrate": "MAP_ENTRATE"}
         if info_type not in _types:
@@ -206,7 +210,7 @@ class Wallet:
             - update_dict -> dizionario in cui chaive (<-campo) = valore nel costrutto SET di UPDATE
             - insert_dict -> dizionario contenete il campo (chiave) e il valore da inserire in esso nel costrutto INSERT INTO
             - join -> tipo di join da eseguire -> 'I' inner, 'L' left, 'R' right, 'C' cross
-            - join_table -> tabella da joinare, NB per ora non sono previsti join multipli
+            - join_table -> tabella da joinare
             - join_fields -> dizionario di campi da uguagliare per il join
             - keys_varchar -> lista di valori varchar da inserire in select, where, insert o update, restituisce il valore nello statement SQL racchiuso da singoli apici
             - order_by_dict -> coppie CAMPO: DESC/ASC

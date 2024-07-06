@@ -1,5 +1,6 @@
 from DefaultLayouts import *
 from kivy.factory import Factory
+from datetime import datetime
 
 
 class LayoutInfo(DefaultLayout, BKGrowLayout):
@@ -17,12 +18,16 @@ class LayoutInfo(DefaultLayout, BKGrowLayout):
 
 class LayoutDate(LayoutInfo):
     def get_data(self):
-        data = {}
-        if self.ids.input_day.text.strip() or self.ids.input_month.text.strip() or self.ids.input_year.text.strip():
-            data["str_data_mov"] = "{}/{}/{}".format(self.ids.input_day.text.strip(),
-                                                     self.ids.input_month.text.strip(),
-                                                     self.ids.input_year.text.strip())
-        return data
+        year = self.ids.input_year.text.strip()
+        month = self.ids.input_month.text.strip()
+        day = self.ids.input_day.text.strip()
+        if not year:
+            year = datetime.now().year
+        if not month:
+            month = datetime.now().month
+        if not day:
+            day = datetime.now().day
+        return {"data_mov": "{year}-{month:>02}-{day:>02}".format(year=year, month=month, day=day)}
 
     def refresh_data(self):
         self.ids.input_day.text = ""
@@ -39,7 +44,7 @@ class LayoutMainMov(LayoutInfo):
         if self.ids.input_importo.text.strip():
             data["importo"] = self.ids.input_importo.text.strip()
         if self.ids.input_payments.id_active_widgets():
-            data["id_tipo_pag"] = str(self.ids.input_payments.id_active_widgets())
+            data["id_conto"] = str(self.ids.input_payments.id_active_widgets())
         if self.ids.input_note.text.strip():
             data["note"] = self.ids.input_note.text.strip()
         return data
@@ -55,7 +60,7 @@ class LayoutMainMov(LayoutInfo):
             self.ids.input_note.text = ""
 
 
-class LayoutSpesaGenerica(LayoutInfo):
+class LayoutSpesaVaria(LayoutInfo):
     """Layout di inserimento delle informazioni del movimento di tipo spesa generica; _type_spec_movements_dict è un
     dizionario che contiene tutti i possibili tipi di tipi specifici di spesa selezionabili, nella forma
     id_spesa: nome_spesa, popolato in self.refresh_dynamic_objs()"""

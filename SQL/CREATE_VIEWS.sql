@@ -1,4 +1,4 @@
--- creo vista per spese variabili
+-- creo vista per spese varie
 create view V_SPESE_VARIE AS
 select format(mv.DATA_MOV, 'dd/MM/yyyy')	as DATA,			
 	round(IMPORTO, 2)						as IMPORTO,
@@ -10,7 +10,7 @@ select format(mv.DATA_MOV, 'dd/MM/yyyy')	as DATA,
 FROM MOVIMENTI mv
 inner join SPESE_VARIE sv on		
 	sv.ID_MOV = mv.id				
-inner join MAP_PAGAMENTI mp on
+inner join MAP_CONTI mp on
 	mv.ID_PAG = mp.id
 inner join MAP_SPESE_VARIE msv on
 	msv.id = sv.ID_TIPO_SPESA
@@ -26,7 +26,7 @@ select format(mv.DATA_MOV, 'dd/MM/yyyy')		as DATA,
 FROM MOVIMENTI mv
 inner join SPESE_FISSE sf on		
 	sf.ID_MOV = mv.id				
-inner join MAP_PAGAMENTI mp on
+inner join MAP_CONTI mp on
 	mv.ID_PAG = mp.id
 
 -- creo vista spese lavoro
@@ -35,13 +35,13 @@ select format(mv.DATA_MOV, 'dd/MM/yyyy')					as DATA,
 	round(IMPORTO, 2)										as IMPORTO,		
 	sl.DESCRIZIONE											as DESCRIZIONE,		
 	mp.DESCRIZIONE											as 'TIPO PAGAMENTO',
-	case when sl.RIMBORSATO = 0 then 'Sì' else 'No' end		as RIMBORSATO,
+	case when sl.RIMBORSATO = 0 then 'Sï¿½' else 'No' end		as RIMBORSATO,
 	isnull(mv.NOTE, '')										as NOTE,
 	mv.ID													as ID
 FROM MOVIMENTI mv
 inner join SPESE_LAVORO sl on		
 	sl.ID_MOV = mv.id				
-inner join MAP_PAGAMENTI mp on
+inner join MAP_CONTI mp on
 	mv.ID_PAG = mp.id
 
 -- creo vista entrate
@@ -56,7 +56,7 @@ select format(mv.DATA_MOV, 'dd/MM/yyyy')	as DATA,
 FROM MOVIMENTI mv
 inner join ENTRATE ent on		
 	ent.ID_MOV = mv.id				
-inner join MAP_PAGAMENTI mp on
+inner join MAP_CONTI mp on
 	mv.ID_PAG = mp.id
 
 -- creo vista stipendi
@@ -71,7 +71,7 @@ select format(mv.DATA_MOV, 'dd/MM/yyyy')		as DATA,
 FROM MOVIMENTI mv
 inner join STIPENDI stp on		
 	stp.ID_MOV = mv.id				
-inner join MAP_PAGAMENTI mp on
+inner join MAP_CONTI mp on
 	mv.ID_PAG = mp.id
 
 	

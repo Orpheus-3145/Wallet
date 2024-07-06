@@ -18,8 +18,8 @@ CONFIG_PATH = Tools.get_abs_path("..\\settings\\config_wallet.ini")
 Config.read(CONFIG_PATH)
 
 from kivy.lang import Builder
-from Screens import *
 from kivy.core.window import Window
+from Screens import *
 from Popups import *
 
 
@@ -187,9 +187,12 @@ class WalletApp(App):
         try:
             self.update_log("inserimento nuovo movimento tipo %s", 10, id_mov)
             self.wallet_instance.insert_movement(id_mov=id_mov, data_info=data_movement)
-        except (InternalError, SqlError) as int_err:
-            self.update_log("errore inserimento - %s", 40, str(int_err))
-            raise AppException("Movimento non inserito, consulta il log per ulteriori dettagli")
+        except (InternalError, WrongValueInsert, SqlError) as error:
+            if isinstance(error, InternalError) is True:
+                self.update_log("errore inserimento - %s", 40, str(error))
+                raise AppException("Movimento non inserito, consulta il log per ulteriori dettagli")
+            else:       # an info is missing or wrong
+                raise AppException(str(error))
         else:
             self.update_log("inserimento nuovo movimento tipo %s riuscito", 20, id_mov)
 
@@ -199,7 +202,7 @@ class WalletApp(App):
             try:
                 self.wallet_instance.drop_record(record_to_drop)
             except SqlError as error:
-                self.update_log("rimozione movimento id: %s fallita - trace: %s", 40, str(error))
+                self.update_log("rimozione movimento id: %s fallita - trace: %s", 40, record_to_drop, str(error))
                 count_errs = count_errs + 1
             else:
                 self.update_log("movimento id: %s rimosso", 20, record_to_drop)
@@ -224,7 +227,7 @@ class WalletApp(App):
         backup_name = "Wallet_{}.bak".format(datetime.now().strftime("%d-%m-%Y"))
         if not os.path.isabs(backup_path):
             backup_path = os.path.normpath(os.path.join(os.getcwd(), backup_path))
-        for i in range(100):
+        for i in range(1, 100):
             if not os.path.exists(os.path.join(backup_path, backup_name)):
                 break
             backup_name = "Wallet_{}_{}.bak".format(datetime.now().strftime("%d-%m-%Y"), i)
@@ -264,9 +267,9 @@ class WalletApp(App):
                     break
         return movements
 
-    def get_type_payments(self):
+    def get_type_accounts(self):
         try:
-            return self.wallet_instance.get_info_db("pagamenti")
+            return self.wallet_instance.get_info_db("conti")
         except SqlError as db_err:
             self.update_log("errore nella lettura del database - trace: %s", 40, str(db_err))
             raise AppException("Errore database, consulta il log per ulteriori dettagli")

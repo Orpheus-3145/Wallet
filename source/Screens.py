@@ -168,7 +168,7 @@ class PayOffScreen(Screen):
         self.ids.deb_cred_tab.clear_widgets()           # svuoto la tabella
         self.ids.appearing_box.hide_widget()           # faccio sparire il box di eliminazione/saldo
 
-    def update_rows(self):      # NB add exception and popup handling
+    def update_rows(self):
         try:
             cols, rows = App.get_running_app().get_open_deb_creds()
         except AppException as err:
