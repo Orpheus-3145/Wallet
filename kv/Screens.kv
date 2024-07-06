@@ -29,12 +29,11 @@
             pos_hint: {"x": 0.25, "y": 0.2}
 
             DefaultLabel:
-                id: input_user
                 text: "USERNAME"
                 size_hint_x: 0.37
 
             DefaultTextInput:
-                id: user_input
+                id: input_user
                 font_size_scale: 0.8
                 size_hint_x: 0.63
                 valign: "middle"
@@ -42,12 +41,11 @@
                 focus: True
 
             DefaultLabel:
-                id: input_pwd
                 text: "PASSWORD"
                 size_hint_x: 0.37
 
             DefaultTextInput:
-                id: pwd_input
+                id: input_pwd
                 font_size_scale: 0.8
                 size_hint_x: 0.63
                 valign: "middle"
@@ -55,7 +53,7 @@
                 multiline: False
                 password: True
                 on_text_validate:
-                    root.login(True)
+                    root.login()
 
 <MainScreen>:
     FloatLayout:
