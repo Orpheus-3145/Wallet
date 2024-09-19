@@ -1,0 +1,36 @@
+NEW FEATURE:
+    | | aggiungere in ShowMovementsScreen gli ultimi n generici movimenti inseriti
+	| | porting su linux
+	| | migrazione da SQL serv. a PostgreSQL
+	| | aggiungere logo app, voce in file .ini: window_icon
+
+MODIFICHE:
+	| | cambio da venv a pipenv
+	| | "movimento \n inserito", inoltre ridurre l'altezza del widget
+	| | cambio conti bancomat -> unicredit
+	| | elencare in ordine alfabetico i campi negli inserimenti
+
+BUG:
+	| | soppressione scrittura file di log di kivy
+	| | inserimento di numero con virgola per separatore dei decimali fallisce e non scrive neanche il log
+
+CHECK:
+
+FORSE:
+
+SQL:
+	| | inserire tutti i vincoli di foreign key alle tabelle
+    | | mapping errori delle stored procs in una table con le relative descrizioni
+	| | script SQL per creare il db e riempire tabelle di mapping
+
+BI:
+	|V| apertura foglio qlik su sheet principale
+	|V| terminare bi
+	|V| aggiornare bi
+	
+SETUP:
+
+
+	-- rimuovere movimenti di test
+	-- check tutti gli NB
+	-- aggiornare counter versione (anche nel file .ini)
