@@ -81,20 +81,21 @@ class Wallet:
                 try:
                     datetime.strptime(movement[date_key], "%Y-%m-%d")
                 except (KeyError, ValueError):
-                    raise WrongValueInsert("Data non valida")
+                    raise WrongValueInsert(f"Data non valida: {movement[date_key]}")
         for numeric_key in keys_float_to_check:
             if numeric_key in movement:
                 try:
-                    if Tools.convert_to_float(movement[numeric_key]) <= 0:
+                    movement[numeric_key] = Tools.convert_to_float(movement[numeric_key])
+                    if movement[numeric_key] <= 0:
                         raise WrongValueInsert("Importo nullo o negativo")
                 except (TypeError, ValueError):
-                    raise WrongValueInsert("Importo non valido")
+                    raise WrongValueInsert(f"Importo non valido: {movement[numeric_key]}")
         for id_key in keys_id_to_check:
             if id_key in movement:
                 try:
                     int(movement[id_key])
                 except ValueError:
-                    raise WrongValueInsert("ID non valido" + movement[id_key])
+                    raise WrongValueInsert(f"ID non valido: {movement[id_key]}")
 
     def run_sp(self, sp_name, sp_args=None, keys_varchar=None, do_commit=True):
         sql_query = self.format_sql_string(suide='E',
