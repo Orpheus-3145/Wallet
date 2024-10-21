@@ -1,0 +1,56 @@
+ID,ID_MOV,VIAGGIO,DESCRIZIONE
+2,1686,Amsterdam,Solo andata 2/10
+3,1748,Amsterdam,MXP
+4,1977,ASDASDASD,ASD
+5,1978,123,ASD
+6,1979,Amsterdam - Milano,A (19/12) +R (10/1)
+7,2082,Amsterdam - Milan,Treno Central Station - Schiphol
+8,2087,Amsterdam-Milano,MXP
+9,2146,Milano-Amsterdam,MXP
+10,2147,Milano-Amsterdam,Treno e metro da Schiphol
+11,2325,Milano,Volo ritorno Amsterdam-Milano 26/7
+12,2361,Viaggio Thailandia,Voli 26-8 8-9 2023
+13,2422,Amsterdam-Milano,Cambio volo da 26/7 a 10/8
+14,2440,Thailandia 2023,Volo interno Chiang Mai - Koh Samui
+15,2451,Thailandia 2023,Altri voli interni
+16,2452,Thailandia 2023,Pernottamenti, Chang Mai, bangkok, Koh Panghan e Koh Samui
+17,2474,Milano - Amsterdam,Volo di rientro in data 20/9
+18,2490,Amsterdam - Milano,Treno per Schiphol
+19,2491,Amsterdam - Milano,Metro per stazione RAI
+20,2500,Amsterdam - Milano,MXP
+23,2520,Thailandia 2023,MXP andata
+24,2521,Thailandia,Pasto da Burger King (scalo a Doha)
+25,2522,Thailandia 2023,Biglietto per palazzo reale di Bangkok
+26,2523,Thailandia 2023,Mantenimento da 26/8 a 8/9
+27,2534,Milano - Amsterdam,MXP
+28,2610,Amsterdam - Milano,A + R (15/12 - 5/1)
+29,2649,Amsterdam - Milano,MXP
+30,2699,Milano - Amsterdam,Bagaglio grande + da stiva
+31,2700,Milano - Amsterdam,MXP
+32,2723,Amsterdam-Milano,Bagaglio a mano grande + stiva
+33,2746,Amsterdam - Milano,Volo A + R
+34,2784,Amsterdam ' Milano (3/24),MXP A+R
+35,2935,TEST,TEST
+36,2936,TES,TTT
+49,3232,Amsterdam-Milano,Pranzo a Schiphol AH
+50,3234,Amsterdam-Milano,Cena Mc Donald's Linate
+51,3236,Amsterdam-Milano,Metro+treno per Schiphol
+52,3237,Amsterdam-Milano,Biglietto ATM
+53,3276,Amsterdam,Volo di ritorno Mi - Am
+54,3277,Amsterdam,Spostamento volo rientro Am dal 24/8 al 26/8
+55,3286,Mi - Am,Biglietto ATM per Linate
+56,3287,Mi - Am,Treno + metro da Schiphol
+57,3288,Mi - Am,Doritos Linate
+58,3289,Mi - AM,Cena BK Schiphol
+59,3307,Am - Enidhoven,Viaggio in treno A + R
+60,3310,AM - Eindhoven,Metro di ritorno
+62,3317,Am - Eindhoven,MEtro di andata
+63,3318,Mi - Am (24/9 - 2/10),Volo A+R
+64,3319,Mi - Am (30/10 - 4/11),Volo A+R
+65,3323,Milano - Trento,Treno andata
+66,3328,Mi - MdC,Navetta Trento - MdC
+72,3351,Mi - Am,Metro e treno (Am)
+73,3352,Mi - Am,Metro (Mi) blu e rossa
+74,3353,Mi - Trento,Metro
+75,3354,Mi - Am,Metro (Mi) rossa e blu
+76,3355,Mi - Am,Treno e metro (Am)

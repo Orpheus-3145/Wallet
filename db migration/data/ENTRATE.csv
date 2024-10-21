@@ -1,0 +1,137 @@
+ID,ID_MOV,ID_TIPO_ENTRATA,DESCRIZIONE
+1,3,0,
+2,6,0,
+3,7,0,
+4,11,0,
+5,17,0,
+6,50,0,
+7,70,0,
+8,79,0,
+9,103,0,
+10,112,0,
+11,120,0,
+12,127,0,
+13,130,0,
+14,135,0,
+15,143,0,
+16,146,0,Rimborso acquisto luci Helios Touch (regalo)
+17,149,0,
+18,232,0,
+19,234,0,Regalo Natale
+20,258,0,Trovati per terra
+21,499,0,Differenza appartamento (che costa meno) a Barcellona
+22,506,0,Voleva pagarmi il casello a tutti i costi
+28,609,0,Rimborso caselli Telepass
+30,706,0,Eccedenza da soldi in restituzione
+31,719,0,Divisione cavo USB C
+32,732,0,Pedaggi telepass
+33,744,0,Restitutizione spese di spedizione cornici
+34,745,0,Giornata di prova
+35,747,0,Cresta
+36,772,0,Vendita di 'Inganno' (16,46€) + 'Il Sentiero della distruzione' (Bane - 21,77€) - tariffe sugli articoli (4,90€)
+37,773,0,Vendita del libro 'Revan'
+38,799,0,Acquisto trilogie: 'Guerre Mondo Emerso', 'Leggende Mondo Emerso' e Drizzt
+41,878,0,Vendita libri
+42,881,0,Vendita pc portatile Acer
+43,884,0,Rimborso spese ATM
+44,936,0,Restituzione di alcuni soldi dovuti
+45,939,0,Cinquello
+47,1022,0,Fiorellini
+48,1030,0,Fiorellini
+49,1042,0,Vendita 'Alleanza Fatale'
+50,1043,0,Vendita powerlink
+51,1052,0,Vendita 'La guerra degli Elfi'
+52,1067,0,Aiuto posizionamento chiodi e tappeti
+55,1233,0,Mancia
+56,1238,0,Budget VdD
+58,1249,0,Vendita saponetta internet
+60,1286,0,Servizio catering
+61,1352,0,Vendite online
+62,1353,0,Spesucce
+63,1356,0,Vendite online
+65,1385,0,Vendita bretelle
+66,1397,0,Vednita costume Volcom
+68,1437,0,Rimbroso ritardo volo
+69,1495,0,Taxi (?)
+79,1676,0,Mancia
+84,1696,0,asd
+110,1736,3,Spese per 'mangiare bene' ad Amsterdam
+111,1737,2,Vendite articoli miei e Papà
+112,1746,4,Svuoto conto su Hype
+113,1932,1,Da CafeScala (boh)
+114,1991,2,40% vendita Orologio Tissot
+115,1993,2,PC fisso
+116,2102,2,40% vendita trench papà
+117,2141,2,40% vendita cintura F. Colato e giacca Boglioli, 30% vendita scialle Hermes
+118,2188,4,Vendita mini forno
+119,2202,4,Vendita armadio per vestiti
+120,2216,1,serate 3/4/5/7 di Gennaio (CS)
+121,2236,4,Vendita frigorifero
+122,2280,3,Regalo compleanno Papà
+123,2302,3,Papa' regalo aggratis
+124,2303,2,Vendita cintura cocco e scarpe
+125,2326,4,Rimborso elastici persi Ana
+126,2359,4,Rimborso Belastingdienst Aprile
+127,2360,4,Rimborso Belastingdienst Maggio
+128,2372,4,Huurtoeslag mese di giugno
+130,2421,4,Huurtoeslaag Luglio
+131,2472,4,Belastingdienst Agosto
+132,2512,4,Huurtoeslag Settembre
+133,2513,4,Belastingdienst ass. sanitaria da marzo ad Agosto
+134,2532,4,Huurtoeslag Ottobre
+135,2533,4,HH Ottobre
+136,2575,4,Huurtoeslag
+137,2576,4,Zorgtoeslag
+138,2633,4,Zorgtoeslag
+139,2634,4,Huurtoeslag
+140,2638,4,Aggiuntina bonifico Papá dicembre
+141,2658,2,Vendita monitor Samsung
+142,2667,4,Huurtoeslag
+143,2668,4,Zorgtoeslag
+144,2689,3,Regalo Natale Papà
+145,2726,2,Vendite papà
+146,2728,4,Zorgtoeslag
+147,2729,4,Huurtoeslag
+148,2772,4,Huurtoeslagen
+149,2773,4,Zorgtoeslag
+150,2796,4,Vendita bicicletta
+151,2814,4,Huurtoeslag
+152,2815,4,Zorgotoeslag
+153,2851,4,Huurtoeslag
+154,2852,4,Zorgtoeslag
+155,2886,4,Aggiunta per cene fuori da papà
+156,2916,4,Zorgtoeslag
+157,2917,4,Huurtoeslag
+159,2933,1,TEST
+160,2942,3,TEST
+161,2943,4,TEST
+162,2944,4,TEST
+163,2945,4,TEST
+164,2946,1,TEST
+165,2947,1,TEST
+166,2948,1,TEST
+167,2949,1,TEST
+168,2950,3,TEST
+169,2951,2,TEST
+170,2952,0,Credito diventato entrata, TEST_SRC: TEST_DSC
+171,2954,0,Credito diventato entrata, TEST_D_S: TEST_D_D
+172,2956,0,Credito diventato entrata, TEST_D: TEST_D
+173,2958,0,Debito diventato entrata, TEST: TEST_DEB
+174,2960,0,Debito diventato entrata, TEST: TEST_D
+175,2965,3,TEST
+176,2966,2,TEST
+177,2967,1,TEST
+196,3214,4,Huurtoeslag
+197,3215,4,Zorgtoeslag
+198,3251,4,Huurtoeslag
+199,3252,4,Zorgtoeslag
+200,3255,3,Rimborso volo Am-Mi + bonus
+201,3272,4,Zorgtoeslaag
+202,3273,4,Huurtoeslaag
+203,3279,4,Rimborso spese riscaldamento anno 2023
+204,3349,3,Rimborso treno Mi - Trento
+205,3358,4,Huurtoeslag
+206,3359,4,Zorgtoeslag
+207,3379,3,Rimborso volo Mi-Am di fine settembre
+208,3380,4,Huurtoelsag
+209,3381,4,Zorgtoeslag

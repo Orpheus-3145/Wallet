@@ -1,0 +1,105 @@
+ID,ID_MOV,DESCRIZIONE,MESE
+1,5,Ricarica telefonica,11
+2,30,Promo Iliad,11
+3,102,Pedaggi Telepass,11
+4,113,Abbonamento Wikiloc (annuale),11
+5,126,Ricarica Tim,11
+6,132,Ricarica Tim,11
+7,136,Ricarica Tim,11
+8,141,Ricarica Tim,11
+9,142,Ricarica Tim,11
+10,144,Abbonamento Disney+ (Annuale),11
+11,154,Ricarica Tim,2
+12,158,Addebito Satispay,3
+13,170,Ricarica Iliad,12
+14,207,Ricarica Tim,2
+15,237,Addebito telepass Dicembre,12
+16,241,Addebito Iliad,1
+17,265,Ricarica Iliad,2
+18,282,Ricarica Iliad,3
+19,299,Abbonamento Disney+ (annuale),3
+20,300,Telepass (trimestrale),3
+21,308,Ricarica Iliad,4
+22,334,Ricarica iliad,5
+23,458,Ricarica Iliad,7
+55,1821,Abbonamento Iliad,10
+29,603,Ricarica Iliad (una è per errore),8
+30,746,Rinnovo Amazon Prime (annuale),9
+31,762,Ricarica Iliad,9
+37,943,Ricarica Iliad,11
+34,836,Addebito Telepass (7-8-9/21),10
+38,998,Rinnovo Iliad,12
+39,1066,Rinnovo Iliad,1
+40,1153,Ricarica Iliad,2
+41,1177,Ricarica Iliad,3
+42,1190,Abbonamento annuale Disney+,3
+44,1248,Ricarica Iliad,4
+45,1295,Ricarica Iliad,5
+56,1852,Addebito trimestrale Telepass (L-A-S) (ultimo),10
+54,1664,Abbonamento Amazom Prime,9
+48,1424,Ricarica Iliad,6
+49,1462,Addebito Telepass,7
+50,1522,Ricarica Iliad (numero 333 201 1181,8
+57,1946,Ricarica Iliad Novembre,11
+58,2163,Ricarica Iliad,1
+59,2171,Ricarica Iliad,1
+60,2240,Ricarica Iliad Febbraio,2
+61,2263,Ricarica Iliad,3
+62,2321,Ricarica Iliad,4
+63,2367,Ricarica iliad,5
+64,2417,Ricarica Iliad (cazzo),6
+65,2428,Addeibot mese Simyo,6
+66,2476,Ricarica Simyo,7
+67,2493,Ricarica Iliad Agosto,8
+68,2524,Ricarica Iliad,9
+69,2527,Ricarica Simyo Luglio,9
+70,2560,Ricarica Simyo,9
+71,2589,Simyo Novembre 2023,10
+72,2120,Affitto AH mese Gennaio,1
+73,2208,Affitto mese di febbraio,1
+74,2590,Affitto AM marzo,2
+75,2282,Affitto mese di Aprile AmstelHome,3
+76,2342,Affitto mese di Maggio,4
+77,2374,Affitto giugno AmstelHome,5
+78,2439,Affitto Luglio,6
+79,2485,Affitto Agosto AmstelHome,7
+80,2514,Affitto Settembre AH,8
+81,2537,Affitto Ottobre,9
+82,2581,Affitto Novembre 2023,10
+83,2540,Assicurazione Sanitaria Ottobre,10
+84,2525,Assicurazione sanitaria Settembre 2023,9
+85,2608,Assicurazione sanitaria Novembre,11
+86,2618,Ricarica Symio,11
+87,2632,Affitto AH Dicembre,11
+88,2654,HH Dicembre,12
+89,2671,Sim Simyo,12
+90,2688,Affitto Gennaio AH,12
+91,2712,Ricarica SImyo Febbraio,1
+92,2719,HH Gennaio,1
+93,2730,Affitto Febbraio AH,1
+102,2849,Abbonamento Simyo Maggio,4
+95,2739,HH Febbraio,2
+96,2768,Abbonamento Simyo,2
+97,2774,Affitto Marzo,2
+98,2802,HH Marzo,3
+99,2817,Affito Aprile,3
+100,2819,HH Aprile,4
+101,2822,Addebito Simyo,3
+103,2853,Affitto Maggio,4
+104,2867,HH Maggio,5
+105,2870,Affitto Maggio,5
+106,2905,Simyo,5
+107,2915,Affitto Giugno,5
+108,2925,HH Giugno,6
+119,3210,Ricarica Simyo,7
+120,3217,Affitto Luglio AH,7
+121,3221,Ass. sanitaria Luglio,8
+122,3250,Affitto AH Agosto,8
+123,3256,Ricarica Symio,8
+124,3258,HH Agosto,9
+125,3285,Ricarica Simyo Settembre,9
+126,3297,HH Settembre,10
+128,3347,HH Ottobre,11
+129,3348,Affitto AH Ottobre,11
+130,3357,Affitto AH Settembre,9
+131,3378,Abbonamento Simyo Novembre,11

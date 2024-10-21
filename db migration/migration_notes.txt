@@ -1,0 +1,20 @@
+note migrating from MSSQL to postgreSQL:
+	1. check .md file
+	2. no GO instructions, the normal ; is used
+	3. no scheme in table names
+	4. no such thing:  'set NOCOUNT on;'
+	5. 
+	
+	
+changes added to tables (tSQL):
+	1. better primary/foreign key declarations
+	2. added DEFAULTS:
+		- QLIK_USERS(RUOLO, NOTE)
+		- WALLET_USERS(NOTE)
+		- MOVIMENTI(DATA_INS, DATA_MOV, DARE_AVERE, NOTE) (aggiunto check importo > 0)
+		- DEBITI_CREDITI(DEB_CRED, SALDATO, ID_MOV_SALDO, DATA_SALDO)
+		- SPESE_FISSE(MESE)
+		- STIPENDI(TOTALE, TRATTENUTE, RIMBORSO_SPESE)  (aggiunto check NETTO, TOTALE, TRATTENUTE, RIMBORSO_SPESE > 0)
+		
+	3. controllare se con l'aggiunta di vincoli di chiavi esterne alcuni controlli nelle sp possono essere rimossi
+	4. vedere se, alla fine di tutto, MAP_TABELLE e' aggiornata
