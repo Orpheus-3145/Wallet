@@ -3,12 +3,13 @@ NEW FEATURE:
 	| | porting su linux
 	| | migrazione da SQL serv. a PostgreSQL
 	| | aggiungere logo app, voce in file .ini: window_icon
+	| | traduzione italiano-inglese (codice sorgente e database)
 
 MODIFICHE:
 	| | cambio da venv a pipenv
 	| | "movimento \n inserito", inoltre ridurre l'altezza del widget
-	| | cambio conti bancomat -> unicredit
 	| | elencare in ordine alfabetico i campi negli inserimenti
+	| | cambio logica stipendio, input importo=netto, eventualmente vengono forniti anche TRATTENUTE e RIMBORSO_SPESE, totale non viene mai settato in input e vale in automatico TOTALE = NETTO + TRATTENUTE + R. SPESE
 
 BUG:
 	| | soppressione scrittura file di log di kivy
@@ -19,9 +20,15 @@ CHECK:
 FORSE:
 
 SQL:
-	| | inserire tutti i vincoli di foreign key alle tabelle
+	|V| inserire tutti i vincoli di foreign key alle tabelle
     | | mapping errori delle stored procs in una table con le relative descrizioni
 	| | script SQL per creare il db e riempire tabelle di mapping
+	| | automatismo insierimento spese ed entrate periodiche
+	| | cambio 'Weed' into 'Drugs' so MAP_SPESE_VARIE
+	|V| cambio conti bancomat -> unicredit
+	| | porting MSSQL -> postgreSQL
+	| | aggiungere tabella di mapping per stored procedure
+	| | unire WALLET_USERS e QLIK_USERS, hashing della password di qlik
 
 BI:
 	|V| apertura foglio qlik su sheet principale
