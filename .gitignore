@@ -1,6 +1,8 @@
 # of the project
 logs/
 backup/
+backup_old/
+versions/
 
 # Byte-compiled files
 *.pyc
