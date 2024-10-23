@@ -19,3 +19,4 @@ changes added to tables (tSQL):
 	3. controllare se con l'aggiunta di vincoli di chiavi esterne alcuni controlli nelle sp possono essere rimossi
 	4. vedere se, alla fine di tutto, MAP_TABELLE e' aggiornata
 	5. check file stipendi_con_note.csv
+	6. file .py correzione campo IMPORTO di MOVIMENTTI.csv

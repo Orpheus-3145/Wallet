@@ -39,7 +39,7 @@ ID,ID_MOV,DESCRIZIONE
 582,3385,Spesa Amazing Oriental
 3,1367,Asciugamani
 4,1368,Spesa da Jumbo
-6,1386,Wok, tovagliete, detersivi, supgne, straccio
+6,1386,Wok tovagliete detersivi supgne straccio
 7,1387,Spesa AH
 8,1389,Abbonamento Budget Mobile (tel)
 9,1392,Spesa Jumbo
@@ -165,7 +165,7 @@ ID,ID_MOV,DESCRIZIONE
 142,1916,Cena hamburger ostello
 143,1918,Pranzo AH
 144,1920,Cena kebab
-145,1921,Anticipo affitto 19-20/11, rimangono da pagare 118,80€
+145,1921,Anticipo affitto 19-20/11 rimangono da pagare 118.80â‚¬
 146,1922,Pranzo AH
 147,1923,Cena W2W
 148,1924,Pranzo ostello
@@ -217,10 +217,10 @@ ID,ID_MOV,DESCRIZIONE
 238,2084,Seconda colazione (muffin)
 239,2086,Terza colazione (ciambella)
 246,2148,Viaggio metro
-247,2151,Lenzuola, asciugamano e coperta da HEMA
+247,2151,Lenzuola asciugamano e coperta da HEMA
 248,2153,Spesa AH
 249,2154,Tende
-250,2155,Letto, materassi, frigo, fornetto e appendiabiti
+250,2155,Letto materassi frigo fornetto e appendiabiti
 251,2156,Cena Burger Bar De Pijp
 254,2159,Frigorifero
 255,2160,Poltrona
@@ -230,7 +230,7 @@ ID,ID_MOV,DESCRIZIONE
 259,2166,Acquisto Amazon per casa
 262,2170,Spesa AH
 263,2172,Spesa AH
-266,2185,Fari e elastici per bici, scotch biadesivo
+266,2185,Fari e elastici per bici scotch biadesivo
 267,2186,Spesa AH
 268,2187,Spesa AH
 275,2197,Spesa AH
@@ -245,7 +245,7 @@ ID,ID_MOV,DESCRIZIONE
 289,2228,Lavatrice
 291,2232,Spesa AH
 292,2234,Spesa AH
-293,2238,Acquisti Action: bilancia, blocco bici, oliera, piattino, iotole, sacchetti pattumiera
+293,2238,Acquisti Action: bilancia blocco bici oliera piattino iotole sacchetti pattumiera
 154,1933,Pranzo Kanteen
 155,1936,Cena ostello
 156,1937,Lavatrice
@@ -306,7 +306,7 @@ ID,ID_MOV,DESCRIZIONE
 321,2336,Spesa AH
 322,2339,Spesa AH
 408,2596,Spesa AH
-324,2344,Acquisti Actionç lampadine, bounty
+324,2344,Acquisti Actionï¿½ lampadine bounty
 325,2346,Lavatrice
 326,2347,Spesa AH
 327,2350,Spesa AH
@@ -357,7 +357,7 @@ ID,ID_MOV,DESCRIZIONE
 376,2486,Assicurazione sanitaria periodo 6/3 1/9
 377,2489,Lavatrice
 378,2492,Colazione AH
-379,2495,Spese AH (su più giorni)
+379,2495,Spese AH (su piï¿½ giorni)
 380,2501,Asciugatura
 415,2605,2G2G
 417,2611,Spesa AH
@@ -424,7 +424,7 @@ ID,ID_MOV,DESCRIZIONE
 475,2793,Colazione AH
 476,2798,Colazione AH
 477,2799,Laundry
-478,2801,Spesa metropolitana giorni 4->8, 11-12 Marzo
+478,2801,Spesa metropolitana giorni 4->8 11-12 Marzo
 479,2816,Spesa mezzi Am 12-13/03
 481,2821,Spesa AH
 483,2824,Spesa AH
@@ -494,7 +494,7 @@ ID,ID_MOV,DESCRIZIONE
 173,1964,Pranzo AH + tabacco
 203,2023,Cena ostello
 245,2138,Spedizione due pacchi
-269,2190,Lavatrice (3€ per errore)
+269,2190,Lavatrice (3ï¿½ per errore)
 270,2191,Spesa AH
 222,2054,Cena ostello
 448,2745,Spesa AH

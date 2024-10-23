@@ -20,7 +20,7 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 18,27,7,Drink allo Slim
 19,28,5,Pedaggio pedemontana
 20,29,5,Spesa (?)
-21,31,1,Cena alle Striatelle (Ste, Jack, Chiara)
+21,31,1,Cena alle Striatelle (Ste Jack Chiara)
 22,32,5,Pedaggi telepass
 23,33,5,Imposta Bollo CC
 24,34,5,Drink al Tommasi
@@ -29,7 +29,7 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 27,37,7,Drink allo Slim
 28,38,7,4 birre al Confine
 29,39,1,Hamburger da Burgez
-30,40,5,Cinema Orfeo, Tenet
+30,40,5,Cinema Orfeo Tenet
 31,41,3,Primark
 32,42,7,2 birre da Hop
 33,43,7,Birra da Hora Feliz
@@ -43,13 +43,13 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 41,53,5,Spesa supermercato MdC
 42,54,5,Benzina
 43,55,7,2 drink al bar Azzurro
-44,56,5,Spesa supermercato MdC, grigliata
-45,57,1,Cena allo Zeledria, (pagato per 2 probabilmente)
+44,56,5,Spesa supermercato MdC grigliata
+45,57,1,Cena allo Zeledria (pagato per 2 probabilmente)
 46,58,5,Spesa al Ballardini
 47,60,5,Addebito Satispay
-48,61,1,Cena al Fratè
+48,61,1,Cena al Fratï¿½
 49,62,5,Spesa supermercato MdC
-50,63,5,Parcheggio (Vallesinella), perso
+50,63,5,Parcheggio (Vallesinella) perso
 51,64,5,Parcheggio (Vallesinella)
 52,65,1,Cena Homestube (pagato x2)
 53,66,5,Benzina
@@ -83,7 +83,7 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 81,98,5,Imposta di bollo CC
 82,99,5,Sim Iliad
 83,101,5,Benzina
-84,104,5,Bonifico a papà
+84,104,5,Bonifico a papï¿½
 85,105,5,Prelievo
 86,106,5,Addebito Satispay
 87,107,5,Spesa supermercato MdC
@@ -95,10 +95,10 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 93,116,3,Vestiti di Decathlon
 94,117,7,Drink al Cantun
 95,118,5,Vetro cellulare
-96,119,2,Reggi occhiali, vetro per cellulare, sostegno da macchina per cellulare
+96,119,2,Reggi occhiali vetro per cellulare sostegno da macchina per cellulare
 97,121,3,Primark
 98,122,1,Mc Donald's
-99,123,5,Acquisti Decathlon (materassino, bobmboleta, ... )
+99,123,5,Acquisti Decathlon (materassino bobmboleta ... )
 100,124,5,Cuffie esterne Samsung
 101,125,5,Spesa Carrefour
 102,128,7,Drink allo Slim
@@ -126,7 +126,7 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 125,166,7,Drink all'Azzurro
 126,167,5,Spesa supermercato  MdC
 127,168,2,Vernici per fioriera
-128,169,2,SSD Sandisk, spray aria compressa, fascette + stringhe
+128,169,2,SSD Sandisk spray aria compressa fascette + stringhe
 129,171,5,Spesa supermercato MdC (legna)
 130,172,1,Mc Donald's
 131,173,6,
@@ -141,13 +141,13 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 140,184,4,Tabacco Winston blu
 141,185,2,Macchinetta Nespresso
 142,186,5,Regalo Natale mamma (porta chiavi)
-143,187,2,Regalo Natale papà (casse)
+143,187,2,Regalo Natale papï¿½ (casse)
 144,188,5,Prelievo
 145,189,5,Prelievo
 146,190,1,Cena Giulio Pane e Ojo
 147,192,2,Mouse wireless lavoro
 148,193,2,Cuffie Sony
-149,196,5,Addebiti da Comune di Milano (bollettino, multa?)
+149,196,5,Addebiti da Comune di Milano (bollettino multa?)
 150,197,5,Benzina
 151,206,7,Birra all'Old Fox
 152,208,1,"cena" da Mc Donald's
@@ -171,7 +171,7 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 170,240,5,Pedaggio autostradale Laveno Monbello - Milano
 171,242,7,"spesa" per Capodanno
 172,243,3,Pantaloni e camicia da Primark
-173,244,2,Regalo per Tommi (piastra per Waffles), supporto per cuffie e piano rialzato per pc
+173,244,2,Regalo per Tommi (piastra per Waffles) supporto per cuffie e piano rialzato per pc
 174,245,3,Camicia Spada
 175,247,6,
 176,248,5,Fattura eliosoccorso
@@ -179,7 +179,7 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 178,256,5,Aperitivo Carrefour
 179,257,1,Sushi burrito
 180,259,4,Tabacco + cartine + kit
-181,260,2,Regalo Tommi, smartbox
+181,260,2,Regalo Tommi smartbox
 182,261,7,Birra Darsena
 183,262,7,Birra cingalese
 184,263,5,Spesa per casa di Nico
@@ -187,12 +187,12 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 186,267,1,Spesa MdC centrale
 187,268,5,Termometro
 188,269,4,Tabacco
-189,270,1,Spesa MdC, centrale
+189,270,1,Spesa MdC centrale
 190,271,4,Tabacco + cartine lunghe e corte
 191,272,1,Hamburger malga Patascoss
 192,273,7,Birra Patascoss
 193,274,1,Pizza Pappagallo asporto
-194,275,1,Spesa Mdc, centrale
+194,275,1,Spesa Mdc centrale
 195,276,4,tabacco + c. lunghe + filtri
 196,277,1,Spesa MdC
 197,278,1,Spesa MdC
@@ -211,7 +211,7 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 210,294,2,Stampe classic/pop art
 211,295,2,Cornici per stampe (3)
 212,296,5,Spesa x casa Jack
-213,297,5,Danno auto papà
+213,297,5,Danno auto papï¿½
 214,298,5,Spesa x cena Teo Ravano
 215,301,5,Imposta di bollo
 216,302,7,Birra cingalese
@@ -245,8 +245,8 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 244,338,5,Acconto Bicicletta
 245,339,5,Copia chiavi per rimessa bici
 246,340,4,Lunghe + filtri
-247,341,2,Catena U per bici, ramponi
-248,342,7,Birre più cena, 10 Gradi Nord
+247,341,2,Catena U per bici ramponi
+248,342,7,Birre piï¿½ cena 10 Gradi Nord
 249,343,7,Drink
 250,344,7,birre hops
 251,345,5,Spesa a Comabbio
@@ -259,7 +259,7 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 258,353,3,Riparazione pc + cavo hdmi
 259,354,2,Spese spedizione pentolino
 260,355,5,Spesa Carrefour
-261,356,1,Ravioli al vapore, Paolo Sarpi
+261,356,1,Ravioli al vapore Paolo Sarpi
 262,357,5,Drink Todos a Cuba e bar Fiore
 263,358,1,Pranzo a Pavia
 264,359,1,Kebab
@@ -314,7 +314,7 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 313,433,6,
 314,434,7,Birre al Bootleg
 315,435,1,Cena ristorante Singapore
-316,436,5,Regalo Nicolò
+316,436,5,Regalo Nicolï¿½
 317,437,7,Birra Old Fox
 318,438,5,Benzina
 319,439,4,Filtri + cartine
@@ -338,7 +338,7 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 339,466,1,Pranzo alla Genzianella
 340,467,5,Notte al rifugio XII Apostoli
 341,468,5,Impianti Doss de Sabion
-342,469,5,Impianti Grostè
+342,469,5,Impianti Grostï¿½
 343,471,1,Kebab
 344,472,7,Birre al Confine
 345,473,5,Spesa per notte al rifugio
@@ -347,14 +347,14 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 348,477,2,Saponetta Huawei
 349,479,7,Birra alla Patascoss
 350,480,4,Accendino
-351,481,5,Cornetto e acqua, rifugio Cornisella
+351,481,5,Cornetto e acqua rifugio Cornisella
 352,482,4,Tabacco
 353,483,5,Treno Brescia-Milano
 354,484,7,Negroni all'Azzurro
 355,485,2,Adesivo pc Dell
 356,486,5,Redbull
 357,487,6,
-358,488,2,Regalo Jack, coltello
+358,488,2,Regalo Jack coltello
 359,493,5,Differenza appartamenti di Barcellona
 360,500,7,Birre al Linearetta
 361,501,4,Tabacco + filtri + cartine + p. San patrigano x3
@@ -421,7 +421,7 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 1010,1747,7,Birra al linea retta
 505,834,7,3 birre + pizza in P. Sarpi
 507,838,5,Elemosina portafoglio perso
-508,839,5,Drink al Panika (più uno mezzo rubato)
+508,839,5,Drink al Panika (piï¿½ uno mezzo rubato)
 510,843,5,Regalo Chiara
 702,1156,5,Pedaggio A8
 521,869,2,Masch. nere + cotton fioc + supporto spazzolino
@@ -456,13 +456,13 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 575,948,4,Tabacco
 581,957,2,Nuove cuffie
 584,961,7,Birre al Cia Birretta2
-585,963,5,1° parte tattoo
-586,964,2,Burro di karitè
+585,963,5,1ï¿½ parte tattoo
+586,964,2,Burro di karitï¿½
 588,966,4,Tabacco + cartine
 589,967,5,Regalo Tommi (perso)
 591,969,5,Birra + nachos a Pazzeria
 592,970,4,Pacchetto San Patrignano
-593,980,7,Vin Brulèe in Darsena
+593,980,7,Vin Brulï¿½e in Darsena
 594,981,7,Drink all'Hora Feliz
 596,983,7,Drink allo Slim
 597,985,4,Cartine corte
@@ -477,15 +477,15 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 607,997,5,Tampone
 608,1002,7,Drink al Cantun
 609,1003,1,Kebab
-610,1005,2,Regalo papà (affetta ananas)
+610,1005,2,Regalo papï¿½ (affetta ananas)
 611,1006,4,Cartine corte + lunghe
 612,1007,6,
 613,1009,5,Spedizione Powerlink
 617,1016,7,Birre al cingalese
-618,1017,7,Vin brulé al Ritorto
+618,1017,7,Vin brulï¿½ al Ritorto
 619,1018,4,Tabacco + filtri + clipper
 620,1019,5,Spesa MdC
-621,1020,7,Vin Brulè in Baracca
+621,1020,7,Vin Brulï¿½ in Baracca
 626,1026,5,Cena + alcool per Capodanno
 630,1031,5,Redbull + barretta
 631,1032,1,Hambuerger + mozzarelline da Snoopy
@@ -554,8 +554,8 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 754,1241,3,Pantaloni cargo Primark
 755,1242,4,Cartine
 398,642,7,Drink alla Ca D'oro
-415,709,5,Cabinovia Grostè A + R
-416,710,5,Parcheggio Grostè
+415,709,5,Cabinovia Grostï¿½ A + R
+416,710,5,Parcheggio Grostï¿½
 404,665,4,Tabacco
 448,760,5,Volo Amsterdam (A + R)
 536,892,6,
@@ -612,10 +612,10 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 993,1688,7,Drink all'Azzurro
 994,1689,4,Tabacco
 995,1690,2,Jack to USB
-803,1318,3,Mutande, pinzette e salviette (Primark)
+803,1318,3,Mutande pinzette e salviette (Primark)
 804,1319,4,Cartine corte
 816,1345,7,Birra + acqua al Terzo Tempo
-1004,1726,2,Lucchetti, specchietto, astuccio cavi, astuccio passaporto targhetta da valigia
+1004,1726,2,Lucchetti specchietto astuccio cavi astuccio passaporto targhetta da valigia
 1006,1740,5,Fanale posteriore bici 
 817,1346,4,Tabacco
 818,1347,1,Hamburger Mc Donald's
@@ -626,7 +626,7 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 824,1390,1,Schifezze macchinette
 825,1391,5,Tariffa prelievo ATM
 826,1395,5,Spedizione costume Volcom
-827,1396,5,My genius platinum, bancomat
+827,1396,5,My genius platinum bancomat
 828,1398,6,Coffeshop Club Social Media
 832,1409,3,CoffeShop Club Social Media
 833,1410,1,Schifezze macchinette
@@ -650,12 +650,12 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 860,1461,1,Mc Donald's
 861,1463,5,Imposta bollo
 862,1464,5,Addebito mensile Budget Mobile (errato)
-864,1467,5,Parcheggio Grostè
+864,1467,5,Parcheggio Grostï¿½
 866,1475,1,Panino + Redbull a Tovel
 875,1492,5,Viaggio in Thailandia (2-14/8)
 869,1481,5,Accendino MdC
 1007,1741,4,2x Rothmans
-1008,1742,7,Birre al Confine (5€ messi da Eugi)
+1008,1742,7,Birre al Confine (5ï¿½ messi da Eugi)
 873,1489,5,Appartamento Praga (26-29/8) prima parte
 874,1490,5,Volo Praga (A+R)
 876,1493,1,Panino Subway
@@ -731,7 +731,7 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 1120,2063,4,Cartine lunghe + corte
 1119,2061,5,Macchinette
 1121,2064,6,2g Enemy of the State
-1122,2065,3,Primark, muande calze e pantaloni
+1122,2065,3,Primark muande calze e pantaloni
 1123,2066,7,Birre
 419,713,4,Accendino
 502,829,5,Pedaggio casello A8
@@ -756,7 +756,7 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 867,1477,4,Tabacco + mappe
 878,1497,5,Volo andata Thailandia (perso)
 879,1498,5,Taxi ritorno a casa
-882,1501,7,2 birre, 1 drink
+882,1501,7,2 birre 1 drink
 884,1503,5,Tampone molecolare Malpensa
 885,1504,2,Biglietto MXP
 1026,1798,5,Macchinette
@@ -774,7 +774,7 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 1089,1971,4,Cartine
 1106,2026,4,Cartine
 1111,2042,5,Macchinette
-1112,2044,5,Regalo Natale mamma, campanello bici
+1112,2044,5,Regalo Natale mamma campanello bici
 1113,2047,6,2g Enemy of the State
 1124,2068,1,Doughnut
 1125,2070,5,Schimica
@@ -788,9 +788,9 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 1140,2110,4,Tabacco + gas
 1141,2111,7,Alcool natalizio
 1142,2112,5,Spesa di Capodanno
-1143,2113,4,Cartine lunghe, corte filtri accendino
+1143,2113,4,Cartine lunghe corte filtri accendino
 1145,2117,7,Birra Codi Buttiga
-1147,2122,2,Convertitore usb-c ethernet, lunchbox
+1147,2122,2,Convertitore usb-c ethernet lunchbox
 1148,2123,5,Zaino FjallRaven
 1149,2124,7,Birre all'English
 1152,2127,4,Tabacco e accendino
@@ -799,7 +799,7 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 1156,2134,7,Aperitivo P.ta Venezia
 1157,2135,5,Biglietto ATM
 1158,2142,1,Baklava
-1159,2143,2,Regalo Davide, pantofole
+1159,2143,2,Regalo Davide pantofole
 1160,2144,4,2 Rothmans
 1161,2145,5,Cartucce stampante non compatibili
 1162,2149,5,Tasca borraccia e portachavhi FjallRaven
@@ -853,7 +853,7 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 1246,2335,6,1g weed
 1248,2338,5,Schimica Febo
 1249,2343,5,Spesa mezzi Amsterdam (?)
-1250,2345,6,1g fumo 1g weed, coffeeshop Centraal
+1250,2345,6,1g fumo 1g weed coffeeshop Centraal
 1251,2348,5,Bounty e spray catena bici
 1252,2349,5,Macchinette
 1253,2355,6,2g Coffeeshop Central
@@ -894,14 +894,14 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 1299,2458,6,1g weed (perso)
 1300,2459,7,2 birre festival davanti Codam
 1301,2460,4,Tabacco
-1302,2461,5,Acquisti Action: sellino, mattarello e confezione di Lion
+1302,2461,5,Acquisti Action: sellino mattarello e confezione di Lion
 1303,2462,6,1g fumo 1g erba
 1304,2464,5,Serata Awakenings 19/10
 1305,2466,1,Pacchi di pasta
 1306,2468,1,Macchinette
 1307,2470,6,2g erba + mappe
 1308,2478,6,Coffee Central
-1309,2479,6,1g Central, 1g Boerejongens
+1309,2479,6,1g Central 1g Boerejongens
 1310,2481,1,Chimica AH
 1311,2484,4,Tabacco + pacchetto S. Patrignano
 1312,2487,1,Macchinette
@@ -917,9 +917,9 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 1325,2508,7,Grappe all'Azzurro
 1324,2507,7,Vino all'Azzurro
 1326,2509,7,Birra al Tuckett
-1327,2510,5,Acquisti Decathlon: sacca 10L impermeabile, 3 magliette, 2 costumi
+1327,2510,5,Acquisti Decathlon: sacca 10L impermeabile 3 magliette 2 costumi
 1328,2515,5,Soldi vari anticipati da Omar a Campiglio
-1333,2530,5,Sapone da barba e dopobarba, coltelleria Rivola
+1333,2530,5,Sapone da barba e dopobarba coltelleria Rivola
 1334,2535,1,Burger King Schiphol
 1335,2542,7,Birre Cafe Krull
 409,682,4,Cartine corte doppie
@@ -999,7 +999,7 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 1363,2595,4,Cartine
 1364,2599,5,Fix bicicletta
 1365,2600,6,1g weed coffeshop Hawaii
-1366,2606,6,1g hash 1g weed, coffeshop Central
+1366,2606,6,1g hash 1g weed coffeshop Central
 1367,2612,6,1g weed 1g hash coffeeshop Central
 1368,2613,1,Macchinette
 1369,2615,6,1g weed 1g hash coffeeshop Central
@@ -1008,11 +1008,11 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 1372,2623,6,1g weed 1g hash Coffeshop Central
 1373,2625,6,1g weed 1g hash coffeshop Central
 1374,2626,5,ATM Amsterdam
-1375,2627,5,Acquisti Action (soffione doccia, fari bici, pulisci vetri doccia, ciabatta)
+1375,2627,5,Acquisti Action (soffione doccia fari bici pulisci vetri doccia ciabatta)
 1376,2629,4,Pacchetto S. Patrignano
-1377,2631,5,Cuffiette, regalo Natale Tommi
+1377,2631,5,Cuffiette regalo Natale Tommi
 1378,2640,6,1g hash 1g weed Boerejongens
-1379,2642,6,1g weed 1g hash, coffeeshop Central
+1379,2642,6,1g weed 1g hash coffeeshop Central
 1380,2645,4,Pacchetto S. Patrignano
 1381,2646,1,Colazione AH
 1382,2648,1,Colazione Mac Donald's
@@ -1022,7 +1022,7 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 1386,2655,2,TW Warhammer III
 1387,2656,2,Acquisti Amazon
 1388,2657,5,Ricarica Iliad
-1390,2660,7,Birra da Cià Birretta
+1390,2660,7,Birra da Ciï¿½ Birretta
 1391,2661,7,Birre da Hops
 1392,2662,6,Fiorellini e tabacco
 1393,2663,5,Cena di classe
@@ -1100,7 +1100,7 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 628,1028,1,Pizza + torta alla Patascoss
 716,1173,7,Alcool per compleanno
 717,1174,1,Pizza
-739,1218,3,Vestiti Primark (maglietta, camicie e infradito)
+739,1218,3,Vestiti Primark (maglietta camicie e infradito)
 740,1219,5,Deodorante + dentifricio + b. schiuma
 741,1220,5,Transito Area C
 742,1221,1,Brioche
@@ -1117,7 +1117,7 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 1069,1906,5,Succhi
 1070,1907,7,Giro di birra
 1071,1909,7,Birra pub
-1133,2097,5,Orlo pantaloni, stringere golf e maglia lotr
+1133,2097,5,Orlo pantaloni stringere golf e maglia lotr
 1134,2098,5,Cavo Ethernet
 1144,2115,2,Supporto pc
 1146,2118,7,Birra e coca post Capodanno
@@ -1143,18 +1143,18 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 1503,2913,2,Vermintide 2
 1504,2918,6,5g hash Boerejongens
 1508,2937,5,TEST
-1509,2953,5,Debito diventato spesa, TEST_SRC_CRED: TEST_DSC_CRED
-1510,2955,5,Credito diventato spesa, TEST_C_S: TEST_C_S
-1512,2959,5,Credito diventato spesa, TEST: TEST_CRED
-1513,2961,5,Credito diventato spesa, TEST: TEST_C
+1509,2953,5,Debito diventato spesa TEST_SRC_CRED: TEST_DSC_CRED
+1510,2955,5,Credito diventato spesa TEST_C_S: TEST_C_S
+1512,2959,5,Credito diventato spesa TEST: TEST_CRED
+1513,2961,5,Credito diventato spesa TEST: TEST_C
 1536,3207,4,Mappe
 1537,3211,2,Cavo displayport
 1538,3212,1,Macchinette
 1539,3213,1,Macchinette
-1540,3216,5,Monitor, supporto braccio e cavo HDMI
+1540,3216,5,Monitor supporto braccio e cavo HDMI
 1541,3218,5,Ciabatta MediaMatic
 1542,3219,6,5g hash Boerejongens
-1543,3220,7,Birre e birre analcoliche sbagliate, spesa AH
+1543,3220,7,Birre e birre analcoliche sbagliate spesa AH
 1544,3224,6,1 pre-rolled joint Bushdocter
 1545,3225,4,Tabacco
 1546,3227,6,2g Hash Boerejongens
@@ -1177,7 +1177,7 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 1563,3249,5,Spedizione nuova patente
 1564,3253,6,5g fiorellini neri
 1565,3257,1,Hamburger Coruja
-1566,3259,5,Navetta V., brioche e coca cola
+1566,3259,5,Navetta V. brioche e coca cola
 1567,3260,4,2 tabacchi Rothmans
 1568,3261,4,p. San patrignano
 1569,3263,1,Grigliata ferragosto
@@ -1193,7 +1193,7 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 1579,3275,7,Vino al Pappagallo
 1580,3278,5,Aperitivo Malga (a Ste)
 1581,3280,5,Beneficienza (Breadline Africa NL)
-1582,3281,5,Vino per papà e coca cola
+1582,3281,5,Vino per papï¿½ e coca cola
 1583,3282,5,Spugne sottili e muffin (Amort Spiazzo)
 1584,3284,3,Set 3 mutande da Primark
 1585,3293,6,5g Black Block Boerejongens
@@ -1209,7 +1209,7 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 1601,3331,4,2 Tabacchi Rothmans e c. lunghe
 1602,3332,5,Parcheggio Vallesinella
 1603,3333,5,Bottiglie d'acqua al Casinei
-1604,3334,5,Sapone da barba, Rivola
+1604,3334,5,Sapone da barba Rivola
 1605,3337,6,2g hash Boerejongens
 1606,3338,1,Macchinette x2
 1608,3356,1,Panzerotto Luini
@@ -1237,13 +1237,13 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 725,1187,1,Tortina 
 726,1188,7,Birra English Pub
 727,1189,1,Mc Donald's
-880,1499,5,Zaino, 4 magliette (2 merino) fissa-gancio bici e pantaloncini Decathlon
+880,1499,5,Zaino 4 magliette (2 merino) fissa-gancio bici e pantaloncini Decathlon
 730,1194,7,Birra al confine
 731,1195,1,Kebab + baklawa
 732,1196,1,Trancio di pizza Spontini
 733,1197,2,Mascherine + nuova cornice
 896,1517,5,Spesa pre trekking
-897,1518,5,Acquisti Decathlon, barrette pantaloncini e maglietta bianca
+897,1518,5,Acquisti Decathlon barrette pantaloncini e maglietta bianca
 910,1533,5,Spese lungo VF (Lucca)
 911,1534,5,Treno CasteFiorentino - Trento
 912,1535,5,Snack di ritorno verso Trento
@@ -1262,7 +1262,7 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 1470,2850,1,Colazione Dirk
 1471,2857,6,1g weed Sativa coffeeshop
 1586,3294,4,Cartine lunghe
-1594,3315,4,2 mappe, filtri e accendino Amsterdam Genetics
+1594,3315,4,2 mappe filtri e accendino Amsterdam Genetics
 522,870,5,Ingresso Area C
 587,965,1,Hamburger + birra al Murphy's Law
 590,968,5,Regalo Tommi (Cyberpunk 2077)
@@ -1307,14 +1307,14 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 1044,1845,5,Affitto locker 12h ostello
 1045,1846,7,Birra
 1081,1947,5,Ricarica singola su Iliad
-1115,2052,5,Regalo apà, supporto pc
+1115,2052,5,Regalo apï¿½ supporto pc
 1116,2053,5,Macchinette
 1514,3061,6,1g hash Boerejongens
 1515,3062,6,5g hash Boerejongens
 525,877,5,Biglietto ATM
 574,947,5,Regalo Ludo
 651,1060,6,
-654,1064,5,Fix camicia da Celestina (40€ li ha pagati il papi)
+654,1064,5,Fix camicia da Celestina (40ï¿½ li ha pagati il papi)
 655,1065,2,Sbarra per trazioni
 813,1342,2,Elastici + cuffie wired (+ spedizione in Olanda)
 894,1514,2,Toppa Thailandia
@@ -1357,8 +1357,8 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 1224,2286,5,Macchinette
 1225,2287,4,Cartine
 1226,2289,5,Birre
-1400,2676,2,Acquisti Amazon #2: bombola gas, cover cuffie, desk mat, ssd 1 Tb e cavo ethernet
-1401,2677,5,Regalo papà, rasoio
+1400,2676,2,Acquisti Amazon #2: bombola gas cover cuffie desk mat ssd 1 Tb e cavo ethernet
+1401,2677,5,Regalo papï¿½ rasoio
 1402,2678,1,Spesa Natale Carrefour
 1403,2679,7,Birre all'Old Fox
 1406,2683,7,Drink al Magenta
@@ -1368,7 +1368,7 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 1505,2926,5,Reinvio bancomat
 1506,2927,5,Abbonamento resume.io (PD)
 1507,2930,4,Tabacco e cartine
-1202,2249,5,Differenza guadagno 60€ trench (40%) e vendita mouse (48)
+1202,2249,5,Differenza guadagno 60ï¿½ trench (40%) e vendita mouse (48)
 1203,2252,6,1g Hash
 1204,2253,5,Cappellino
 1205,2254,5,Macchinette
@@ -1380,7 +1380,7 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 1435,2751,1,Macchinette
 1436,2752,1,Macchinette
 1437,2753,5,Biadesivo
-1511,2957,5,Debito diventato spesa, TEST_C: TEST_C
+1511,2957,5,Debito diventato spesa TEST_C: TEST_C
 1589,3304,5,Portadocumenti Ralph Lauren da Peter
 1590,3306,5,Abbonamento annuale Amazon Prime
 1592,3309,1,Spesa per cena da Lorenzo
