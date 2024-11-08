@@ -117,4 +117,4 @@ create table STIPENDI(
 	RIMBORSO_SPESE real default 0 check (RIMBORSO_SPESE >= 0);
 );
 
-end
+commit
