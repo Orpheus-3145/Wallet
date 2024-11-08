@@ -20,3 +20,5 @@ TODO:
 	6. fix italian characters
 	7. ricostruire BI su https://store.metabase.com/
 	8. file .py correzione campo IMPORTO di MOVIMENTTI.csv
+	9. aggiungere altri CHECK nella definizione delle tabelle
+	10. tradurre in inglese

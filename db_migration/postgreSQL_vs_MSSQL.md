@@ -202,3 +202,16 @@ SELECT * FROM cte;
 | Functions/Procedures             | `FUNCTION` (and `PROCEDURE` from v11)       | Separate `FUNCTION` and `PROCEDURE`    |
 | NULL Handling                    | `IS DISTINCT FROM`                         | `ISNULL()`                             |
 | Case Sensitivity                 | Case-sensitive by default                  | Case-insensitive (collation dependent) |
+
+### 11. Documentation:
+  - [installation](https://www.postgresql.org/download/linux/redhat/)
+  - [filling a db](https://www.postgresql.org/docs/current/populate.html)
+  - [SQL](https://www.postgresql.org/docs/current/sql.html)
+  - [SQL syntax - functions](https://www.postgresql.org/docs/current/functions.html)
+  - [SQL syntax - $$ notation](https://www.postgresql.org/docs/current/sql-syntax-lexical.html#SQL-SYNTAX-DOLLAR-QUOTING)
+  - [transactions](https://www.postgresql.org/docs/current/tutorial-transactions.html)
+  - [server config](https://www.postgresql.org/docs/current/runtime-config.html)
+  - [PL/pgSQL](https://www.postgresql.org/docs/current/plpgsql.html)
+  - [PL/pgSQL - transactions](https://www.postgresql.org/docs/current/plpgsql-transactions.html)
+  - [PL/pgSQL - errors](https://www.postgresql.org/docs/current/plpgsql-errors-and-messages.html)
+  - [PL/Python](https://www.postgresql.org/docs/current/plpython-funcs.html)
