@@ -67,7 +67,7 @@ ID,ID_MOV,DEB_CRED,DESCRIZIONE,ORIGINE,SALDATO,ID_MOV_SALDO,DATA_SALDO
 89,979,True,H2O x2,Pap�,True,1134,2022-02-18
 90,990,False,40 multa e 40 differenza con bonifico originale (740� al posto di 700�),Pap�,True,1133,2022-02-18
 91,999,True,Differenza reso occhiali (eBay),Pap�,True,1132,2022-02-18
-92,1000,False,60% della vendita dell'Apple Watch (totale 123,40�),Pap�,True,1355,2022-05-27
+92,1000,False,60% della vendita dell'Apple Watch (totale 123.40�),Pap�,True,1355,2022-05-27
 93,1001,True,Rimborso soggiorno cancellato Amsterdam,Airbnb,True,1045,2021-12-10
 94,1004,True,Regalo mamma (cuffie in ear),Pap�,True,1131,2022-02-18
 95,1008,True,Fiorellini,Omar,True,1010,2021-12-23
@@ -129,7 +129,7 @@ ID,ID_MOV,DEB_CRED,DESCRIZIONE,ORIGINE,SALDATO,ID_MOV_SALDO,DATA_SALDO
 222,1678,True,Dr. Vercesi,Mamma,True,1682,2022-09-19
 97,1013,True,Regalo Egle,Tommi,True,1051,2021-01-11
 100,1050,True,Dr. Vercesi,Mamma,True,1129,2022-02-18
-106,1094,False,60% parte della vendita del set di cravatte (6�) totale 56,65�,Pap�,True,1355,2022-05-27
+106,1094,False,60% parte della vendita del set di cravatte (6�) totale 56.65�,Pap�,True,1355,2022-05-27
 114,1142,False,Serve contante,Marisa,True,1155,2022-03-01
 228,1727,False,Ripulire,Pap�,True,1728,2022-09-28
 229,1729,True,Spedizione cravatta Hermes,Pap�,True,1735,2022-09-29
@@ -170,7 +170,6 @@ ID,ID_MOV,DEB_CRED,DESCRIZIONE,ORIGINE,SALDATO,ID_MOV_SALDO,DATA_SALDO
 413,3283,False,Soldi anticipati fiorellini,Jack,False,,
 414,3295,False,Soldi Settembre,Pap�,False,,
 415,3350,False,Soldi Ottobre,Pap�,False,,
-382,3087,False,Soldi di Luglio,Pap�,False,,
 115,1143,False,Serve contante,Mamma,True,1282,2022-03-03
 116,1144,True,Fiorellini,Nicol�,True,1154,2022-03-01
 227,1725,True,Addebito Telepass,Pap�,True,1735,2022-09-29

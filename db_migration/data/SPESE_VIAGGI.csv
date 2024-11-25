@@ -1,8 +1,6 @@
 ID,ID_MOV,VIAGGIO,DESCRIZIONE
 2,1686,Amsterdam,Solo andata 2/10
 3,1748,Amsterdam,MXP
-4,1977,ASDASDASD,ASD
-5,1978,123,ASD
 6,1979,Amsterdam - Milano,A (19/12) +R (10/1)
 7,2082,Amsterdam - Milan,Treno Central Station - Schiphol
 8,2087,Amsterdam-Milano,MXP
@@ -30,8 +28,6 @@ ID,ID_MOV,VIAGGIO,DESCRIZIONE
 32,2723,Amsterdam-Milano,Bagaglio a mano grande + stiva
 33,2746,Amsterdam - Milano,Volo A + R
 34,2784,Amsterdam ' Milano (3/24),MXP A+R
-35,2935,TEST,TEST
-36,2936,TES,TTT
 49,3232,Amsterdam-Milano,Pranzo a Schiphol AH
 50,3234,Amsterdam-Milano,Cena Mc Donald's Linate
 51,3236,Amsterdam-Milano,Metro+treno per Schiphol

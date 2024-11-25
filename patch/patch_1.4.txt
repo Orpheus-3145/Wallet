@@ -10,6 +10,7 @@ MODIFICHE:
 	| | "movimento \n inserito", inoltre ridurre l'altezza del widget
 	| | elencare in ordine alfabetico i campi negli inserimenti
 	| | cambio logica stipendio, input importo=netto, eventualmente vengono forniti anche TRATTENUTE e RIMBORSO_SPESE, totale non viene mai settato in input e vale in automatico TOTALE = NETTO + TRATTENUTE + R. SPESE
+	| | rimuovere spesa varia Alcool
 
 BUG:
 	| | soppressione scrittura file di log di kivy

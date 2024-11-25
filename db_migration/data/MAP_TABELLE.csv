@@ -1,17 +1,17 @@
-ID,NOME,DESCRIZIONE,RUOLO
-1,MOVIMENTI,Tabella principale che contiente il movimento generico,DATA
-2,SPESE_VARIE,Tabella contenente spese di vario tipo,DATA
-3,SPESE_FISSE,Tabella contenente spese fisse mensili (abbonamenti, ...),DATA
-4,SPESE_LAVORO,Tabella contenente spese legate al lavoro (trasferte, pranzi, ...),DATA
-5,STIPENDI,Tabella contenente informazione sugli stipendi percepiti,DATA
-6,DEBITI_CREDITI,Tabella che gestisce i prestiti,DATA
-7,MAP_SPESE_VARIE,Tabella che mappa i tipi di spese variabili,MAPPING
-8,MAP_PAGAMENTI,Tabella che mappa il modo in cui è stato fatto il movimento,MAPPING
-9,UTENTI,Tabella che mappa gli utenti che hanno accesso al DB,SERVICE
-10,QLIK_USERS,Tabella che mappa gli utenti che hanno accesso alla BI (QlikView),SERVICE
-11,ENTRATE,Tabella che memorizza le entrate diverse dagli stipendi,DATA
-12,MAP_MOVIMENTI,Tabella che mappa i tipi generici di spese/entrate,MAPPING
-13,MAP_TABELLE,Tabella che mappa tutte le altre tabelle,MAPPING
-14,MAP_ENTRATE,Tabella che mappa i tipi di entrate,MAPPING
-15,SPESE_MANTENIMENTO,Tabella contenente le spese per il mantenimeno ad Amsterdam,DATA
-16,SPESE_VIAGGI,Tabella contenente le spese fatte per ciascun viaggio,DATA
+ID,ID_RUOLO,NOME,DESCRIZIONE
+1,1,MOVIMENTI,Tabella principale che contiente il movimento generico
+2,1,SPESE_VARIE,Tabella contenente spese di vario tipo
+3,1,SPESE_FISSE,Tabella contenente spese fisse mensili
+4,1,SPESE_LAVORO,Tabella contenente spese legate al lavoro
+5,1,STIPENDI,Tabella contenente informazione sugli stipendi percepiti
+6,1,DEBITI_CREDITI,Tabella che gestisce i prestiti
+7,2,MAP_SPESE_VARIE,Tabella che mappa i tipi di spese variabili
+8,2,MAP_PAGAMENTI,Tabella che mappa il modo in cui ï¿½ stato fatto il movimento
+9,3,UTENTI,Tabella che mappa gli utenti che hanno accesso al DB
+10,3,QLIK_USERS,Tabella che mappa gli utenti che hanno accesso alla BI (QlikView)
+11,1,ENTRATE,Tabella che memorizza le entrate diverse dagli stipendi
+12,2,MAP_MOVIMENTI,Tabella che mappa i tipi generici di spese/entrate
+13,2,MAP_TABELLE,Tabella che mappa tutte le altre tabelle
+14,2,MAP_ENTRATE,Tabella che mappa i tipi di entrate
+15,1,SPESE_MANTENIMENTO,Tabella contenente le spese per il mantenimeno ad Amsterdam
+16,1,SPESE_VIAGGI,Tabella contenente le spese fatte per ciascun viaggio

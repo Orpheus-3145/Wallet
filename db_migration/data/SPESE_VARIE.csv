@@ -2,7 +2,7 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 0,2,5,Spesa supermercato MdC
 1,4,5,Spesa supermercato MdC
 2,8,5,Spesa LIDL Tione
-3,9,6,
+3,9,6,quantita' imprecis di erba
 4,10,5,Benzina
 5,12,7,4 drink
 6,13,6,Maxi acquisto
@@ -14,7 +14,7 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 12,21,7,Birra da Hops
 13,22,7,Birra da Hops
 14,23,2,Pesa x Ste
-15,24,6,
+15,24,6,quantita' imprecis di erba
 16,25,2,Mascherine
 17,26,7,Birra da Hops
 18,27,7,Drink allo Slim
@@ -33,7 +33,7 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 31,41,3,Primark
 32,42,7,2 birre da Hop
 33,43,7,Birra da Hora Feliz
-34,44,6,
+34,44,6,quantita' imprecis di erba
 35,45,1,Deliveroo
 36,46,7,3 birre al Confine
 37,47,5,Rinnovo Amazon Prime
@@ -75,7 +75,7 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 73,89,7,Ignoto pub
 74,90,7,Drink allo Slim
 75,92,1,Sushi
-76,93,6,
+76,93,6,quantita' imprecis di erba
 77,94,2,Mouse wireless
 78,95,7,Drink allo Slim
 79,96,1,Cena Speckstube
@@ -107,7 +107,7 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 106,138,7,Ordine a domicilio di Birra (Buttiga)
 107,139,5,Mascherine (Davide)
 108,140,2,Cuffie interne Samsung
-109,145,6,
+109,145,6,quantita' imprecis di erba
 110,147,5,Commissione bancomat acquisto luci Helios Touch
 111,148,2,Luci Helios Touch
 112,151,5,Addebito Comune di Milano (multa?)
@@ -129,7 +129,7 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 128,169,2,SSD Sandisk spray aria compressa fascette + stringhe
 129,171,5,Spesa supermercato MdC (legna)
 130,172,1,Mc Donald's
-131,173,6,
+131,173,6,quantita' imprecis di erba
 132,174,5,Rimborso Ste
 133,175,2,Vetro cellulare (sbagliata + giusta)
 134,177,5,Prelievo
@@ -156,12 +156,12 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 155,211,2,Cellulare Huawei p30 pro
 156,212,5,Addebito su prepagata Hype
 157,213,5,Volo per Londra (balzato)
-158,214,6,
+158,214,6,quantita' imprecis di erba
 159,222,5,Benzina
 160,223,5,Corsi Udemy (Big Data e ML)
 161,224,2,Cuffie Boom
 162,229,2,USB Sandisk 256 Gb e laccetti
-163,230,6,
+163,230,6,quantita' imprecis di erba
 164,231,5,Addebito su prepagata Hype
 165,233,7,Birre al Carrefour
 166,235,2,Black Desert Online
@@ -173,7 +173,7 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 172,243,3,Pantaloni e camicia da Primark
 173,244,2,Regalo per Tommi (piastra per Waffles) supporto per cuffie e piano rialzato per pc
 174,245,3,Camicia Spada
-175,247,6,
+175,247,6,quantita' imprecis di erba
 176,248,5,Fattura eliosoccorso
 177,249,4,tabacco + cartine + filtri
 178,256,5,Aperitivo Carrefour
@@ -207,7 +207,7 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 206,290,4,Tabacco Winston
 207,291,5,cena (patatine) + birra
 208,292,4,cartine lunge + filtri
-209,293,6,
+209,293,6,quantita' imprecis di erba
 210,294,2,Stampe classic/pop art
 211,295,2,Cornici per stampe (3)
 212,296,5,Spesa x casa Jack
@@ -216,9 +216,9 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 215,301,5,Imposta di bollo
 216,302,7,Birra cingalese
 217,303,7,Birra cingalese
-218,304,6,
+218,304,6,quantita' imprecis di erba
 219,305,7,2 birre piccole
-220,307,6,
+220,307,6,quantita' imprecis di erba
 221,309,7,Birra cingalese
 222,310,4,tabacco + filtri + lunghe
 223,311,7,Birre cingalese
@@ -267,7 +267,7 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 266,363,4,Tabacco Senza Nome rosa
 267,364,4,Tabacco + cartine
 268,365,7,Bicchieri di vino Hora Feliz
-269,366,6,
+269,366,6,quantita' imprecis di erba
 270,367,7,Birre Cambusa
 271,369,7,Drink allo Slim
 272,370,3,Fantasmini
@@ -302,7 +302,7 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 301,413,7,Birra al pogue mahone's
 302,415,7,Birra da Hop
 303,416,1,Pizza a Comabbio
-304,418,6,
+304,418,6,quantita' imprecis di erba
 305,419,5,Parcheggio Vallesinella
 306,420,5,Spesa Eurospar
 307,421,4,Pacchetto S. Patrignano + accendino
@@ -311,7 +311,7 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 310,425,2,Noleggio film Dune
 311,426,5,Volo Barcellona
 312,431,2,Mouse MS + spork + bombola aria compressa
-313,433,6,
+313,433,6,quantita' imprecis di erba
 314,434,7,Birre al Bootleg
 315,435,1,Cena ristorante Singapore
 316,436,5,Regalo Nicol�
@@ -328,7 +328,7 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 329,453,5,Benzina
 330,454,1,Panino da Snoopy
 331,455,7,Birra al Bootleg
-332,456,6,
+332,456,6,quantita' imprecis di erba
 333,457,5,Reso case cuffie Ste
 334,459,5,Addebito Telepass
 335,460,5,Imposta di bollo
@@ -353,7 +353,7 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 354,484,7,Negroni all'Azzurro
 355,485,2,Adesivo pc Dell
 356,486,5,Redbull
-357,487,6,
+357,487,6,quantita' imprecis di erba
 358,488,2,Regalo Jack coltello
 359,493,5,Differenza appartamenti di Barcellona
 360,500,7,Birre al Linearetta
@@ -400,7 +400,7 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 437,742,1,Kebab
 438,743,7,Birre alla Cambusa
 439,748,4,Filtri
-440,749,6,
+440,749,6,quantita' imprecis di erba
 441,753,5,Sistemazione abito (Celestina)
 442,754,5,Buste x spedire libri (Ebay)
 443,755,4,Porta-brasa + scatoletta (Hakuna Matata)
@@ -469,7 +469,7 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 598,986,5,Regalo laurea Omar
 599,987,3,Golf verde da Scout
 601,989,2,Posticipo volo Amsterdam
-602,991,6,
+602,991,6,quantita' imprecis di erba
 603,992,5,Biglietto ATM
 604,993,5,Regalo secret santa
 605,994,7,4 birre + hamberger + patatine + fritto
@@ -479,7 +479,7 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 609,1003,1,Kebab
 610,1005,2,Regalo pap� (affetta ananas)
 611,1006,4,Cartine corte + lunghe
-612,1007,6,
+612,1007,6,quantita' imprecis di erba
 613,1009,5,Spedizione Powerlink
 617,1016,7,Birre al cingalese
 618,1017,7,Vin brul� al Ritorto
@@ -514,7 +514,7 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 667,1080,7,Birre al Confine
 668,1081,4,Filtri + cartine
 670,1083,7,Birre per cena da Nico
-673,1089,6,
+673,1089,6,quantita' imprecis di erba
 674,1091,2,Nuovo mouse + spedizione (Subito.it)
 676,1096,7,Birre al Linea Retta
 677,1097,1,Kebab + baklawa
@@ -558,23 +558,23 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 416,710,5,Parcheggio Grost�
 404,665,4,Tabacco
 448,760,5,Volo Amsterdam (A + R)
-536,892,6,
+536,892,6,quantita' imprecis di erba
 537,893,7,2 birre bottiglia
 582,958,1,Cena (Osteria della Concordia) + vino
-583,959,6,
+583,959,6,quantita' imprecis di erba
 600,988,5,Spedizione libro Alleanza e Inganno (SW)
 627,1027,4,Tabacco
 629,1029,4,Cartine + filtri drum
 633,1034,3,Differenza cambio scarpe - giubbotto Vintage 55
 635,1036,5,Seconda parte tattoo
 636,1037,4,Tabacco + clipper
-650,1059,6,
+650,1059,6,quantita' imprecis di erba
 661,1074,5,Notte in Ostello Londra (12/3)
 669,1082,2,DLC (2) Total War Warhammer 2
 671,1084,2,Mascherine nere
 694,1123,7,Drink da Distreat
 698,1147,7,Drinks all'Hora Feliz
-715,1172,6,
+715,1172,6,quantita' imprecis di erba
 719,1176,4,Tabacco
 720,1179,1,Deliveroo
 734,1200,5,Addebito Telepass
@@ -584,7 +584,7 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 757,1244,4,Tabacco
 758,1246,5,Spese/rifornimenti lungo Via degli Dei (13-16/4)
 759,1250,5,Regalo mamma (profumo)
-760,1251,6,
+760,1251,6,quantita' imprecis di erba
 762,1253,1,Pizza da Geppo
 763,1254,7,Birre al Confine e Blocale
 765,1256,2,Differenza reso Amazon per astuccio
@@ -593,7 +593,7 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 768,1259,1,Muffin e gelato
 770,1262,4,Tabacco
 771,1263,5,Fix bici Decathlon
-777,1270,6,
+777,1270,6,quantita' imprecis di erba
 778,1272,1,Pranzo al sushi
 779,1273,4,Tabacco
 780,1274,7,Drink + shottino
@@ -645,7 +645,7 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 852,1449,1,StrropWafel
 853,1450,5,Addebito Telepass
 854,1451,7,Birra all'English
-855,1453,6,
+855,1453,6,quantita' imprecis di erba
 856,1454,4,Tabacco + filtri
 860,1461,1,Mc Donald's
 861,1463,5,Imposta bollo
@@ -683,7 +683,7 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 1027,1800,6,1 g AK-47
 1028,1801,4,Tabacco + corte + pacchetto S. Patrignano
 1029,1806,1,Macchinette
-955,1592,6,
+955,1592,6,quantita' imprecis di erba
 1032,1814,4,Filtri
 1036,1824,6,1g Amnesia
 969,1617,2,(Nuova) toppa Thailandia
@@ -929,7 +929,7 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 562,929,1,Burgez
 564,931,2,Bomboletta aria compressa + mascherine nere
 568,937,4,Cartine corte
-569,941,6,
+569,941,6,quantita' imprecis di erba
 570,942,5,Acconto tattoo
 571,944,7,Birre alla Cambusa
 572,945,7,Shottino + drink
@@ -939,7 +939,7 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 693,1122,5,Preservativi
 695,1140,4,Tabacco + filtri + cartine
 696,1141,1,Panzerotti
-697,1145,6,
+697,1145,6,quantita' imprecis di erba
 701,1152,1,Bounty
 764,1255,4,Filtri + pacchetto S. Patrignano
 773,1266,4,Cartine
@@ -951,7 +951,7 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 815,1344,3,Kway e maglietta
 831,1405,1,Donoughts
 839,1421,6,Weed divisa con Maas
-857,1455,6,
+857,1455,6,quantita' imprecis di erba
 858,1456,7,Birre a cingalese
 859,1459,1,Macchinette Scala
 895,1516,5,Treno Milano - Lucca
@@ -1142,11 +1142,6 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 1502,2911,1,Macchinette x2
 1503,2913,2,Vermintide 2
 1504,2918,6,5g hash Boerejongens
-1508,2937,5,TEST
-1509,2953,5,Debito diventato spesa TEST_SRC_CRED: TEST_DSC_CRED
-1510,2955,5,Credito diventato spesa TEST_C_S: TEST_C_S
-1512,2959,5,Credito diventato spesa TEST: TEST_CRED
-1513,2961,5,Credito diventato spesa TEST: TEST_C
 1536,3207,4,Mappe
 1537,3211,2,Cavo displayport
 1538,3212,1,Macchinette
@@ -1313,7 +1308,7 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 1515,3062,6,5g hash Boerejongens
 525,877,5,Biglietto ATM
 574,947,5,Regalo Ludo
-651,1060,6,
+651,1060,6,quantita' imprecis di erba
 654,1064,5,Fix camicia da Celestina (40� li ha pagati il papi)
 655,1065,2,Sbarra per trazioni
 813,1342,2,Elastici + cuffie wired (+ spedizione in Olanda)
@@ -1380,7 +1375,6 @@ ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 1435,2751,1,Macchinette
 1436,2752,1,Macchinette
 1437,2753,5,Biadesivo
-1511,2957,5,Debito diventato spesa TEST_C: TEST_C
 1589,3304,5,Portadocumenti Ralph Lauren da Peter
 1590,3306,5,Abbonamento annuale Amazon Prime
 1592,3309,1,Spesa per cena da Lorenzo

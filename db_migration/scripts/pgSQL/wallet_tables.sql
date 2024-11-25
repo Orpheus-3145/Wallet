@@ -1,5 +1,6 @@
 create table MAP_RUOLI_TABELLE(
 	ID serial primary key,
+	NOME text not NULL,
 	DESCRIZIONE text not NULL
 );
 
@@ -24,7 +25,6 @@ create table MAP_ENTRATE(
 create table MAP_MOVIMENTI(
 	ID serial primary key,
 	ID_TABLE int references MAP_TABELLE(ID),
-	--ID_SP int references MAP_SP(ID),   when there's gonna be a table MAP_SP references foreign key MAP_SP(ID), remove STORED_PROCEDURE column then
 	DESCRIZIONE text not NULL,
 	STORED_PROCEDURE text not NULL
 );

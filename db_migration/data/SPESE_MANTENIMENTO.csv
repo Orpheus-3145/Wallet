@@ -168,7 +168,6 @@ ID,ID_MOV,DESCRIZIONE
 145,1921,Anticipo affitto 19-20/11 rimangono da pagare 118.80€
 146,1922,Pranzo AH
 147,1923,Cena W2W
-148,1924,Pranzo ostello
 150,1926,Pranzo ostello
 151,1927,Cena hamburger ostello
 152,1929,Pranzo Kanteen + macchinette
@@ -469,7 +468,6 @@ ID,ID_MOV,DESCRIZIONE
 502,2862,Spesa AH
 520,2919,Spesa AH
 521,2920,Spesa Amazing Oriental
-529,2934,TEST
 531,3063,Spesa AH
 162,1944,Pranzo Burger 'n shake
 178,1973,Pranzo AH

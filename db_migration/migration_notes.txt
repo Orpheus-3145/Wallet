@@ -1,13 +1,6 @@
-note migrating from MSSQL to postgreSQL:
-	1. check .md file
-	2. no GO instructions, the normal ; is used
-	3. no scheme in table names
-	4. no such thing:  'set NOCOUNT on;'
-	
-	
 TODO:
-	1. better primary/foreign key declarations		<-- check
-	2. added DEFAULTS:   <-- check
+X	1. better primary/foreign key declarations		<-- check
+X	2. added DEFAULTS:   <-- check
 		- QLIK_USERS(RUOLO, NOTE)
 		- WALLET_USERS(NOTE)
 		- MOVIMENTI(DATA_INS, DATA_MOV, DARE_AVERE, NOTE) (aggiunto check importo > 0)
@@ -17,8 +10,10 @@ TODO:
 	3. controllare se con l'aggiunta di vincoli di chiavi esterne alcuni controlli nelle sp possono essere rimossi
 	4. vedere se, alla fine di tutto, MAP_TABELLE e' aggiornata
 	5. check file stipendi_con_note.csv
-	6. fix italian characters
+	6. fix italian charactersfactorio
 	7. ricostruire BI su https://store.metabase.com/
-	8. file .py correzione campo IMPORTO di MOVIMENTTI.csv
+X	8. file .py correzione campo IMPORTO di MOVIMENTTI.csv
 	9. aggiungere altri CHECK nella definizione delle tabelle
 	10. tradurre in inglese
+	11. check inserimento debito 1k luglio '24
+	12. ogni inserimento di numero ha il punto come separatore decimale, rimuovere inserimento di virgole dentro campi testuali per csv protection
