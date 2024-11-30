@@ -17,3 +17,9 @@ X	8. file .py correzione campo IMPORTO di MOVIMENTTI.csv
 	10. tradurre in inglese
 	11. check inserimento debito 1k luglio '24
 	12. ogni inserimento di numero ha il punto come separatore decimale, rimuovere inserimento di virgole dentro campi testuali per csv protection
+	13. rimuovere variabile type_mov da ogni INSERT_*.sql e la gestione eccezioni relativa
+	14. rimuovere movimenti TEST
+	15. rinominare tabella [NB: anche tabella map_movimenti], sql e python di INSERISCI_S_MANTENIMENTO in INSERISCI_SPESA_MANTENIMENTO
+	16. modificare gestione di importo-netto-totale per gli stipendi (sql [tabella e sp], python [back-end e front-end])
+	17. aggiustare i campi boolean dati in input dal back-end al database (deb_cred,)
+	18. fare sp che rimuove tutti i movimenti che hanno 'TEST' nei campi testuali

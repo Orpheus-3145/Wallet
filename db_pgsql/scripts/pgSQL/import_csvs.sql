@@ -31,7 +31,6 @@ WITH (
     DELIMITER ','
 );
 
-
 \copy public.map_spese_varie(id, descrizione) 
 FROM './wallet/data/MAP_SPESE_VARIE.csv' 
 WITH (
@@ -55,7 +54,6 @@ WITH (
     HEADER true,
     DELIMITER ','
 );
-
 \copy public.debiti_crediti(id, id_mov, deb_cred, descrizione, origine, saldato, id_mov_saldo, data_saldo) 
 FROM './wallet/data/DEBITI_CREDITI.csv' 
 WITH (
@@ -111,3 +109,20 @@ WITH (
     HEADER true,
     DELIMITER ','
 );
+
+
+-- to update id field to last value in imported table
+SELECT setval(pg_get_serial_sequence('MAP_TABELLE', 'id'), MAX(id)) FROM MAP_TABELLE;
+SELECT setval(pg_get_serial_sequence('MAP_CONTI', 'id'), MAX(id)) FROM MAP_CONTI;
+SELECT setval(pg_get_serial_sequence('MAP_ENTRATE', 'id'), MAX(id)) FROM MAP_ENTRATE;
+SELECT setval(pg_get_serial_sequence('MAP_MOVIMENTI', 'id'), MAX(id)) FROM MAP_MOVIMENTI;
+SELECT setval(pg_get_serial_sequence('MAP_SPESE_VARIE', 'id'), MAX(id)) FROM MAP_SPESE_VARIE;
+SELECT setval(pg_get_serial_sequence('WALLET_USERS', 'id'), MAX(id)) FROM WALLET_USERS;
+SELECT setval(pg_get_serial_sequence('MOVIMENTI', 'id'), MAX(id)) FROM MOVIMENTI;
+SELECT setval(pg_get_serial_sequence('DEBITI_CREDITI', 'id'), MAX(id)) FROM DEBITI_CREDITI;
+SELECT setval(pg_get_serial_sequence('ENTRATE', 'id'), MAX(id)) FROM ENTRATE;
+SELECT setval(pg_get_serial_sequence('SPESE_FISSE', 'id'), MAX(id)) FROM SPESE_FISSE;
+SELECT setval(pg_get_serial_sequence('SPESE_MANTENIMENTO', 'id'), MAX(id)) FROM SPESE_MANTENIMENTO;
+SELECT setval(pg_get_serial_sequence('SPESE_VIAGGI', 'id'), MAX(id)) FROM SPESE_VIAGGI;
+SELECT setval(pg_get_serial_sequence('SPESE_VARIE', 'id'), MAX(id)) FROM SPESE_VARIE;
+SELECT setval(pg_get_serial_sequence('STIPENDI', 'id'), MAX(id)) FROM STIPENDI;
