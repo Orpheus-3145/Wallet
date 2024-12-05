@@ -23,3 +23,9 @@ X	8. file .py correzione campo IMPORTO di MOVIMENTTI.csv
 	16. modificare gestione di importo-netto-totale per gli stipendi (sql [tabella e sp], python [back-end e front-end])
 	17. aggiustare i campi boolean dati in input dal back-end al database (deb_cred,)
 	18. fare sp che rimuove tutti i movimenti che hanno 'TEST' nei campi testuali
+	19. rimossa sp READ_MOVEMENTS, adeguare codice
+	20. settare date_mov nella tabella MOVIMENTI e derivati, in formato [GG-MM-AA]
+	21. check BK_DATABASE
+	22. modifica SALDO_DEBITO_CREDITO.sql, passaggio di id da saldare in formato di array al posto che stringa 'id1,id2,id3,...'
+	23. REMOVE_MOVEMENT non dovrebbe modificare movimenti di tipo saldo dc
+	24. check su python di inserimento di id in formato [id1 id2 id3 ...] per saldo dc multipli

@@ -31,8 +31,5 @@ EXCEPTION
 	WHEN NO_DATA_FOUND THEN
 		RAISE EXCEPTION 'No movement found for type: %', type_mov USING HINT = 'Internal error';
 
-	WHEN TOO_MANY_ROWS THEN
-		RAISE EXCEPTION 'Too many movements found for type: %', type_mov USING HINT = 'Internal error';
-
 END;
 $$;

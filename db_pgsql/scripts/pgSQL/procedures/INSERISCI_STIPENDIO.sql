@@ -19,9 +19,9 @@ DECLARE
 
 BEGIN
 	IF importo < netto THEN
-        RAISE 'Invalid input: netto [%] has to be equal of less than importo [%]', netto, importo;
+        RAISE EXCEPTION 'Invalid input: netto [%] has to be equal of less than importo [%]', netto, importo;
 	ELSIF importo < rimborso_spese THEN
-        RAISE 'Invalid input: rimborso spese [%] has to be equal of less than importo [%]', rimborso_spese, importo;
+        RAISE EXCEPTION 'Invalid input: rimborso spese [%] has to be equal of less than importo [%]', rimborso_spese, importo;
 	END IF;
 
     IF previous_month = 0 THEN
@@ -51,9 +51,6 @@ BEGIN
 EXCEPTION
 	WHEN NO_DATA_FOUND THEN
 		RAISE EXCEPTION 'No movement found for type: %', type_mov USING HINT = 'Internal error';
-
-	WHEN TOO_MANY_ROWS THEN
-		RAISE EXCEPTION 'Too many movements found for type: %', type_mov USING HINT = 'Internal error';
 
 END;
 $$;
