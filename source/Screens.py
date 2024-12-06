@@ -46,7 +46,7 @@ class LoginScreen(Screen):
     def login(self, autologin=False):
         username = self.ids.input_user.text.strip()
         password = self.ids.input_pwd.text.strip()
-        if not username or not password:
+        if autologin == False and (not username or not password):
             Factory.ErrorPopup(err_text="credenziali mancanti").open()
             return
         try:
