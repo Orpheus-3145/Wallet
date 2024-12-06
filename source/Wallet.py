@@ -1,5 +1,4 @@
 from datetime import datetime
-# import pyodbc                           # per la connessione al db SQL Server
 from hashlib import sha256              # per creare l'hash di una pwd in input e verificare con quella salvata nel db
 
 from AppExceptions import *

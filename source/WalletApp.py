@@ -27,44 +27,11 @@ from kivy.core.window import Window
 from Screens import *
 from Popups import *
 
-
-# class BusIntApp:
-#     """App che permette di aprire un file di QlikView"""
-#     def __init__(self, bi_path):
-#         self.app = None             # applicazione di QlikView
-#         self.current_file = None    # istanza del file qlik
-#         if not os.path.exists(bi_path):
-#             raise AppException("Il file di BI {} non esiste".format(bi_path))
-#         elif os.path.splitext(bi_path)[1] != ".qvw":
-#             raise AppException("Il file di BI {} non ha estensione .qvw".format(bi_path))
-#         else:
-#             self.bi_path = os.path.dirname(bi_path)    # percorso del file qlik
-#             self.bi_name = os.path.basename(bi_path)   # nome del file qlik
-
-#     def open(self, user=None, pwd=None):
-#         try:
-#             self.app = win32.Dispatch('QlikTech.QlikView')
-#         except pywintypes.com_error as error:
-#             raise AppException(str(error))
-#         else:
-#             self.current_file = self.app.OpenDoc(os.path.join(os.getcwd(), self.bi_path, self.bi_name), user, pwd)
-#             return self.current_file
-
-#     def close(self):
-#         try:
-#             if self.current_file:
-#                 self.current_file.CloseDoc()
-#             self.app.Quit()
-#         except AttributeError:      # se chiudo il file qlik prima dell'app ho queso errore, lo ignoro
-#             pass
-
-
 class WalletApp(App):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self._stopped = False
         self.wallet_instance = None
-        # self.qlik_app = None
         self.config_info = {}
         self.stored_procs = {}
         self.create_logger(LOG_PATH, Config.get("log", "log_level", fallback=DEF_LOG_LVL))
@@ -72,9 +39,7 @@ class WalletApp(App):
 
     def read_config(self, config):
         try:
-            # self.config_info["dsn"] = config["database"]["dsn_name"].strip("'")
             self.config_info["kv_files"] = [Tools.get_abs_path(kv_file) for kv_file in config["kivy_files"].values()]
-            # self.config_info["bi_file_path"] = Tools.get_abs_path(config["bi"]["bi_file_path"])
             self.config_info["backup_path"] = Tools.get_abs_path(config["database"]["backup_path"])
             self.config_info["bi_logo_path"] = Tools.get_abs_path(config["graphics"]["bi_logo_path"])
             self.config_info["background_img_path"] = Tools.get_abs_path(config["graphics"]["background_img_path"])
@@ -181,18 +146,6 @@ class WalletApp(App):
         if login_success is True:
             self.update_log("utente %s ha effettuato l'accesso", 20, user)
         return login_success
-
-    def open_BI(self):
-        pass
-        # try:
-        #     user, pwd = self.wallet_instance.get_bi_credentials()
-        #     self.qlik_app.open(user, pwd)
-        # except SqlError as db_err:
-        #     self.update_log("errore apertura BI - %s", 40, str(db_err))
-        #     raise AppException()
-        # except AppException as bi_error:
-        #     self.update_log("errore apertura BI - %s", 40, str(bi_error))
-        #     raise AppException("Errore apertura BI, consulta il log per ulteriori dettagli")
 
     def insert_movement(self, id_mov, data_movement):
         try:

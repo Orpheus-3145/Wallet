@@ -3,13 +3,13 @@ from kivy_deps import sdl2, glew
 
 block_cipher = None
 
-added_files = [("..\\kv", "kv"),
-	("..\\media", "media" ),
-	("..\\settings", "settings"),
-	("..\\qlik", "qlik")]
+added_files = [("../kv", "kv"),
+	("../media", "media" ),
+	("../settings", "settings"),
+	("../qlik", "qlik")]
 	
-a = Analysis(['..\\source\\WalletApp.py'],
-             pathex=['..\\source'],
+a = Analysis(['../source/WalletApp.py'],
+             pathex=['../source'],
              binaries=[],
              datas=added_files,
              hiddenimports=[],
@@ -37,7 +37,7 @@ exe = EXE(pyz,
           target_arch=None,
           codesign_identity=None,
           entitlements_file=None,
-		  icon='..\\media\\logos\\W_logo_2.ico')
+		  icon='../media/logos/W_logo_2.ico')
 coll = COLLECT(exe,
                a.binaries,
                a.zipfiles,

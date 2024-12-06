@@ -75,12 +75,6 @@ class MainScreen(Screen):
         """Attiva il layout per visualizzare i tipi di moviemento generici"""
         self.ids.general_mov.show_widget()
 
-    def open_bi(self):
-        try:
-            App.get_running_app().open_BI()
-        except AppException as error:
-            Factory.ErrorPopup(err_text=str(error)).open()
-
     def set_movement(self, new_id_mov):
         self.manager.go_to_insert_screen(new_id_mov)
 
