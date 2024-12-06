@@ -1,6 +1,6 @@
 from datetime import datetime
 from hashlib import sha256              # per creare l'hash di una pwd in input e verificare con quella salvata nel db
-import psycopg2
+import psycopg2                         # info: https://www.psycopg.org/docs/usage.html
 from AppExceptions import *
 import Tools                            # funzioni generiche di supporto
 
