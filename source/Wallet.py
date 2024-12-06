@@ -1,5 +1,5 @@
 from datetime import datetime
-import pyodbc                           # per la connessione al db SQL Server
+# import pyodbc                           # per la connessione al db SQL Server
 from hashlib import sha256              # per creare l'hash di una pwd in input e verificare con quella salvata nel db
 
 from AppExceptions import *
@@ -9,14 +9,14 @@ import Tools                            # funzioni generiche di supporto
 class Wallet:
     def __init__(self, dsn, logger=None):
         self.logger = logger
-        try:
-            self.connection = pyodbc.connect(dsn)       # autocommit = False default
-            self.cursor = self.connection.cursor()
-        except pyodbc.Error as error:
-            raise SqlError(error.args[1])
-        else:
-            self.db_name = "Wallet"
-            self.movements = self.get_info_db("movimenti")
+        # try:
+        #     self.connection = pyodbc.connect(dsn)       # autocommit = False default
+        #     self.cursor = self.connection.cursor()
+        # except pyodbc.Error as error:
+        #     raise SqlError(error.args[1])
+        # else:
+        #     self.db_name = "Wallet"
+        #     self.movements = self.get_info_db("movimenti")
 
     def login_wallet(self, username, password):
         hash_pwd_db = self.get_password_from_username(username)

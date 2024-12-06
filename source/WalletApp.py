@@ -1,9 +1,9 @@
 import logging
 import os
 from datetime import date
-from win32api import GetSystemMetrics
-import win32com.client as win32         # per aprire applicazioni win
-import pywintypes                       # per gestire alcune eccezioni legate al modulo di cui sopra
+import tkinter as tk
+# import win32com.client as win32         # per aprire applicazioni win
+# import pywintypes                       # per gestire alcune eccezioni legate al modulo di cui sopra
 
 import Tools
 import Wallet
@@ -12,13 +12,13 @@ from AppExceptions import *
 from kivy.config import Config
 DEF_LOG_LVL = 20
 
-if os.environ.get("WalletAppPath") == os.getcwd():
-    os.chdir("_internal")
-else:
-    os.chdir("..")
+# if os.environ.get("WalletAppPath") == os.getcwd():
+#     os.chdir("_internal")
+# else:
+#     os.chdir("..")
 
 LOG_PATH = Tools.get_abs_path("logs")
-CONFIG_PATH = Tools.get_abs_path("settings\\config_wallet.ini")
+CONFIG_PATH = Tools.get_abs_path("settings/config_wallet.ini")
 
 Config.read(CONFIG_PATH)
 
@@ -28,35 +28,35 @@ from Screens import *
 from Popups import *
 
 
-class BusIntApp:
-    """App che permette di aprire un file di QlikView"""
-    def __init__(self, bi_path):
-        self.app = None             # applicazione di QlikView
-        self.current_file = None    # istanza del file qlik
-        if not os.path.exists(bi_path):
-            raise AppException("Il file di BI {} non esiste".format(bi_path))
-        elif os.path.splitext(bi_path)[1] != ".qvw":
-            raise AppException("Il file di BI {} non ha estensione .qvw".format(bi_path))
-        else:
-            self.bi_path = os.path.dirname(bi_path)    # percorso del file qlik
-            self.bi_name = os.path.basename(bi_path)   # nome del file qlik
+# class BusIntApp:
+#     """App che permette di aprire un file di QlikView"""
+#     def __init__(self, bi_path):
+#         self.app = None             # applicazione di QlikView
+#         self.current_file = None    # istanza del file qlik
+#         if not os.path.exists(bi_path):
+#             raise AppException("Il file di BI {} non esiste".format(bi_path))
+#         elif os.path.splitext(bi_path)[1] != ".qvw":
+#             raise AppException("Il file di BI {} non ha estensione .qvw".format(bi_path))
+#         else:
+#             self.bi_path = os.path.dirname(bi_path)    # percorso del file qlik
+#             self.bi_name = os.path.basename(bi_path)   # nome del file qlik
 
-    def open(self, user=None, pwd=None):
-        try:
-            self.app = win32.Dispatch('QlikTech.QlikView')
-        except pywintypes.com_error as error:
-            raise AppException(str(error))
-        else:
-            self.current_file = self.app.OpenDoc(os.path.join(os.getcwd(), self.bi_path, self.bi_name), user, pwd)
-            return self.current_file
+#     def open(self, user=None, pwd=None):
+#         try:
+#             self.app = win32.Dispatch('QlikTech.QlikView')
+#         except pywintypes.com_error as error:
+#             raise AppException(str(error))
+#         else:
+#             self.current_file = self.app.OpenDoc(os.path.join(os.getcwd(), self.bi_path, self.bi_name), user, pwd)
+#             return self.current_file
 
-    def close(self):
-        try:
-            if self.current_file:
-                self.current_file.CloseDoc()
-            self.app.Quit()
-        except AttributeError:      # se chiudo il file qlik prima dell'app ho queso errore, lo ignoro
-            pass
+#     def close(self):
+#         try:
+#             if self.current_file:
+#                 self.current_file.CloseDoc()
+#             self.app.Quit()
+#         except AttributeError:      # se chiudo il file qlik prima dell'app ho queso errore, lo ignoro
+#             pass
 
 
 class WalletApp(App):
@@ -64,7 +64,7 @@ class WalletApp(App):
         super().__init__(**kwargs)
         self._stopped = False
         self.wallet_instance = None
-        self.qlik_app = None
+        # self.qlik_app = None
         self.config_info = {}
         self.stored_procs = {}
         self.create_logger(LOG_PATH, Config.get("log", "log_level", fallback=DEF_LOG_LVL))
@@ -72,9 +72,9 @@ class WalletApp(App):
 
     def read_config(self, config):
         try:
-            self.config_info["dsn"] = config["database"]["dsn_name"].strip("'")
+            # self.config_info["dsn"] = config["database"]["dsn_name"].strip("'")
             self.config_info["kv_files"] = [Tools.get_abs_path(kv_file) for kv_file in config["kivy_files"].values()]
-            self.config_info["bi_file_path"] = Tools.get_abs_path(config["bi"]["bi_file_path"])
+            # self.config_info["bi_file_path"] = Tools.get_abs_path(config["bi"]["bi_file_path"])
             self.config_info["backup_path"] = Tools.get_abs_path(config["database"]["backup_path"])
             self.config_info["bi_logo_path"] = Tools.get_abs_path(config["graphics"]["bi_logo_path"])
             self.config_info["background_img_path"] = Tools.get_abs_path(config["graphics"]["background_img_path"])
@@ -132,8 +132,12 @@ class WalletApp(App):
             self.update_log("invalid log level provided: {}, original message: '{}'".format(level, message), 30, *args)
 
     def build(self):
-        width_screen = GetSystemMetrics(0)
-        height_screen = GetSystemMetrics(1)
+
+        root = tk.Tk()
+        root.withdraw()
+        width_screen = root.winfo_screenwidth()
+        height_screen = root.winfo_screenheight()
+        
         Window.left = (width_screen - self.config_info["width_app"]) // 2
         Window.top = (height_screen - self.config_info["height_app"]) // 2
         for kv_file in self.config_info["kv_files"]:
@@ -146,24 +150,25 @@ class WalletApp(App):
         return ManagerScreen()
 
     def connect(self):
-        dsn = self.config_info["dsn"]
-        try:
-            self.update_log("connessione al database con dsn: '%s'", 10, dsn)
-            self.wallet_instance = Wallet.Wallet(dsn)
-        except SqlError as db_err:
-            self.update_log("errore connessione - %s", 40, str(db_err))
-            raise AppException("Connessione al database fallita, consulta il log per ulteriori dettagli")
-        else:
-            self.update_log("connessione al database effettuata", 10)
-        bi_file = self.config_info["bi_file_path"]
-        try:
-            self.update_log("creazione app BI (pywin32) con file: %s", 10, bi_file)
-            self.qlik_app = BusIntApp(bi_file)
-        except AppException as bi_error:
-            self.update_log("errore app BI (pywin32) - %s", 40, str(bi_error))
-            raise AppException("Errore app BI, consulta il log per ulteriori dettagli")
-        else:
-            self.update_log("app BI creata", 10)
+        pass
+        # dsn = self.config_info["dsn"]
+        # try:
+        #     self.update_log("connessione al database con dsn: '%s'", 10, dsn)
+        #     self.wallet_instance = Wallet.Wallet(dsn)
+        # except SqlError as db_err:
+        #     self.update_log("errore connessione - %s", 40, str(db_err))
+        #     raise AppException("Connessione al database fallita, consulta il log per ulteriori dettagli")
+        # else:
+        #     self.update_log("connessione al database effettuata", 10)
+        # bi_file = self.config_info["bi_file_path"]
+        # try:
+        #     self.update_log("creazione app BI (pywin32) con file: %s", 10, bi_file)
+        #     self.qlik_app = BusIntApp(bi_file)
+        # except AppException as bi_error:
+        #     self.update_log("errore app BI (pywin32) - %s", 40, str(bi_error))
+        #     raise AppException("Errore app BI, consulta il log per ulteriori dettagli")
+        # else:
+        #     self.update_log("app BI creata", 10)
 
     def login(self, user, pwd, autologin):
         if autologin is True:
@@ -178,15 +183,16 @@ class WalletApp(App):
         return login_success
 
     def open_BI(self):
-        try:
-            user, pwd = self.wallet_instance.get_bi_credentials()
-            self.qlik_app.open(user, pwd)
-        except SqlError as db_err:
-            self.update_log("errore apertura BI - %s", 40, str(db_err))
-            raise AppException()
-        except AppException as bi_error:
-            self.update_log("errore apertura BI - %s", 40, str(bi_error))
-            raise AppException("Errore apertura BI, consulta il log per ulteriori dettagli")
+        pass
+        # try:
+        #     user, pwd = self.wallet_instance.get_bi_credentials()
+        #     self.qlik_app.open(user, pwd)
+        # except SqlError as db_err:
+        #     self.update_log("errore apertura BI - %s", 40, str(db_err))
+        #     raise AppException()
+        # except AppException as bi_error:
+        #     self.update_log("errore apertura BI - %s", 40, str(bi_error))
+        #     raise AppException("Errore apertura BI, consulta il log per ulteriori dettagli")
 
     def insert_movement(self, id_mov, data_movement):
         try:
