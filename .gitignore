@@ -1,14 +1,7 @@
 # of the project
 logs/
 backup/
-backup_old/
 versions/
-
-# Byte-compiled files
-*.pyc
-*.pyo
-*.pyd
-__pycache__/
 
 # Distribution / packaging
 .Python
@@ -28,7 +21,7 @@ var/
 *.pyc
 *.pyo
 *.pyd
-__pycache__/
+**/__pycache__/
 
 # Pyenv
 .python-version
