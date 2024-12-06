@@ -1,31 +1,38 @@
 TODO:
-X	1. better primary/foreign key declarations		<-- check
-X	2. added DEFAULTS:   <-- check
+V	1. better primary/foreign key declarations
+V	2. added DEFAULTS:
 		- QLIK_USERS(RUOLO, NOTE)
 		- WALLET_USERS(NOTE)
 		- MOVIMENTI(DATA_INS, DATA_MOV, DARE_AVERE, NOTE) (aggiunto check importo > 0)
 		- DEBITI_CREDITI(DEB_CRED, SALDATO, ID_MOV_SALDO, DATA_SALDO)
 		- SPESE_FISSE(MESE)
 		- STIPENDI(TOTALE, TRATTENUTE, RIMBORSO_SPESE)  (aggiunto check NETTO, TOTALE, TRATTENUTE, RIMBORSO_SPESE > 0)
-	3. controllare se con l'aggiunta di vincoli di chiavi esterne alcuni controlli nelle sp possono essere rimossi
-	4. vedere se, alla fine di tutto, MAP_TABELLE e' aggiornata
+V	3. controllare se con l'aggiunta di vincoli di chiavi esterne alcuni controlli nelle sp possono essere rimossi
+	4. unificare creazione ed instanziazione del db wallet (creazione tables, views, sp) riempimento (tabelle con i valori di mapping e dummy data)
 	5. check file stipendi_con_note.csv
-	6. fix italian charactersfactorio
-	7. ricostruire BI su https://store.metabase.com/
-X	8. file .py correzione campo IMPORTO di MOVIMENTTI.csv
-	9. aggiungere altri CHECK nella definizione delle tabelle
-	10. tradurre in inglese
+	6. fix italian characters
+V	7. check BK_DATABASE
+V	8. file .py correzione campo IMPORTO di MOVIMENTTI.csv
+V	9. aggiungere altri CHECK nella definizione delle tabelle
+	10. in mancanza di qlik, script di esportazione dati da postgreSQL -> csv -> drive -> (pc Win) Qlik
 	11. check inserimento debito 1k luglio '24
 	12. ogni inserimento di numero ha il punto come separatore decimale, rimuovere inserimento di virgole dentro campi testuali per csv protection
 	13. rimuovere variabile type_mov da ogni INSERT_*.sql e la gestione eccezioni relativa
-	14. rimuovere movimenti TEST
+	14. ridefinire tabelle, sp e viste, re-importare i csv
 	15. rinominare tabella [NB: anche tabella map_movimenti], sql e python di INSERISCI_S_MANTENIMENTO in INSERISCI_SPESA_MANTENIMENTO
 	16. modificare gestione di importo-netto-totale per gli stipendi (sql [tabella e sp], python [back-end e front-end])
-	17. aggiustare i campi boolean dati in input dal back-end al database (deb_cred,)
+	17. aggiustare i campi boolean dati in input dal back-end al database (deb_cred,...)
 	18. fare sp che rimuove tutti i movimenti che hanno 'TEST' nei campi testuali
 	19. rimossa sp READ_MOVEMENTS, adeguare codice
 	20. settare date_mov nella tabella MOVIMENTI e derivati, in formato [GG-MM-AA]
-	21. check BK_DATABASE
+	21. riadattare BK_DATABASE (ora lo script genera un comando che crea il backup, deve essere eseguito lato python)
 	22. modifica SALDO_DEBITO_CREDITO.sql, passaggio di id da saldare in formato di array al posto che stringa 'id1,id2,id3,...'
 	23. REMOVE_MOVEMENT non dovrebbe modificare movimenti di tipo saldo dc
 	24. check su python di inserimento di id in formato [id1 id2 id3 ...] per saldo dc multipli
+	25. fixare chiamata stored procedures
+
+
+Alla fine:
+	. vedere se MAP_TABELLE e' aggiornata
+	. rimuovere movimenti TEST
+	. update per patch 2.0

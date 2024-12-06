@@ -1,7 +1,8 @@
 NEW FEATURE:
     | | aggiungere in ShowMovementsScreen gli ultimi n generici movimenti inseriti
 	| | porting su linux
-	| | migrazione da SQL serv. a PostgreSQL
+	| | migrazione da SQL serv. a PostgreSQL (vedi migration_notes.txt)
+	| | ricostruire BI su https://store.metabase.com/
 	| | aggiungere logo app, voce in file .ini: window_icon
 	| | traduzione italiano-inglese (codice sorgente e database)
 
@@ -14,31 +15,25 @@ MODIFICHE:
 
 BUG:
 	| | soppressione scrittura file di log di kivy
-	| | inserimento di numero con virgola per separatore dei decimali fallisce e non scrive neanche il log
+	| | inserimento di numero con virgola per separatore dei decimali fallisce e non scrive neanche il log  (vedi migration_notes.txt#12) 
 
 CHECK:
 
 FORSE:
+	| | esecuzione suono all'inserimento del movimento
 
 SQL:
 	|V| inserire tutti i vincoli di foreign key alle tabelle
     | | mapping errori delle stored procs in una table con le relative descrizioni
-	| | script SQL per creare il db e riempire tabelle di mapping
 	| | automatismo insierimento spese ed entrate periodiche
 	| | cambio 'Weed' into 'Drugs' so MAP_SPESE_VARIE
 	|V| cambio conti bancomat -> unicredit
-	| | porting MSSQL -> postgreSQL
 	| | aggiungere tabella di mapping per stored procedure
-	| | unire WALLET_USERS e QLIK_USERS, hashing della password di qlik
-
-BI:
-	|V| apertura foglio qlik su sheet principale
-	|V| terminare bi
-	|V| aggiornare bi
+	|X| unire WALLET_USERS e QLIK_USERS, hashing della password di qlik
 	
 SETUP:
 
-
 	-- rimuovere movimenti di test
 	-- check tutti gli NB
+	-- aggiornare documentazione
 	-- aggiornare counter versione (anche nel file .ini)
