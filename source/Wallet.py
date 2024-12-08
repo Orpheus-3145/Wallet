@@ -6,23 +6,17 @@ import Tools                            # funzioni generiche di supporto
 
 
 class Wallet:
-    def __init__(self, host_db, port_db, logger=None):
+    def __init__(self, host, port_db, user, password, logger=None):
         self.db_name = "wallet"
         self.logger = logger
         self.connection = psycopg2.connect(
             dbname=self.db_name,
-            # host=host_db,
-            port=port_db
+            port=port_db,
+            user=user,
+            password=password,
         )
         self.cursor = self.connection.cursor()
         self.connection.autocommit = False
-        # try:
-        #     self.connection = pyodbc.connect(dsn)       # autocommit = False default
-        #     self.cursor = self.connection.cursor()
-        # except pyodbc.Error as error:
-        #     raise SqlError(error.args[1])
-        # else:
-        #     self.movements = self.get_info_db("movimenti")
 
     def login_wallet(self, username, password):
         hash_pwd_db = self.get_password_from_username(username)
@@ -103,27 +97,8 @@ class Wallet:
                 except ValueError:
                     raise WrongValueInsert(f"ID non valido: {movement[id_key]}")
 
-    def run_sp(self, sp_name, sp_args=None, keys_varchar=None, do_commit=True):
-        sql_query = self.format_sql_string(suide='E',
-                                           sp_name=sp_name,
-                                           sp_args=sp_args,
-                                           keys_varchar=keys_varchar)
-        self.exec_query_sql(sql_query, do_commit)
-
-    def exec_query_sql(self, sql_query, do_commit=False):
-        if self.logger:
-            self.logger.debug("esecuzione query SQL: '%s'", sql_query)
-        try:
-            self.cursor.execute(sql_query)
-        except pyodbc.Error as err:
-            self.cursor.rollback()
-            raise SqlError(err.args[1])
-        else:
-            if do_commit is True:
-                self.cursor.commit()
 
     def close_wallet(self):
-        """concludo il log"""
         self.cursor.close()
         self.connection.close()
 
@@ -163,16 +138,6 @@ class Wallet:
         self.exec_query_sql(sql_string)
         return self.cursor.fetchval()
 
-    def get_bi_credentials(self, role="ADMIN"):
-        sql_string = self.format_sql_string(suide="S",
-                                            table_name="QLIK_USERS",
-                                            field_select_list=["username", "password"],
-                                            where_dict={"RUOLO": role},
-                                            keys_varchar=[role])
-        self.exec_query_sql(sql_string)
-        row = self.cursor.fetchone()
-        return row.username, row.password
-
     def get_open_deb_creds(self):
         sql_string = self.format_sql_string(suide="S",
                                             table_name="V_DEBITI_CREDITI_APERTI",
@@ -206,6 +171,28 @@ class Wallet:
 
     def turn_deb_cred_into_mov(self, id_record):
         self.run_sp(sp_name="TURN_INTO_MOVEMENT", sp_args={"id_record": id_record})
+
+    def run_sp(self, sp_name, sp_args=None, keys_varchar=None, do_commit=True):
+        sql_query = self.format_sql_string(suide='E',
+                                           sp_name=sp_name,
+                                           sp_args=sp_args,
+                                           keys_varchar=keys_varchar)
+        self.exec_query_sql(sql_query, do_commit)
+
+    def exec_query_sql(self, sql_query, do_commit=False):
+        if self.logger:
+            self.logger.debug("esecuzione query SQL: '%s'", sql_query)
+        try:
+            if sql_query.startswith("CALL INS"):
+                print(sql_query)
+            else:
+                self.cursor.execute(sql_query)
+        except pyodbc.Error as err:
+            self.cursor.rollback()
+            raise SqlError(err.args[1])
+        else:
+            if do_commit is True:
+                self.cursor.commit()
 
     def format_sql_string(self, suide, table_name=None, field_select_list=None, where_dict=None, update_dict=None,
                           insert_dict=None, join_type=None, join_table=None, join_dict=None, keys_varchar=None,
@@ -309,7 +296,6 @@ class Wallet:
                         str_args.append("@{}={}".format(arg_name, arg_value))
                 sql_string = sql_string + ", ".join(str_args)
         return sql_string
-
 
 if __name__ == "__main__":
     pass

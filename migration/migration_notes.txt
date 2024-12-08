@@ -30,6 +30,9 @@ V	9. aggiungere altri CHECK nella definizione delle tabelle
 	23. REMOVE_MOVEMENT non dovrebbe modificare movimenti di tipo saldo dc
 	24. check su python di inserimento di id in formato [id1 id2 id3 ...] per saldo dc multipli
 	25. fixare chiamata stored procedures
+	26. app non e' accentrata
+	27. fixare handling except for postgreSQL
+	28. automatizzare procedura di creazione nuovo utente, anche alla creazione dell'app
 
 
 Alla fine:

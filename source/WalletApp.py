@@ -42,6 +42,8 @@ class WalletApp(App):
             self.config_info["kv_files"] = [Tools.get_abs_path(kv_file) for kv_file in config["kivy_files"].values()]
             self.config_info["host"] = config["database"]["host"]
             self.config_info["port"] = config["database"]["port"]
+            self.config_info["user"] = config["database"]["user"]
+            self.config_info["password"] = config["database"]["password"]
             self.config_info["backup_path"] = Tools.get_abs_path(config["database"]["backup_path"])
             self.config_info["background_img_path"] = Tools.get_abs_path(config["graphics"]["background_img_path"])
             self.config_info["logo_path"] = Tools.get_abs_path(config["graphics"]["logo_path"])
@@ -98,7 +100,6 @@ class WalletApp(App):
             self.update_log("invalid log level provided: {}, original message: '{}'".format(level, message), 30, *args)
 
     def build(self):
-
         root = tk.Tk()
         root.withdraw()
         width_screen = root.winfo_screenwidth()
@@ -116,24 +117,13 @@ class WalletApp(App):
         return ManagerScreen()
 
     def connect(self):
-        # dsn = self.config_info["dsn"]
         try:
-            self.update_log("connessione al database postgreSQL", 10 )
-            self.wallet_instance = Wallet.Wallet(self.config_info["host"], self.config_info["port"])
+            self.wallet_instance = Wallet.Wallet(self.config_info["host"], self.config_info["port"], self.config_info["user"], self.config_info["password"])
         except SqlError as db_err:
             self.update_log("errore connessione - %s", 40, str(db_err))
             raise AppException("Connessione al database fallita, consulta il log per ulteriori dettagli")
         else:
             self.update_log("connessione al database effettuata", 10)
-        # bi_file = self.config_info["bi_file_path"]
-        # try:
-        #     self.update_log("creazione app BI (pywin32) con file: %s", 10, bi_file)
-        #     self.qlik_app = BusIntApp(bi_file)
-        # except AppException as bi_error:
-        #     self.update_log("errore app BI (pywin32) - %s", 40, str(bi_error))
-        #     raise AppException("Errore app BI, consulta il log per ulteriori dettagli")
-        # else:
-        #     self.update_log("app BI creata", 10)
 
     def login(self, user, pwd, autologin):
         if autologin is True:
