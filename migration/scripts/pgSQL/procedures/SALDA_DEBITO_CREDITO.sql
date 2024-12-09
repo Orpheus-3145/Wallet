@@ -1,6 +1,6 @@
 CREATE OR REPLACE PROCEDURE SALDA_DEBITO_CREDITO(
-    id_conto int,
     data_mov date,
+    id_conto int,
     id_saldo_deb_cred text,
     importo real DEFAULT 0,
     note text DEFAULT ''

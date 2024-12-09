@@ -2,8 +2,8 @@ CREATE OR REPLACE PROCEDURE INSERISCI_ENTRATA(
 	data_mov date,
 	id_conto int,
 	importo real,
-	descrizione text,
 	id_tipo_entrata int,
+	descrizione text,
 	note text DEFAULT ''
 )
 LANGUAGE plpgsql AS $$

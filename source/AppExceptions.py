@@ -8,8 +8,18 @@ class AppException(Exception):
         return self.error_text
 
 
-class WrongValueInsert(Exception):
-    """Eccezione che viene sollevata in caso in cui uno dei dati passati, da inserire in un movimento, non sia corretto"""
+class FailCheckException(Exception):
+    """Eccezione che viene sollevata in caso in cui uno dei dati in non sia corretto"""
+
+    def __init__(self, error_text):
+        super().__init__()
+        self.error_text = error_text
+
+    def __str__(self):
+        return self.error_text
+
+class EmptySelectException(Exception):
+    """Eccezione che viene sollevata quando una istruzione SELECT non ritorna nessuna linea"""
 
     def __init__(self, error_text):
         super().__init__()

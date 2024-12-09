@@ -2,8 +2,6 @@ import logging
 import os
 from datetime import date
 import tkinter as tk
-# import win32com.client as win32         # per aprire applicazioni win
-# import pywintypes                       # per gestire alcune eccezioni legate al modulo di cui sopra
 
 import Tools
 import Wallet
@@ -11,11 +9,6 @@ from AppExceptions import *
 
 from kivy.config import Config
 DEF_LOG_LVL = 20
-
-# if os.environ.get("WalletAppPath") == os.getcwd():
-#     os.chdir("_internal")
-# else:
-#     os.chdir("..")
 
 LOG_PATH = Tools.get_abs_path("logs")
 CONFIG_PATH = Tools.get_abs_path("settings/config_wallet.ini")
@@ -33,7 +26,6 @@ class WalletApp(App):
         self._stopped = False
         self.wallet_instance = None
         self.config_info = {}
-        self.stored_procs = {}
         self.create_logger(LOG_PATH, Config.get("log", "log_level", fallback=DEF_LOG_LVL))
         self.read_config(Config)
 
@@ -118,7 +110,7 @@ class WalletApp(App):
 
     def connect(self):
         try:
-            self.wallet_instance = Wallet.Wallet(self.config_info["host"], self.config_info["port"], self.config_info["user"], self.config_info["password"])
+            self.wallet_instance = Wallet.Wallet(self.config_info["host"], self.config_info["port"], self.config_info["user"], self.config_info["password"], logging)
         except SqlError as db_err:
             self.update_log("errore connessione - %s", 40, str(db_err))
             raise AppException("Connessione al database fallita, consulta il log per ulteriori dettagli")
@@ -132,23 +124,21 @@ class WalletApp(App):
         elif user == "" or pwd == "":
             raise AppException("Credenziali mancanti")
         self.connect()
-        login_success = self.wallet_instance.login_wallet(user.strip(), pwd.strip())
+        login_success = self.wallet_instance.connect_database(user.strip(), pwd.strip())
         if login_success is True:
             self.update_log("utente %s ha effettuato l'accesso", 20, user)
         return login_success
 
     def insert_movement(self, id_mov, data_movement):
         try:
-            self.update_log("inserimento nuovo movimento tipo %s", 10, id_mov)
             self.wallet_instance.insert_movement(id_mov=id_mov, data_info=data_movement)
-        except (InternalError, WrongValueInsert, SqlError) as error:
-            if isinstance(error, InternalError) is True:
-                self.update_log("errore inserimento - %s", 40, str(error))
-                raise AppException("Movimento non inserito, consulta il log per ulteriori dettagli")
-            else:       # an info is missing or wrong
-                raise AppException(str(error))
+        except (InternalError, SqlError) as error:
+            self.update_log("errore interno - %s", 40, str(error))
+            raise AppException("Errore interno, consulta il log per ulteriori dettagli")
+        except FailCheckException as wrong_input:
+            raise AppException(str(wrong_input))
         else:
-            self.update_log("inserimento nuovo movimento tipo %s riuscito", 20, id_mov)
+            self.update_log("inserimento movimento tipo %s riuscito", 20, id_mov)
 
     def drop_records(self, list_records):
         count_errs = 0
@@ -203,7 +193,7 @@ class WalletApp(App):
         if not self._stopped:
             self._stopped = True
             if self.wallet_instance:
-                self.wallet_instance.close_wallet()
+                self.wallet_instance.disconnect_database()
         self.update_log("app chiusa", 20)
         self.update_log("#" * 80, 20)
 
@@ -211,7 +201,11 @@ class WalletApp(App):
     def get_movements(self, movs_to_drop=None):
         if movs_to_drop is None:
             movs_to_drop = []
-        movements = self.wallet_instance.get_info_db("movimenti")
+        try:
+            movements = self.wallet_instance.get_movements()
+        except (SqlError, EmptySelectException) as db_err:
+            self.update_log("errore database: %s", 40, str(db_err))
+            raise AppException("Errore database, consulta il log per ulteriori dettagli")
         for mov_to_drop in movs_to_drop:
             for key_mov, name_mov in movements.items():
                 if name_mov == mov_to_drop:
@@ -221,30 +215,30 @@ class WalletApp(App):
 
     def get_type_accounts(self):
         try:
-            return self.wallet_instance.get_info_db("conti")
-        except SqlError as db_err:
-            self.update_log("errore nella lettura del database - trace: %s", 40, str(db_err))
+            return self.wallet_instance.get_map_data("conti")
+        except (SqlError, EmptySelectException) as db_err:
+            self.update_log("errore database: %s", 40, str(db_err))
             raise AppException("Errore database, consulta il log per ulteriori dettagli")
 
     def get_type_spec_movements(self):
         try:
-            return self.wallet_instance.get_info_db("spese_varie")
-        except SqlError as db_err:
-            self.update_log("errore nella lettura del database - trace: %s", 40, str(db_err))
+            return self.wallet_instance.get_map_data("spese_varie")
+        except (SqlError, EmptySelectException) as db_err:
+            self.update_log("errore database: %s", 40, str(db_err))
             raise AppException("Errore database, consulta il log per ulteriori dettagli")
 
     def get_type_entrate(self):
         try:
-            return self.wallet_instance.get_info_db("entrate")
-        except SqlError as db_err:
-            self.update_log("errore nella lettura del database - trace: %s", 40, str(db_err))
+            return self.wallet_instance.get_map_data("entrate")
+        except (SqlError, EmptySelectException) as db_err:
+            self.update_log("errore database: %s", 40, str(db_err))
             raise AppException("Errore database, consulta il log per ulteriori dettagli")
 
     def get_open_deb_creds(self):
         try:
             return self.wallet_instance.get_open_deb_creds()
-        except SqlError as db_err:
-            self.update_log("errore nella lettura del database - trace: %s", 40, str(db_err))
+        except (SqlError, EmptySelectException) as db_err:
+            self.update_log("errore database: %s", 40, str(db_err))
             raise AppException("Errore database, consulta il log per ulteriori dettagli")
 
     def get_last_n_records(self, id_mov, n_records):
@@ -276,6 +270,7 @@ class WalletApp(App):
     def get_logo_path(self):
         return self.config_info["logo_path"]
 
+    #remove
     def get_bi_logo_path(self):
         return self.config_info["bi_logo_path"]
 

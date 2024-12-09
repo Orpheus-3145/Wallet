@@ -4,301 +4,355 @@ import psycopg2                         # info: https://www.psycopg.org/docs/usa
 from AppExceptions import *
 import Tools                            # funzioni generiche di supporto
 
+class CheckerWallet:
+	def check_exist(self, info, exist_field):
+		try:
+			info[exist_field]
+		except KeyError:
+			raise FailCheckException(f"Campo {exist_field} mancante")
+
+	def check_text(self, info, text_field):
+		try:
+			if info[text_field].strip() == "":
+				raise FailCheckException(f"Campo {text_field} vuoto")
+		except KeyError:
+			raise FailCheckException(f"Campo {text_field} mancante")
+		else:
+			info[text_field] = f"'{info[text_field]}'"
+
+	def check_date(self, info, date_field):
+		try:
+			datetime.strptime(info[date_field], "%Y-%m-%d")
+		except KeyError:
+			raise FailCheckException(f"Data mancante")
+		except ValueError:
+			raise FailCheckException(f"Data non valida: {info[date_field]}")
+		else:
+			info[date_field] = f"'{info[date_field]}'"
+
+	def check_num(self, info, num_field, check_positivity=False):
+		try:
+			info[num_field] = Tools.convert_to_float(info[num_field])
+		except KeyError:
+			raise FailCheckException(f"Importo {num_field} mancante")
+		except (TypeError, ValueError):
+			raise FailCheckException(f"Importo {num_field} non valido: {info[num_field]}")
+		else:
+			if check_positivity is True and info[num_field] <= 0:
+				raise FailCheckException(f"Importo {num_field} nullo o negativo")
+			info[num_field] = str_number).replace(",", ".")
+
+	def check_id(self, info, id_field):
+		try:
+			if int(info[id_field]) <= 0:
+				raise FailCheckException("ID {id_field} negativo")
+		except KeyError:
+			raise FailCheckException(f"ID {id_field} mancante")
+		except ValueError:
+			raise FailCheckException(f"ID {id_field} non valido: {info[id_field]}")
+		else:
+			info[id_field] = int(info[id_field])
+
 
 class Wallet:
-    def __init__(self, host, port_db, user, password, logger=None):
-        self.db_name = "wallet"
-        self.logger = logger
-        self.connection = psycopg2.connect(
-            dbname=self.db_name,
-            port=port_db,
-            user=user,
-            password=password,
-        )
-        self.cursor = self.connection.cursor()
-        self.connection.autocommit = False
+	def __init__(self, host, port_db, user, password, logger=None):
+		self.db_name = "wallet"
+		self.connection = psycopg2.connect(
+			dbname=self.db_name,
+			port=port_db,
+			# host=host,
+			user=user,
+			password=password,
+		)
+		self.cursor = self.connection.cursor()
+		self.connection.autocommit = False
+		self._logger = logger
+		self._checker = CheckerWallet()
 
-    def login_wallet(self, username, password):
-        hash_pwd_db = self.get_password_from_username(username)
-        hash_pwd_input = sha256(str(password).encode()).hexdigest()
-        return hash_pwd_input == hash_pwd_db
+	def connect_database(self, username, password):
+		try:
+			hash_pwd_db = self.get_password_from_username(username)
+		except EmptySelectException:
+			return False
+		hash_pwd_input = sha256(str(password).encode()).hexdigest()
+		return hash_pwd_input == hash_pwd_db
 
-    def insert_movement(self, id_mov, data_info):
-        if id_mov not in self.movements:
-            raise InternalError("ID {} movimento sconosciuto".format(id_mov))
-        sp_name = ""
-        keys_to_check = ["importo", "id_conto"]
-        keys_date_to_check = ["data_mov"]
-        keys_float_to_check = ["importo"]
-        keys_id_to_check = ["id_conto"]
-        keys_varchar = ["data_mov", "note"]
-        if self.movements[id_mov] == "Spesa Varia":
-            keys_to_check.extend(["id_tipo_s_varia", "descrizione"])
-            keys_id_to_check.append("id_tipo_s_varia")
-            keys_varchar.append("descrizione")
-            sp_name = "INSERISCI_S_VARIA"
-        elif self.movements[id_mov] == "Spesa Fissa":
-            keys_to_check.append("descrizione")
-            keys_varchar.append("descrizione")
-            sp_name = "INSERISCI_S_FISSA"
-        elif self.movements[id_mov] == "Stipendio":
-            keys_to_check.append("ddl")
-            keys_varchar.append("ddl")
-            keys_float_to_check.extend(["netto", "rimborso_spese"])
-            sp_name = "INSERISCI_STIPENDIO"
-        elif self.movements[id_mov] == "Entrata":
-            keys_to_check.extend(["id_tipo_entrata", "descrizione"])
-            keys_id_to_check.append("id_tipo_entrata")
-            keys_varchar.append("descrizione")
-            sp_name = "INSERISCI_ENTRATA"
-        elif self.movements[id_mov] == "Debito - Credito":
-            keys_to_check.extend(["deb_cred", "origine", "descrizione"])
-            keys_id_to_check.append("deb_cred")
-            keys_varchar.extend(["origine", "descrizione"])
-            sp_name = "INSERISCI_DEB_CRED"
-        elif self.movements[id_mov] == "Saldo Debito - Credito":
-            keys_to_check.append("id_saldo_deb_cred")
-            keys_to_check.remove("importo")
-            keys_varchar.append("id_saldo_deb_cred")
-            sp_name = "SALDA_DEB_CRED"
-        elif self.movements[id_mov] == "Spesa di Mantenimento":
-            keys_to_check.append("descrizione"),
-            keys_varchar.append("descrizione")
-            sp_name = "INSERISCI_S_MANTENIMENTO"
-        elif self.movements[id_mov] == "Spesa di Viaggio":
-            keys_to_check.extend(["viaggio", "descrizione"]),
-            keys_varchar.extend(["viaggio", "descrizione"])
-            sp_name = "INSERISCI_S_VIAGGIO"
-        self.check_movement(data_info, keys_to_check, keys_date_to_check, keys_float_to_check, keys_id_to_check)
-        self.run_sp(sp_name, data_info, keys_varchar)
+	def disconnect_database(self):
+		self.cursor.close()
+		self.connection.close()
 
-    def check_movement(self, movement, keys_to_check, keys_date_to_check, keys_float_to_check, keys_id_to_check):
-        for key_to_check in keys_to_check:
-            if key_to_check not in movement or movement[key_to_check].strip() == "":
-                raise WrongValueInsert("Informazioni mancanti")
-        for date_key in keys_date_to_check:
-            if date_key in movement:
-                try:
-                    datetime.strptime(movement[date_key], "%Y-%m-%d")
-                except (KeyError, ValueError):
-                    raise WrongValueInsert(f"Data non valida: {movement[date_key]}")
-        for numeric_key in keys_float_to_check:
-            if numeric_key in movement:
-                try:
-                    movement[numeric_key] = Tools.convert_to_float(movement[numeric_key])
-                    if movement[numeric_key] <= 0:
-                        raise WrongValueInsert("Importo nullo o negativo")
-                except (TypeError, ValueError):
-                    raise WrongValueInsert(f"Importo non valido: {movement[numeric_key]}")
-        for id_key in keys_id_to_check:
-            if id_key in movement:
-                try:
-                    int(movement[id_key])
-                except ValueError:
-                    raise WrongValueInsert(f"ID non valido: {movement[id_key]}")
+	def backup_database(self, backup_path):
+		sql_query = Tools.format_sql_string_pgsql(operation='C',
+												proc_name="BK_DATABASE",
+												proc_args=[f"'{self.db_name}'", f"'{backup_path}'"])
+		self._exec_sql_string(sql_query)
 
+	# READ DATABASE
+	def get_map_data(self, info_type):
+		"""Restituisce un dizionario sui tipi di pagamento nel formato {id_pagamento: nome_pagamento}"""
+		_types = {"conti": "MAP_CONTI",
+				  "spese_varie": "MAP_SPESE_VARIE",
+				  "entrate": "MAP_ENTRATE"}
+		
+		if info_type not in _types:
+			raise InternalError(f"Tabella di map non trovata con valore: {info_type} - disponibili: {str(_types.keys())}")
+		
+		sql_string = Tools.format_sql_string_pgsql(operation="S",
+											table_name=_types[info_type],
+											field_select_list=["ID", "DESCRIZIONE"],
+											order_by_dict={"ID": "DESC"})
+		self._exec_sql_string(sql_string, check_return_rows=True)
+		info_data = {}
+		for row in self.cursor:
+			info_data[int(row[0])] = row[1]
+		return info_data
 
-    def close_wallet(self):
-        self.cursor.close()
-        self.connection.close()
+	def get_password_from_username(self, username):
+		sql_string = Tools.format_sql_string_pgsql(operation="S",
+											table_name="WALLET_USERS",
+											field_select_list=["PASSWORD"],
+											where_dict={"USERNAME": f"'{username}'"})
+		self._exec_sql_string(sql_string, check_return_rows=True)
+		return self.cursor.fetchval()
 
-    def backup_database(self, backup_path):
-        sp_args = {"bk_path": backup_path, "db_to_backup": self.db_name}
-        keys_varchar = sp_args.keys()
-        try:        # running a sp that creates the backup always fails the first time even though is outside a transaction and autocommit is False
-            self.run_sp(sp_name="BK_DATABASE", sp_args=sp_args, keys_varchar=keys_varchar, do_commit=False)
-        except SqlError:    # the second time the backup is created (?)
-            self.run_sp(sp_name="BK_DATABASE", sp_args=sp_args, keys_varchar=keys_varchar, do_commit=False)
+	def get_open_deb_creds(self):
+		sql_string = Tools.format_sql_string_pgsql(operation="S",
+											table_name="V_DEBITI_CREDITI_APERTI",
+											order_by_dict={"convert(date, DATA, 103)": "DESC"})
+		self._exec_sql_string(sql_string, check_return_rows=True)
+		column_list = []        # lista dei nomi dei campi
+		matrix_mov = []         # record di dati
+		for column in self.cursor.description:
+			if column[0] != "ID":
+				column_list.append(column[0])
+		for row in self.cursor:
+			matrix_mov.append([elem for elem in row])
+		return column_list, matrix_mov
 
-    # READ DATABASE
-    def get_info_db(self, info_type):
-        """Restituisce un dizionario sui tipi di pagamento nel formato {id_pagamento: nome_pagamento}"""
-        _types = {"movimenti": "MAP_MOVIMENTI",
-                  "conti": "MAP_CONTI",
-                  "spese_varie": "MAP_SPESE_VARIE",
-                  "entrate": "MAP_ENTRATE"}
-        if info_type not in _types:
-            raise InternalError("Tabella di map non trovata con valore: {}".format(info_type))
-        sql_string = self.format_sql_string(suide="S",
-                                            table_name=_types[info_type],
-                                            field_select_list=["ID", "DESCRIZIONE"],
-                                            order_by_dict={"ID": "DESC"})
-        self.exec_query_sql(sql_string)
-        info_data = {}
-        for row in self.cursor:
-            info_data[int(row[0])] = row[1]
-        return info_data
+	def get_last_n_records(self, id_mov, n_records):
+		pass
+		# sql_query = Tools.format_sql_string_pgsql(operation='S',
+		# 								   proc_name="READ_MOVEMENTS",
+		# 								   proc_args={"id_tipo_mov": id_mov, "n_records": n_records})
 
-    def get_password_from_username(self, username):
-        sql_string = self.format_sql_string(suide="S",
-                                            table_name="WALLET_USERS",
-                                            field_select_list=["PASSWORD"],
-                                            where_dict={"USERNAME": username},
-                                            keys_varchar=[username])
-        self.exec_query_sql(sql_string)
-        return self.cursor.fetchval()
+		# self._exec_sql_string(sql_query, check_return_rows=True)
+		# column_list = []        # lista dei nomi dei campi
+		# matrix_mov = []         # record di dati
+		# for column in self.cursor.description:
+		# 	if column[0] != "ID":
+		# 		column_list.append(column[0])
+		# for row in self.cursor:
+		# 	matrix_mov.append([elem for elem in row])
+		# return column_list, matrix_mov
 
-    def get_open_deb_creds(self):
-        sql_string = self.format_sql_string(suide="S",
-                                            table_name="V_DEBITI_CREDITI_APERTI",
-                                            order_by_dict={"convert(date, DATA, 103)": "DESC"})
-        self.exec_query_sql(sql_string)
-        column_list = []        # lista dei nomi dei campi
-        matrix_mov = []         # record di dati
-        for column in self.cursor.description:
-            if column[0] != "ID":
-                column_list.append(column[0])
-        for row in self.cursor:
-            matrix_mov.append([elem for elem in row])
-        return column_list, matrix_mov
+	def get_movements(self,):
+		sql_string = Tools.format_sql_string_pgsql(operation="S",
+											table_name="MAP_MOVIMENTI",
+											field_select_list=["ID", "DESCRIZIONE"],
+											order_by_dict={"ID": "ASC"})
+		self._exec_sql_string(sql_string, check_return_rows=True)
+	
+		info_data = {}
+		for row in self.cursor:
+			info_data[int(row[0])] = row[1]
+		
+		return info_data
 
-    def get_last_n_records(self, id_mov, n_records):
-        self.run_sp(sp_name="READ_MOVEMENTS",
-                    sp_args={"id_tipo_mov": id_mov, "n_records": n_records},
-                    do_commit=False)
-        column_list = []        # lista dei nomi dei campi
-        matrix_mov = []         # record di dati
-        for column in self.cursor.description:
-            if column[0] != "ID":
-                column_list.append(column[0])
-        for row in self.cursor:
-            matrix_mov.append([elem for elem in row])
-        return column_list, matrix_mov
+	def get_info_mov(self, id_mov):
+		result = tuple()
+		sql_string = Tools.format_sql_string_pgsql(operation="S",
+											table_name="MAP_MOVIMENTI",
+											field_select_list=["DESCRIZIONE", "STORED_PROCEDURE"],
+											where_dict={"ID": id_mov})
+		self._exec_sql_string(sql_string, check_return_rows=True)
+		result = self.cursor.fetchone()
 
-    # WRITE DATABASE
-    def drop_record(self, id_record):
-        self.run_sp(sp_name="REMOVE_MOVEMENT", sp_args={"id_mov_to_drop": id_record})
+		return result[0], result[1]
 
-    def turn_deb_cred_into_mov(self, id_record):
-        self.run_sp(sp_name="TURN_INTO_MOVEMENT", sp_args={"id_record": id_record})
+	# WRITE DATABASE
+	def drop_record(self, id_record):
+		sql_query = Tools.format_sql_string_pgsql(operation='C',
+										   proc_name="REMOVE_MOVEMENT",
+										   proc_args=[id_record])
+		self._exec_sql_string(sql_query, True)
 
-    def run_sp(self, sp_name, sp_args=None, keys_varchar=None, do_commit=True):
-        sql_query = self.format_sql_string(suide='E',
-                                           sp_name=sp_name,
-                                           sp_args=sp_args,
-                                           keys_varchar=keys_varchar)
-        self.exec_query_sql(sql_query, do_commit)
+	def turn_deb_cred_into_mov(self, id_record):
+		sql_query = Tools.format_sql_string_pgsql(operation='C',
+										   proc_name="TURN_INTO_MOVEMENT",
+										   proc_args=[id_record])
+		self._exec_sql_string(sql_query, True)
 
-    def exec_query_sql(self, sql_query, do_commit=False):
-        if self.logger:
-            self.logger.debug("esecuzione query SQL: '%s'", sql_query)
-        try:
-            if sql_query.startswith("CALL INS"):
-                print(sql_query)
-            else:
-                self.cursor.execute(sql_query)
-        except pyodbc.Error as err:
-            self.cursor.rollback()
-            raise SqlError(err.args[1])
-        else:
-            if do_commit is True:
-                self.cursor.commit()
+	def insert_movement(self, id_mov, data_info):
+		try:
+			type_mov, proc_name = self.get_info_mov(id_mov)
+		except EmptySelectException:
+			raise InternalError(f"Movimento id: {id_mov} non esistente")
 
-    def format_sql_string(self, suide, table_name=None, field_select_list=None, where_dict=None, update_dict=None,
-                          insert_dict=None, join_type=None, join_table=None, join_dict=None, keys_varchar=None,
-                          order_by_dict=None, top=None, sp_name=None, sp_args=None):
-        """Crea e formatta un'instruzione SQL di tipo suid (SELECT, UPDATE, INSERT, DELETE)
-            - suide -> ha come valore 'S' SELECT, 'U' UPDATE, 'I' INSERT, 'D' DELETE, 'E' EXEC
-            - table_name -> nome tabella,
-            - field_select_list -> lista di campi da selezionare/modificare/inserire/cancellare
-            - where_dict -> dizionario che contiene n condizioni che devono essere interamente soddisfatte (AND ... AND ... ) nella forma chiave = valore inseriti nel costrutto WHERE
-            - update_dict -> dizionario in cui chaive (<-campo) = valore nel costrutto SET di UPDATE
-            - insert_dict -> dizionario contenete il campo (chiave) e il valore da inserire in esso nel costrutto INSERT INTO
-            - join -> tipo di join da eseguire -> 'I' inner, 'L' left, 'R' right, 'C' cross
-            - join_table -> tabella da joinare
-            - join_fields -> dizionario di campi da uguagliare per il join
-            - keys_varchar -> lista di valori varchar da inserire in select, where, insert o update, restituisce il valore nello statement SQL racchiuso da singoli apici
-            - order_by_dict -> coppie CAMPO: DESC/ASC
-            - top -> se diverso da None mostra le prime top (int) righe
-            - sp_name -> nome procedura da eseguire
-            - sp_args -> dizionario nella forma {nome_argomento: valore_argomento}"""
-        sql_string = ""
+		proc_args = []
+		if type_mov == "Spesa Varia":
+			proc_args = self._format_args_spesa_varia(data_info)
+		elif type_mov == "Spesa Fissa":
+			proc_args = self._format_args_spesa_fissa(data_info)
+		elif type_mov == "Stipendio":
+			proc_args = self._format_args_stipendio(data_info)
+		elif type_mov == "Entrata":
+			proc_args = self._format_args_entrata(data_info)
+		elif type_mov == "Debito - Credito":
+			proc_args = self._format_args_debito_credito(data_info)
+		elif type_mov == "Saldo Debito - Credito":
+			proc_args = self._format_args_saldo_debito_credito(data_info)
+		elif type_mov == "Spesa di Mantenimento":
+			proc_args = self._format_args_spesa_mantenimento(data_info)
+		elif type_mov == "Spesa di Viaggio":
+			proc_args = self._format_args_spesa_viaggio(data_info)
+		print(proc_args)
+		sql_string = Tools.format_sql_string_pgsql(operation="C", proc_name=proc_name, proc_args=proc_args)
+		self._exec_sql_string(sql_string, True)
 
-        if suide == 'S':
-            sql_string = "SELECT * FROM {}".format(table_name)
-            if top is not None:  # inserisco top x nella select
-                if str(top).isdigit():
-                    top_n_values = "top {}".format(int(top))
-                    sql_string = sql_string.replace("SELECT", "SELECT {}".format(top_n_values))
-                else:
-                    raise WrongValueInsert("Non è stato passato un valore numerico per il numero di record da selezionare")
-            if isinstance(field_select_list, list):  # field_select_list <> None rimuovo '*' e creo l'elenco dei campi
-                fields_to_select = ", ".join(field_select_list)
-                sql_string = sql_string.replace("*", fields_to_select)
-            # elif field_select_list:
-            #     raise WrongValueInsert("è stato passato un parametro non valido per la condizione SELECT, deve essere list")
-            if join_dict and join_table and join_type:
-                join_types_dict = {"I": "INNER JOIN", "L": "LEFT JOIN", "R": "RIGHT JOIN", "C": "CROSS JOIN"}
-                if join_type in join_types_dict and isinstance(join_dict, dict):  # in questo caso devo inserire anche un join
-                    fields_to_join = " AND ".join("{} = {}".format(key, value) for key, value in join_dict.items())
-                    sql_string = " ".join(
-                        [sql_string, join_types_dict.get(join_type), join_table, "ON", fields_to_join])
-                # else:
-                #     raise WrongValueInsert("per join richiesti parametri validi join_type e join_table")
-            if isinstance(where_dict, dict):  # se where_dict <> da None aggiungo anche le restrizioni tramite WHERE statement
-                fields_to_filter = " AND ".join("{} = {}".format(key, "'{}'".format(
-                    Tools.escape_sql_chars(value)) if keys_varchar and value in keys_varchar else value) for key, value in where_dict.items())
-                sql_string = " ".join([sql_string, "WHERE", fields_to_filter])
-            # elif where_dict:
-            #     raise WrongValueInsert("è stato passato un parametro non valido per la condizione WHERE, deve essere dict")
-            if isinstance(order_by_dict, dict):  # se order_by_dict <> da None inserisco l'ordinamento
-                fields_to_order_by = ", ".join("{} {}".format(key, value) for key, value in order_by_dict.items())
-                sql_string = " ".join([sql_string, "ORDER BY", fields_to_order_by])
-            # elif order_by_dict:
-            #     raise WrongValueInsert("è stato passato un parametro non valido per la condizione ORDER BY, deve essere dict")
-        elif suide == 'U':
-            sql_string = "UPDATE {} SET".format(table_name)
-            if not isinstance(update_dict, dict):
-                raise WrongValueInsert("Non è stata fornita la lista dei campi da modificare oppure il tipo non è corretto, deve essere dict")
-            fields_to_update = ", ".join("{} = {}".format(key, "'{}'".format(
-                Tools.escape_sql_chars(value)) if keys_varchar and value in keys_varchar else value) for
-                                         key, value in
-                                         update_dict.items())
-            sql_string = " ".join([sql_string, fields_to_update])
-            if isinstance(where_dict, dict):  # se where_dict è tipo dict aggiungo anche le restrizioni tramite WHERE statement
-                fields_to_filter = " AND ".join("{} = {}".format(key, "'{}'".format(
-                    Tools.escape_sql_chars(value)) if keys_varchar and value in keys_varchar else value) for
-                                                key, value in
-                                                where_dict.items())
-                sql_string = " ".join([sql_string, "WHERE", fields_to_filter])
-            # elif where_dict is not None:
-            #     raise WrongValueInsert("è stato passato un parametro non valido per la condizione WHERE, deve essere dict")
-            else:  # cautela personale per non modificare una tabella per intero
-                raise WrongValueInsert("Non si può modificare interamente una tabella")
-        elif suide == 'I':
-            if isinstance(insert_dict, dict):  # mi accerto che venga fornita la lista dei campi e il loro relativo valore da aggiungere
-                sql_string = "INSERT INTO {}".format(table_name)
-                fields_to_insert = "({})".format(", ".join(insert_dict.keys()))  # elenco campi da inserire
-                values_to_insert = "({})".format(", ".join(["'{}'".format(
-                    Tools.escape_sql_chars(value)) if keys_varchar and value in keys_varchar else str(value) for value in insert_dict.values()]))
-                sql_string = " ".join([sql_string, fields_to_insert, "VALUES", values_to_insert])
-            elif insert_dict is not None:
-                raise WrongValueInsert("è stato passato un parametro non valido per la condizione INSERT, deve essere dict")
-            else:
-                raise WrongValueInsert("Non è stata fornita la lista dei campi da inserire!")
-        elif suide == 'D':
-            sql_string = "DELETE {}".format(table_name)
-            if isinstance(where_dict, dict):  # non voglio mai cancellare per intero la tabella, faccio sì che debbano esserci sempre clausole WHERE
-                fields_to_filter = " AND ".join("{} = {}".format(key, "'{}'".format(Tools.escape_sql_chars(value)) if keys_varchar and value in keys_varchar else value) for key, value in where_dict.items())
-                sql_string = " ".join([sql_string, "WHERE", fields_to_filter])
-            elif where_dict is not None:
-                raise WrongValueInsert("è stato passato un parametro non valido per la condizione WHERE, deve essere dict")
-            else:
-                raise WrongValueInsert("Non è possibile eliminare per intero una tabella!")
-        elif suide == "E":
-            sql_string = "exec {} ".format(sp_name)
-            if sp_args is not None:
-                str_args = []
-                for arg_name, arg_value in sp_args.items():
-                    if keys_varchar and arg_name in keys_varchar:
-                        str_args.append("@{}='{}'".format(arg_name, Tools.escape_sql_chars(arg_value)))
-                    else:
-                        str_args.append("@{}={}".format(arg_name, arg_value))
-                sql_string = sql_string + ", ".join(str_args)
-        return sql_string
+	def _format_args_spesa_varia(self, data):
+		self._checker.check_date(data, "data_mov")
+		self._checker.check_id(data, "id_conto")
+		self._checker.check_num(data, "importo", True)
+		self._checker.check_text(data, "descrizione")
+		self._checker.check_id(data, "id_tipo_s_varia")
+		
+		proc_args = [data["data_mov"], data["id_conto"], data["importo"], data["id_tipo_s_varia"], data["descrizione"]]
+		
+		if "note" in data:
+			self._checker.check_text(data, "note")
+			proc_args.append(data["note"])
+
+		return proc_args
+
+	def _format_args_spesa_fissa(self, data):
+		self._checker.check_date(data, "data_mov")
+		self._checker.check_id(data, "id_conto")
+		self._checker.check_num(data, "importo", True)
+		self._checker.check_text(data, "descrizione")
+		
+		proc_args = [data["data_mov"], data["id_conto"], data["importo"], data["descrizione"]]
+		
+		if "note" in data:
+			self._checker.check_text(data, "note")
+			proc_args.append(data["note"])
+
+		return proc_args
+	
+	def _format_args_stipendio(self, data):
+		self._checker.check_date(data, "data_mov")
+		self._checker.check_id(data, "id_conto")
+		self._checker.check_num(data, "importo", True)
+		self._checker.check_text(data, "ddl")
+		
+		proc_args = [data["data_mov"], data["id_conto"], data["importo"], data["ddl"]]
+
+		if "note" in data:
+			self._checker.check_text(data, "note")
+			proc_args.append(data["note"])
+
+		if "netto" in data:
+			self._checker.check_num(data, "netto", True)
+			proc_args.append(data["netto"])
+		
+		if "rimborso_spese" in data:
+			self._checker.check_num(data, "rimborso_spese", True)
+			proc_args.append(data["rimborso_spese"])
+
+		return proc_args
+	
+	def _format_args_entrata(self, data):
+		self._checker.check_date(data, "data_mov")
+		self._checker.check_id(data, "id_conto")
+		self._checker.check_num(data, "importo", True)
+		self._checker.check_id(data, "id_tipo_entrata")
+		self._checker.check_text(data, "descrizione")
+
+		proc_args = [data["data_mov"], data["id_conto"], data["importo"], data["id_tipo_entrata"], data["descrizione"]]
+		
+		if "note" in data:
+			self._checker.check_text(data, "note")
+			proc_args.append(data["note"])
+
+		return proc_args
+
+	def _format_args_debito_credito(self, data):
+		self._checker.check_date(data, "data_mov")
+		self._checker.check_id(data, "id_conto")
+		self._checker.check_num(data, "importo", True)
+		self._checker.check_exist(data, "deb_cred")
+		self._checker.check_text(data, "origine")
+		self._checker.check_text(data, "descrizione")
+		
+		proc_args = [data["data_mov"], data["id_conto"], data["importo"], data["deb_cred"], data["origine"], data["descrizione"]]
+		
+		if "note" in data:
+			self._checker.check_text(data, "note")
+			proc_args.append(data["note"])
+
+		return proc_args
+
+	def _format_args_saldo_debito_credito(self, data):
+		self._checker.check_date(data, "data_mov")
+		self._checker.check_id(data, "id_conto")
+		self._checker.check_text(data, "id_saldo_deb_cred")
+
+		proc_args = [data["data_mov"], data["id_conto"], data["id_saldo_deb_cred"]]
+		
+		if "importo" in data:
+			self._checker.check_num(data, "importo", True)
+			proc_args.append(data["importo"])
+
+		if "note" in data:
+			self._checker.check_text(data, "note")
+			proc_args.append(data["note"])
+
+		return proc_args
+
+	def _format_args_spesa_mantenimento(self, data):
+		self._checker.check_date(data, "data_mov")
+		self._checker.check_id(data, "id_conto")
+		self._checker.check_num(data, "importo", True)
+		self._checker.check_text(data, "descrizione")
+
+		proc_args = [data["data_mov"], data["id_conto"], data["importo"], data["descrizione"]]
+		
+		if "note" in data:
+			self._checker.check_text(data, "note")
+			proc_args.append(data["note"])
+
+		return proc_args
+
+	def _format_args_spesa_viaggio(self, data):
+		self._checker.check_date(data, "data_mov")
+		self._checker.check_id(data, "id_conto")
+		self._checker.check_num(data, "importo", True)
+		self._checker.check_text(data, "viaggio")
+		self._checker.check_text(data, "descrizione")
+
+		proc_args = [data["data_mov"], data["id_conto"], data["importo"], data["viaggio"], data["descrizione"]]
+		
+		if "note" in data:
+			self._checker.check_text(data, "note")
+			proc_args.append(data["note"])
+
+		return proc_args
+
+	def _exec_sql_string(self, sql_query, do_commit=False, check_return_rows=False):
+		self._logger.debug("esecuzione query SQL: '%s'", sql_query)
+		try:
+			self.cursor.execute(sql_query)
+		except (psycopg2.Warning, psycopg2.Error) as error:
+			self.connection.rollback()
+			raise SqlError(f"errore query SQL - trace: {str(error)}")
+		else:
+			if check_return_rows is True and self.cursor.rowcount == 0:
+				raise EmptySelectException("L'istruzione SELECT non ha prodotto risultati")
+			if do_commit is True:
+				self.connection.commit()
+
 
 if __name__ == "__main__":
-    pass
+	pass
 
 
 
