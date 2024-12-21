@@ -1,6 +1,6 @@
 DO $$
 DECLARE
-	csv_folder text := '../Wallet/migration/data/';
+	csv_folder text := '/var/lib/pgsql/17/Wallet/migration/data/test_exp/';
 	csv_path text := '';
 	table_name text := '';
 	tables text[] := ARRAY[
@@ -24,21 +24,15 @@ BEGIN
 	FOR table_name IN SELECT UNNEST(tables) LOOP
 
 		csv_path = csv_folder || table_name || '.csv';
-		-- import .csv into table
 		EXECUTE format( $query$
 			COPY public.%s
-			FROM %L
+			TO %L
 			WITH (
 				FORMAT csv,
 				HEADER true,
 				DELIMITER ','
 			)
 			$query$ , table_name, csv_path);
-
-		-- update last index value counter
-		EXECUTE format ( $query$ SELECT setval(pg_get_serial_sequence(%L, %L), MAX(%s)) 
-			FROM %s
-			$query$ , table_name, 'id', 'id', table_name);
 
 	END LOOP;
 

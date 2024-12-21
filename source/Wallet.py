@@ -40,7 +40,7 @@ class CheckerWallet:
 		else:
 			if check_positivity is True and info[num_field] <= 0:
 				raise FailCheckException(f"Importo {num_field} nullo o negativo")
-			info[num_field] = str_number).replace(",", ".")
+			# info[num_field] = str_number).replace(",", ".")
 
 	def check_id(self, info, id_field):
 		try:

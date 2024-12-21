@@ -37,7 +37,7 @@ V	15. rinominare tabella [NB: anche tabella map_movimenti], sql e python di INSE
 	30. aggiungere opzione per fare movimento di test
 	31. come riorganizare MAP_MOVIMENTI
 	32. fix Wallet.get_last_n_records()
-	33. script esportazione in csv
+V	33. script esportazione in csv
 
 
 Alla fine:

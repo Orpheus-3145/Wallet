@@ -1,5 +1,5 @@
-
 CREATE USER w_user WITH LOGIN PASSWORD '82!eyh_dw';
+-- it should also update table WALLET_USERS
 GRANT CONNECT ON DATABASE wallet TO w_user;
 GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO w_user;      -- not all tables: read everywhere, write only in movement tables
 GRANT USAGE, SELECT, UPDATE ON SEQUENCE public.movimenti_id_seq TO w_user;

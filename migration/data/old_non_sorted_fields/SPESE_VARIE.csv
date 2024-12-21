@@ -1,4 +1,4 @@
-id,id_mov,id_tipo_spesa,descrizione
+ID,ID_MOV,ID_TIPO_SPESA,DESCRIZIONE
 0,2,5,Spesa supermercato MdC
 1,4,5,Spesa supermercato MdC
 2,8,5,Spesa LIDL Tione
@@ -150,7 +150,7 @@ id,id_mov,id_tipo_spesa,descrizione
 149,196,5,Addebiti da Comune di Milano (bollettino multa?)
 150,197,5,Benzina
 151,206,7,Birra all'Old Fox
-152,208,1,cena da Mc Donald's
+152,208,1,"cena" da Mc Donald's
 153,209,5,Benzina
 154,210,5,Commissioni banca
 155,211,2,Cellulare Huawei p30 pro
@@ -169,7 +169,7 @@ id,id_mov,id_tipo_spesa,descrizione
 168,238,5,Imposta dal bollo CC
 169,239,5,Pedaggio autostradale  Milano - Laveno Monbello
 170,240,5,Pedaggio autostradale Laveno Monbello - Milano
-171,242,7,spesa per Capodanno
+171,242,7,"spesa" per Capodanno
 172,243,3,Pantaloni e camicia da Primark
 173,244,2,Regalo per Tommi (piastra per Waffles) supporto per cuffie e piano rialzato per pc
 174,245,3,Camicia Spada

@@ -1,12 +1,8 @@
-create table MAP_RUOLI_TABELLE(
-	ID serial primary key,
-	NOME text not NULL,
-	DESCRIZIONE text not NULL
-);
+create database wallet;
+\c wallet;
 
 create table MAP_TABELLE(
 	ID serial primary key,
-	ID_RUOLO int references MAP_RUOLI_TABELLE(ID),
 	NOME text not NULL,
 	DESCRIZIONE text not NULL
 );
@@ -32,13 +28,6 @@ create table MAP_MOVIMENTI(
 create table MAP_SPESE_VARIE(
 	ID serial primary key,
 	DESCRIZIONE text not NULL
-);
-
-create table QLIK_USERS(
-	ID serial primary key,
-	USERNAME text not NULL,
-	PASSWORD text not NULL,
-	NOTE text default ''
 );
 
 create table WALLET_USERS(

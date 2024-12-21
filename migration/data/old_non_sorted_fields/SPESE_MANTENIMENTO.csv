@@ -1,4 +1,4 @@
-id,id_mov,descrizione
+ID,ID_MOV,DESCRIZIONE
 532,3064,Spesa AH
 533,3065,Spesa Jumbo + campanello
 545,3204,Spesa AH
@@ -295,7 +295,7 @@ id,id_mov,descrizione
 311,2309,Spesa AH
 312,2310,Spesa AH
 313,2313,Spesa AH
-314,2319,Riparazione bicicletta
+314,2319,"Riparazione" bicicletta
 315,2320,Biglietto metro
 316,2322,Lavatrice
 317,2323,Spesa AH
