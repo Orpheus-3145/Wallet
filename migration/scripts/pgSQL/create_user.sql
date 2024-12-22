@@ -1,12 +1,53 @@
-CREATE USER w_user WITH LOGIN PASSWORD '82!eyh_dw';
--- it should also update table WALLET_USERS
-GRANT CONNECT ON DATABASE wallet TO w_user;
-GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO w_user;      -- not all tables: read everywhere, write only in movement tables
-GRANT USAGE, SELECT, UPDATE ON SEQUENCE public.movimenti_id_seq TO w_user;
-GRANT USAGE, SELECT, UPDATE ON SEQUENCE public.spese_varie_id_seq TO w_user;
-GRANT USAGE, SELECT, UPDATE ON SEQUENCE public.spese_fisse_id_seq TO w_user;
-GRANT USAGE, SELECT, UPDATE ON SEQUENCE public.stipendi_id_seq TO w_user;
-GRANT USAGE, SELECT, UPDATE ON SEQUENCE public.entrate_id_seq TO w_user;
-GRANT USAGE, SELECT, UPDATE ON SEQUENCE public.debiti_crediti_id_seq TO w_user;
-GRANT USAGE, SELECT, UPDATE ON SEQUENCE public.spese_mantenimento_id_seq TO w_user;
-GRANT USAGE, SELECT, UPDATE ON SEQUENCE public.spese_viaggi_id_seq TO w_user;
+DO $$
+DECLARE
+	data_schema_name text := 'w_data';
+	map_schema_name text := 'w_map';
+	user_name text := 'fra';
+	user_pwd text := '91913881';
+BEGIN
+
+	EXECUTE format(
+		'CREATE USER %s WITH LOGIN PASSWORD %L'
+		, user_name, user_pwd);
+
+	-- user can connect db
+	EXECUTE format( 
+		'GRANT CONNECT ON DATABASE wallet TO %s'
+		, user_name);
+
+	-- can access whatever on schema w_data
+	EXECUTE format( 
+		'GRANT USAGE ON SCHEMA %s TO %s'
+		, data_schema_name, user_name);
+
+	-- can read/write every table of schema w_data
+	EXECUTE format( 
+		'GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA %s TO %s'
+		, data_schema_name, user_name);
+
+    -- and the id fields
+	EXECUTE format( 
+		'GRANT SELECT, UPDATE ON ALL SEQUENCES IN SCHEMA %s TO %s'
+		, data_schema_name, user_name);
+
+	-- can run every function/procedure of w_data
+	EXECUTE format( 
+		'GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA %s TO %s'
+		, data_schema_name, user_name);
+
+	-- can access whatever on schema w_map
+	EXECUTE format( 
+		'GRANT USAGE ON SCHEMA %s TO %s'
+		, map_schema_name, user_name);
+	
+	-- can read every table of schema w_map
+	EXECUTE format( 
+		'GRANT SELECT ON ALL TABLES IN SCHEMA %s TO %s'
+		, map_schema_name, user_name);
+    
+	-- set order of visibility
+	EXECUTE format( 
+		'ALTER USER %s SET search_path TO %s, %s, public;'
+		, user_name, data_schema_name, map_schema_name);
+	
+END $$;

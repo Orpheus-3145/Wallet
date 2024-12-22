@@ -1,15 +1,15 @@
 DO $$
 DECLARE
 	csv_folder text := '/var/lib/pgsql/17/Wallet/migration/data/test_exp/';
-	csv_path text := '';
 	table_name text := '';
+	map_schema_name text := 'w_map';
+	data_schema_name text := 'w_data';
 	tables text[] := ARRAY[
 		'MAP_TABELLE',
 		'MAP_CONTI',
 		'MAP_ENTRATE',
 		'MAP_MOVIMENTI',
 		'MAP_SPESE_VARIE',
-		'WALLET_USERS',
 		'MOVIMENTI',
 		'DEBITI_CREDITI',
 		'ENTRATE',
@@ -21,18 +21,21 @@ DECLARE
 		];
 BEGIN
 
+	EXECUTE format(
+		'SET search_path TO %s, %s'
+	, map_schema_name, data_schema_name);
+
 	FOR table_name IN SELECT UNNEST(tables) LOOP
 
-		csv_path = csv_folder || table_name || '.csv';
 		EXECUTE format( $query$
-			COPY public.%s
+			COPY %s
 			TO %L
 			WITH (
 				FORMAT csv,
 				HEADER true,
 				DELIMITER ','
 			)
-			$query$ , table_name, csv_path);
+			$query$ , table_name, csv_folder || table_name || '.csv');
 
 	END LOOP;
 
