@@ -8,7 +8,7 @@ class AppException(Exception):
         return self.error_text
 
 
-class FailCheckException(Exception):
+class WrongInputException(Exception):
     """Eccezione che viene sollevata in caso in cui uno dei dati in non sia corretto"""
 
     def __init__(self, error_text):

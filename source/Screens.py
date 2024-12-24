@@ -47,18 +47,18 @@ class LoginScreen(Screen):
         username = self.ids.input_user.text.strip()
         password = self.ids.input_pwd.text.strip()
         if autologin == False and (not username or not password):
-            Factory.ErrorPopup(err_text="credenziali mancanti").open()
+            Factory.ErrorPopup(err_text="Credenziali mancanti").open()
             return
         try:
-            login_status = App.get_running_app().login(username, password, autologin)
+            login_status = App.get_running_app().connect(username, password)
         except AppException as error:
             Factory.ErrorPopup(err_text=str(error)).open()
         else:
-            if login_status is False:
-                Factory.ErrorPopup(err_text="Login fallito").open()
-            else:
-                self.manager.create_screens()
-                self.manager.go_to_main_screen()
+            # if login_status is False:
+            #     Factory.ErrorPopup(err_text="Login fallito").open()
+            # else:
+            self.manager.create_screens()
+            self.manager.go_to_main_screen()
 
 
 class MainScreen(Screen):
