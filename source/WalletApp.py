@@ -32,7 +32,7 @@ class WalletApp(App):
 
 	def read_config(self, config):
 		try:
-			self.config_info["kv_files"] = [Tools.get_abs_path(kv_file) for kv_file in config["kivy_files"].values()]
+			self.config_info["kivy_files"] = [Tools.get_abs_path(kv_file) for kv_file in config["kivy_files"].values()]
 			self.config_info["host"] = config["database"]["host"]
 			self.config_info["port"] = config["database"]["port"]
 			self.config_info["db_name"] = config["database"]["db_name"]
@@ -120,7 +120,7 @@ class WalletApp(App):
 		
 		Window.left = (width_screen - self.config_info["width_app"]) // 2
 		Window.top = (height_screen - self.config_info["height_app"]) // 2
-		for kv_file in self.config_info["kv_files"]:
+		for kv_file in self.config_info["kivy_files"]:
 			try:
 				Builder.load_file(kv_file)
 			except Exception as error:

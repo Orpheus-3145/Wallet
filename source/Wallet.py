@@ -18,27 +18,18 @@ class Wallet:
 				dbname=db_name,
 				user=user,
 				password=password,
-				# password=sha256(str(password).encode()).hexdigest(),
 				# host=host_db,
 				port=port_db
 				# require_auth="scram-sha-256"
 			)
-			# hash_pwd_db = self.get_password_from_username(username)
 		except psycopg2.Error as err:
 			if "password authentication failed" in str(err):
 				raise WrongInputException(f"Wrong password for user {user}")
-
-			tmp = psycopg2.extensions.Diagnostics(err)
-			print (tmp, tmp.severity, tmp.sqlstate)
-			raise err
-			# if wrong_login:
-			# else:
-			# 	raise SqlError(err.pgerror)
+			else:
+				raise WrongInputException(f"Login failed: {str(err)}")
 		else:
 			self.cursor = self.connection.cursor()
 			self.connection.autocommit = False
-		# hash_pwd_input = sha256(str(password).encode()).hexdigest()
-		# return hash_pwd_input == hash_pwd_db
 
 	def disconnect_database(self):
 		self.cursor.close()
@@ -229,6 +220,3 @@ class Wallet:
 
 if __name__ == "__main__":
 	pass
-
-
-

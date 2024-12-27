@@ -95,12 +95,13 @@ class InsertMovementScreen(Screen):
 		super().__init__(**kw)
 		self.id_mov = -1
 		self.movements = movements          # dict {id_mov: name_mov}
-		self.ids_deb_cred = []
+		# self.ids_deb_cred = []
 		self.data_layouts = {1: self.ids.layout_s_varia,
 							 2: self.ids.layout_s_fissa,
 							 3: self.ids.layout_stipendio,
 							 4: self.ids.layout_entrata,
-							 5: self.ids.layout_deb_cred,       # NB no 6th! there's no layout for type 6
+							 5: self.ids.layout_deb_cred,
+							 6: self.ids.layout_saldo_deb_cred,
 							 7: self.ids.layout_s_mantenimento,
 							 8: self.ids.layout_data_s_viaggio}
 		for layout in self.data_layouts.values():
@@ -121,7 +122,8 @@ class InsertMovementScreen(Screen):
 		self.ids.layout_date.refresh_data()
 		self.ids.layout_main.refresh_data()
 		if self.movements[self.id_mov] == "Saldo Debito - Credito":
-			self.ids_deb_cred = self.manager.get_screen("open_deb_cred").get_ids()
+			self.ids.layout_saldo_deb_cred.set_data(self.manager.get_screen("open_deb_cred").get_ids())
+			# self.ids_deb_cred = self.manager.get_screen("open_deb_cred").get_ids()
 		else:
 			self.data_layouts[self.id_mov].refresh_data()
 			self.data_layouts[self.id_mov].show_widget()
@@ -137,12 +139,24 @@ class InsertMovementScreen(Screen):
 	def insert_movement(self):
 		try:
 			movement_data = self.ids.layout_date.get_data()
-			movement_data.update(self.ids.layout_main.get_data())
 
 			if self.movements[self.id_mov] == "Saldo Debito - Credito":
-				movement_data.update({"id_saldo_deb_cred": Tools.list_to_str(self.ids_deb_cred)})
-			else:
+				movement_data.update(self.ids.layout_main.get_data(fields_not_mandatory=["importo", "note"]))
+				if "importo" not in movement_data and "note" in movement_data:
+					movement_data["importo"] = 0
 				movement_data.update(self.data_layouts[self.id_mov].get_data())
+				# movement_data.update({"id_saldo_deb_cred": Tools.list_to_str(self.ids_deb_cred)})
+			elif self.movements[self.id_mov] == "Stipendio":
+				movement_data.update(self.ids.layout_main.get_data(fields_not_mandatory=["note"]))
+				movement_data.update(self.data_layouts[self.id_mov].get_data(fields_not_mandatory=["netto", "rimborso_spese"]))
+			else:
+				movement_data.update(self.ids.layout_main.get_data(fields_not_mandatory=["note"]))
+				movement_data.update(self.data_layouts[self.id_mov].get_data())
+			
+				# movement_data.update(self.ids.layout_main.get_data(["importo", "note"]))
+				# movement_data.update({"id_saldo_deb_cred": Tools.list_to_str(self.ids_deb_cred)})
+			# else:
+			# 	movement_data.update(self.data_layouts[self.id_mov].get_data())
 			
 			App.get_running_app().insert_movement(self.id_mov, movement_data)
 

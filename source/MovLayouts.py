@@ -1,7 +1,7 @@
 from DefaultLayouts import *
 from kivy.factory import Factory
 from datetime import datetime, date
-
+import Tools
 
 class InputParser:
 
@@ -81,7 +81,7 @@ class LayoutInfo(DefaultLayout, BKGrowLayout, InputParser):
 		super().__init__(**kw)
 		self.feeder = feeder        # function to call to get updated data
 
-	def get_data(self):
+	def get_data(self, fields_not_mandatory=[]):
 		pass
 
 	def refresh_data(self):
@@ -89,7 +89,7 @@ class LayoutInfo(DefaultLayout, BKGrowLayout, InputParser):
 
 
 class LayoutDate(LayoutInfo):
-	def get_data(self):
+	def get_data(self, fields_not_mandatory=[]):
 		year = self.ids.input_year.text
 		month = self.ids.input_month.text
 		day = self.ids.input_day.text
@@ -103,12 +103,15 @@ class LayoutDate(LayoutInfo):
 
 
 class LayoutMainMov(LayoutInfo):
-	def get_data(self):
+	def get_data(self, fields_not_mandatory=[]):
 		data_info = {}
-		data_info["importo"] = self.parse_float(self.ids.input_importo.text, "importo")
+		
+		if self.ids.input_importo.text or "importo" not in fields_not_mandatory:
+			data_info["importo"] = self.parse_float(self.ids.input_importo.text, "importo")
+
 		data_info["id_conto"] = self.parse_int(self.ids.input_payments.id_active_widgets(), "conto corrente")
 		
-		if self.ids.input_note.text.strip():
+		if self.ids.input_note.text or "note" not in fields_not_mandatory:
 			data_info["note"] = self.parse_text(self.ids.input_note.text, "note")
 		
 		return data_info
@@ -125,10 +128,12 @@ class LayoutMainMov(LayoutInfo):
 
 
 class LayoutSpesaVaria(LayoutInfo):
-	def get_data(self):
+	def get_data(self, fields_not_mandatory=[]):
 		data_info = {}
 		data_info["id_tipo_s_varia"] = self.parse_int(self.ids.input_tipo_spesa.id_active_widgets(), "tipo di spesa")
-		data_info["descrizione"] = self.parse_text(self.ids.input_descrizione.text, "descrizione")
+		
+		if self.ids.input_descrizione.text or "descrizione" not in fields_not_mandatory:
+			data_info["descrizione"] = self.parse_text(self.ids.input_descrizione.text, "descrizione")
 		
 		return data_info
 
@@ -143,22 +148,29 @@ class LayoutSpesaVaria(LayoutInfo):
 
 
 class LayoutSpesaFissa(LayoutInfo):
-	def get_data(self):
-		return {"descrizione": self.parse_text(self.ids.input_descrizione.text, "descrizione")}
+	def get_data(self, fields_not_mandatory=[]):
+		data_info = {}
+		
+		if self.ids.input_descrizione.text or "descrizione" not in fields_not_mandatory:
+			data_info["descrizione"] = self.parse_text(self.ids.input_descrizione.text, "descrizione")
+		
+		return data_info
 
 	def refresh_data(self):
 		self.ids.input_descrizione.text = ""
 
 
 class LayoutStipendio(LayoutInfo):
-	def get_data(self):
+	def get_data(self, fields_not_mandatory=[]):
 		data_info = {}
-		data_info["ddl"] = self.parse_text(self.ids.input_ddl.text, "datore di lavoro")
+
+		if self.ids.input_ddl.text or "ddl" not in fields_not_mandatory:
+			data_info["ddl"] = self.parse_text(self.ids.input_ddl.text, "datore di lavoro")
 		
-		if self.ids.input_netto.text.strip():
+		if self.ids.input_netto.text or "netto" not in fields_not_mandatory:
 			data_info["netto"] = self.parse_float(self.ids.input_netto.text, "netto")
-		
-		if self.ids.input_r_spese.text.strip():
+
+		if self.ids.input_r_spese.text or "rimborso_spese" not in fields_not_mandatory:
 			data_info["rimborso_spese"] = self.parse_float(self.ids.input_r_spese.text, "rimborso_spese")
 		
 		return data_info
@@ -170,11 +182,13 @@ class LayoutStipendio(LayoutInfo):
 
 
 class LayoutEntrata(LayoutInfo):
-	def get_data(self):
+	def get_data(self, fields_not_mandatory=[]):
 		data_info = {}
 		data_info["id_tipo_entrata"] = self.parse_int(self.ids.input_tipo_entrata.id_active_widgets(), "tipo di entrata")
-		data_info["descrizione"] = self.parse_text(self.ids.input_descrizione.text, "descrizione")
-		
+
+		if self.ids.input_descrizione.text or "descrizione" not in fields_not_mandatory:
+			data_info["descrizione"] = self.parse_text(self.ids.input_descrizione.text, "descrizione")
+
 		return data_info
 
 	def refresh_data(self):
@@ -188,11 +202,15 @@ class LayoutEntrata(LayoutInfo):
 
 
 class LayoutDebitoCredito(LayoutInfo):
-	def get_data(self):
+	def get_data(self, fields_not_mandatory=[]):
 		data_info = {}
 		data_info["deb_cred"] = self.parse_bool(self.ids.input_deb_cred.id_active_widgets(), "debito/credito")
-		data_info["origine"] = self.parse_text(self.ids.input_origine.text, "origine")
-		data_info["descrizione"] = self.parse_text(self.ids.input_descrizione.text, "descrizione")
+		
+		if self.ids.input_origine.text or "origine" not in fields_not_mandatory:
+			data_info["origine"] = self.parse_text(self.ids.input_origine.text, "origine")
+		
+		if self.ids.input_descrizione.text or "descrizione" not in fields_not_mandatory:
+			data_info["descrizione"] = self.parse_text(self.ids.input_descrizione.text, "descrizione")
 		
 		return data_info
 
@@ -202,19 +220,44 @@ class LayoutDebitoCredito(LayoutInfo):
 		self.ids.input_descrizione.text = ""
 
 
+class LayoutSaldoDebitoCredito(LayoutInfo):
+	def __init__(self, **kw):
+		super().__init__(**kw)
+		self.ids_deb_cred = []
+
+	def set_data(self, selected_ids):
+		self.ids_deb_cred = selected_ids
+		print(self.ids_deb_cred, Tools.list_to_str(self.ids_deb_cred))
+
+	def get_data(self, fields_not_mandatory=[]):
+		return {"id_saldo_deb_cred": Tools.list_to_str(self.ids_deb_cred)}
+
+	def refresh_data(self):
+		self.ids_deb_cred.clear()
+
+
 class LayoutSpesaMantenimento(LayoutInfo):
-	def get_data(self):
-		return {"descrizione": self.parse_text(self.ids.input_descrizione.text, "descrizione")}
+	def get_data(self, fields_not_mandatory=[]):
+		data_info = {}
+		
+		if self.ids.input_descrizione.text or "descrizione" not in fields_not_mandatory:
+			data_info["descrizione"] = self.parse_text(self.ids.input_descrizione.text, "descrizione")
+		
+		return data_info
 
 	def refresh_data(self):
 		self.ids.input_descrizione.text = ""
 
 
 class LayoutSpesaViaggio(LayoutInfo):
-	def get_data(self):
+	def get_data(self, fields_not_mandatory=[]):
 		data_info = {}
-		data_info["viaggio"] = self.parse_text(self.ids.input_viaggio.text, "viaggio")
-		data_info["descrizione"] = self.parse_text(self.ids.input_descrizione.text, "descrizione")
+
+		if self.ids.input_viaggio.text or "viaggio" not in fields_not_mandatory:
+			data_info["viaggio"] = self.parse_text(self.ids.input_viaggio.text, "viaggio")
+
+		if self.ids.input_descrizione.text or "descrizione" not in fields_not_mandatory:
+			data_info["descrizione"] = self.parse_text(self.ids.input_descrizione.text, "descrizione")
 		
 		return data_info
 
