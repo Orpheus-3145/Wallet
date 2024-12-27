@@ -25,7 +25,7 @@ def get_abs_path(relative_path):
 
 def format_sql_string_pgsql(operation, table_name="", field_select_list=[], where_dict={}, update_dict={},
 						  insert_dict={}, join_type={}, join_table="", join_dict={},
-						  order_by_dict={}, limit=-1, proc_name="", proc_args={}, safe_mode=True):
+						  order_by_dict={}, limit=-1, proc_name="", proc_args=[], safe_mode=True):
 	"""Crea e formatta un'instruzione SQL di tipo suid (SELECT, UPDATE, INSERT, DELETE)
 		- operation -> ha come valore 'S' SELECT, 'U' UPDATE, 'I' INSERT, 'D' DELETE, 'E' EXEC
 		- table_name -> nome tabella,
@@ -40,7 +40,7 @@ def format_sql_string_pgsql(operation, table_name="", field_select_list=[], wher
 		- order_by_dict -> coppie CAMPO: DESC/ASC
 		- limit -> se diverso da None mostra le prime limit (int) righe
 		- proc_name -> nome procedura da eseguire
-		- proc_args -> dict degli argomenti della procedura"""
+		- proc_args -> lista degli argomenti della procedura"""
 	sql_string = ""
 
 	if operation == 'S':
@@ -110,7 +110,7 @@ def format_sql_string_pgsql(operation, table_name="", field_select_list=[], wher
 	elif operation == "C":
 		arguments = ""
 		if proc_args:
-			arguments = ", ".join(proc_args)
+			arguments = ", ".join([f"%({arg_name})s" for arg_name in proc_args])
 		sql_string = f"CALL {proc_name} ({arguments})"
 	
 	return sql_string + ';'

@@ -1,272 +1,272 @@
 <LayoutDate>:
-    GridLayout:
-        rows: 1
-        size_hint_y: 0.224
+	GridLayout:
+		rows: 1
+		size_hint_y: 0.224
 
-        DefaultLabel:
-            text: "Giorno"
-            halign: "right"
-            valign: "middle"
-            font_size_scale: 0.8
+		DefaultLabel:
+			text: "Giorno"
+			halign: "right"
+			valign: "middle"
+			font_size_scale: 0.8
 
-        DefaultTextInput:
-            id: input_day
-            font_size_scale: 0.8
+		DefaultTextInput:
+			id: input_day
+			font_size_scale: 0.8
 
-    GridLayout:
-        rows: 1
-        size_hint_y: 0.224
+	GridLayout:
+		rows: 1
+		size_hint_y: 0.224
 
-        DefaultLabel:
-            text: "Mese"
-            halign: "right"
-            valign: "middle"
-            font_size_scale: 0.8
+		DefaultLabel:
+			text: "Mese"
+			halign: "right"
+			valign: "middle"
+			font_size_scale: 0.8
 
-        DefaultTextInput:
-            id: input_month
-            font_size_scale: 0.8
+		DefaultTextInput:
+			id: input_month
+			font_size_scale: 0.8
 
-    GridLayout:
-        rows: 1
-        size_hint_y: 0.224
+	GridLayout:
+		rows: 1
+		size_hint_y: 0.224
 
-        DefaultLabel:
-            text: "Anno"
-            halign: "right"
-            valign: "middle"
-            font_size_scale: 0.8
+		DefaultLabel:
+			text: "Anno"
+			halign: "right"
+			valign: "middle"
+			font_size_scale: 0.8
 
-        DefaultTextInput:
-            id: input_year
-            font_size_scale: 0.8
+		DefaultTextInput:
+			id: input_year
+			font_size_scale: 0.8
 
 
 <LayoutMainMov>:
-    GridLayout:
-        rows: 1
-        size_hint_y: 0.1
+	GridLayout:
+		rows: 1
+		size_hint_y: 0.1
 
-        DefaultLabel:
-            text: "Importo"
-            halign: "right"
-            valign: "top"
-            font_size_scale: 0.8
+		DefaultLabel:
+			text: "Importo"
+			halign: "right"
+			valign: "top"
+			font_size_scale: 0.8
 
-        DefaultTextInput:
-            id: input_importo
-            font_size_scale: 0.8
-            valign: "middle"
+		DefaultTextInput:
+			id: input_importo
+			font_size_scale: 0.8
+			valign: "middle"
 
-    ButtonDynamicInputLayout:
-        id: input_payments
-        size_hint_y: 0.55
-        font_size_chars: FONT_SIZE * 0.8
+	ButtonDynamicInputLayout:
+		id: input_payments
+		size_hint_y: 0.55
+		font_size_chars: FONT_SIZE * 0.8
 
-    GridLayout:
-        rows: 1
-        size_hint_y: 0.1
+	GridLayout:
+		rows: 1
+		size_hint_y: 0.1
 
-        DefaultLabel:
-            text: "Note"
-            halign: "right"
-            valign: "top"
-            size_hint_x: 0.25
-            font_size_scale: 0.8
+		DefaultLabel:
+			text: "Note"
+			halign: "right"
+			valign: "top"
+			size_hint_x: 0.25
+			font_size_scale: 0.8
 
-        DefaultTextInput:
-            id: input_note
-            font_size_scale: 0.8
-            size_hint_x: 0.5
+		DefaultTextInput:
+			id: input_note
+			font_size_scale: 0.8
+			size_hint_x: 0.5
 
 
 <LayoutSpesaVaria>:
-    ButtonDynamicInputLayout:
-        id: input_tipo_spesa
-        size_hint_y: 0.88
-        font_size_chars: FONT_SIZE * 0.8
+	ButtonDynamicInputLayout:
+		id: input_tipo_spesa
+		size_hint_y: 0.88
+		font_size_chars: FONT_SIZE * 0.8
 
-    GridLayout:
-        rows: 1
-        size_hint_y: 0.12
+	GridLayout:
+		rows: 1
+		size_hint_y: 0.12
 
-        DefaultLabel:
-            text: "Descrizione"
-            font_size_scale: 0.8
-            valign: "top"
-            halign: "right"
+		DefaultLabel:
+			text: "Descrizione"
+			font_size_scale: 0.8
+			valign: "top"
+			halign: "right"
 
-        DefaultTextInput:
-            id: input_descrizione
-            font_size_scale: 0.8
+		DefaultTextInput:
+			id: input_descrizione
+			font_size_scale: 0.8
 
 
 <LayoutSpesaFissa>:
-    size_hint: 0.35, 0.12
-    pos_hint: {"x": 0.375, "y": 0.64}
-    GridLayout:
-        rows: 1
+	size_hint: 0.35, 0.12
+	pos_hint: {"x": 0.375, "y": 0.64}
+	GridLayout:
+		rows: 1
 
-        DefaultLabel:
-            text: "Descrizione"
-            halign: "right"
-            valign: "top"
-            font_size_scale: 0.8
+		DefaultLabel:
+			text: "Descrizione"
+			halign: "right"
+			valign: "top"
+			font_size_scale: 0.8
 
-        DefaultTextInput:
-            id: input_descrizione
-            font_size_scale: 0.8
+		DefaultTextInput:
+			id: input_descrizione
+			font_size_scale: 0.8
 
 
 <LayoutStipendio>:
-    GridLayout:
-        rows: 1
-        size_hint_y: 0.17
+	GridLayout:
+		rows: 1
+		size_hint_y: 0.17
 
-        DefaultLabel:
-            text: "Netto"
-            font_size_scale: 0.8
-            size_hint_y: 0.18
-            halign: "right"
-            valign: "top"
+		DefaultLabel:
+			text: "Netto"
+			font_size_scale: 0.8
+			size_hint_y: 0.18
+			halign: "right"
+			valign: "top"
 
-        DefaultTextInput:
-            id: input_netto
-            valign: "middle"
-            font_size_scale: 0.8
-            size_hint_y: 0.18
+		DefaultTextInput:
+			id: input_netto
+			valign: "middle"
+			font_size_scale: 0.8
+			size_hint_y: 0.18
 
-    GridLayout:
-        rows: 1
-        size_hint_y: 0.17
+	GridLayout:
+		rows: 1
+		size_hint_y: 0.17
 
-        DefaultLabel:
-            text: "Rimborso spese"
-            font_size_scale: 0.8
-            size_hint_y: 0.18
-            halign: "right"
-            valign: "top"
+		DefaultLabel:
+			text: "Rimborso spese"
+			font_size_scale: 0.8
+			size_hint_y: 0.18
+			halign: "right"
+			valign: "top"
 
-        DefaultTextInput:
-            id: input_r_spese
-            valign: "middle"
-            font_size_scale: 0.8
-            size_hint_y: 0.18
+		DefaultTextInput:
+			id: input_r_spese
+			valign: "middle"
+			font_size_scale: 0.8
+			size_hint_y: 0.18
 
-    GridLayout:
-        rows: 1
-        size_hint_y: 0.17
+	GridLayout:
+		rows: 1
+		size_hint_y: 0.17
 
-        DefaultLabel:
-            text: "DDL"
-            font_size_scale: 0.8
-            size_hint_y: 0.28
-            halign: "right"
-            valign: "top"
+		DefaultLabel:
+			text: "DDL"
+			font_size_scale: 0.8
+			size_hint_y: 0.28
+			halign: "right"
+			valign: "top"
 
-        DefaultTextInput:
-            id: input_ddl
-            valign: "middle"
-            font_size_scale: 0.8
-            size_hint_y: 0.28
+		DefaultTextInput:
+			id: input_ddl
+			valign: "middle"
+			font_size_scale: 0.8
+			size_hint_y: 0.28
 
 
 <LayoutEntrata>:
-    ButtonDynamicInputLayout:
-        id: input_tipo_entrata
-        size_hint_y: 0.8
-        font_size_chars: FONT_SIZE * 0.8
+	ButtonDynamicInputLayout:
+		id: input_tipo_entrata
+		size_hint_y: 0.8
+		font_size_chars: FONT_SIZE * 0.8
 
-    GridLayout:
-        rows: 1
-        size_hint_y: 0.2
+	GridLayout:
+		rows: 1
+		size_hint_y: 0.2
 
-        DefaultLabel:
-            text: "Descrizione"
-            font_size_scale: 0.8
-            valign: "top"
-            halign: "right"
+		DefaultLabel:
+			text: "Descrizione"
+			font_size_scale: 0.8
+			valign: "top"
+			halign: "right"
 
-        DefaultTextInput:
-            id: input_descrizione
-            font_size_scale: 0.8
+		DefaultTextInput:
+			id: input_descrizione
+			font_size_scale: 0.8
 
 
 <LayoutDebitoCredito>:
-    ButtonDynamicInputLayout:
-        id: input_deb_cred
-        size_hint_y: 0.33
-        font_size_chars: FONT_SIZE
-        orientation: "horizontal"
+	ButtonDynamicInputLayout:
+		id: input_deb_cred
+		size_hint_y: 0.33
+		font_size_chars: FONT_SIZE
+		orientation: "horizontal"
 
-    GridLayout:
-        rows: 1
-        size_hint_y: 0.33
+	GridLayout:
+		rows: 1
+		size_hint_y: 0.33
 
-        DefaultLabel:
-            text: "Origine"
-            font_size_scale: 0.8
-            halign: "right"
-            valign: "top"
+		DefaultLabel:
+			text: "Origine"
+			font_size_scale: 0.8
+			halign: "right"
+			valign: "top"
 
-        DefaultTextInput:
-            id: input_origine
-            font_size_scale: 0.8
+		DefaultTextInput:
+			id: input_origine
+			font_size_scale: 0.8
 
-    GridLayout:
-        rows: 1
-        size_hint_y: 0.33
+	GridLayout:
+		rows: 1
+		size_hint_y: 0.33
 
-        DefaultLabel:
-            text: "Descrizione"
-            font_size_scale: 0.8
-            halign: "right"
-            valign: "top"
+		DefaultLabel:
+			text: "Descrizione"
+			font_size_scale: 0.8
+			halign: "right"
+			valign: "top"
 
-        DefaultTextInput:
-            id: input_descrizione
-            font_size_scale: 0.8
+		DefaultTextInput:
+			id: input_descrizione
+			font_size_scale: 0.8
 
 
 <LayoutSpesaMantenimento>:
-    GridLayout:
-        rows: 1
-        DefaultLabel:
-            text: "Descrizione"
-            font_size_scale: 0.8
-            halign: "right"
-            valign: "top"
+	GridLayout:
+		rows: 1
+		DefaultLabel:
+			text: "Descrizione"
+			font_size_scale: 0.8
+			halign: "right"
+			valign: "top"
 
-        DefaultTextInput:
-            id: input_descrizione
-            font_size_scale: 0.8
+		DefaultTextInput:
+			id: input_descrizione
+			font_size_scale: 0.8
 
 
 <LayoutSpesaViaggio>:
-    GridLayout:
-        rows: 1
-        size_hint_y: 0.5
+	GridLayout:
+		rows: 1
+		size_hint_y: 0.5
 
-        DefaultLabel:
-            text: "Viaggio"
-            font_size_scale: 0.8
-            halign: "right"
-            valign: "top"
+		DefaultLabel:
+			text: "Viaggio"
+			font_size_scale: 0.8
+			halign: "right"
+			valign: "top"
 
-        DefaultTextInput:
-            id: input_viaggio
-            font_size_scale: 0.8
+		DefaultTextInput:
+			id: input_viaggio
+			font_size_scale: 0.8
 
-    GridLayout:
-        rows: 1
-        size_hint_y: 0.5
+	GridLayout:
+		rows: 1
+		size_hint_y: 0.5
 
-        DefaultLabel:
-            text: "Descrizione"
-            font_size_scale: 0.8
-            halign: "right"
-            valign: "top"
+		DefaultLabel:
+			text: "Descrizione"
+			font_size_scale: 0.8
+			halign: "right"
+			valign: "top"
 
-        DefaultTextInput:
-            id: input_descrizione
-            font_size_scale: 0.8
+		DefaultTextInput:
+			id: input_descrizione
+			font_size_scale: 0.8

@@ -20,6 +20,7 @@ from kivy.core.window import Window
 from Screens import *
 from Popups import *
 
+
 class WalletApp(App):
 	def __init__(self, **kwargs):
 		super().__init__(**kwargs)
@@ -34,8 +35,9 @@ class WalletApp(App):
 			self.config_info["kv_files"] = [Tools.get_abs_path(kv_file) for kv_file in config["kivy_files"].values()]
 			self.config_info["host"] = config["database"]["host"]
 			self.config_info["port"] = config["database"]["port"]
-			self.config_info["user"] = config["database"]["user"]
-			self.config_info["password"] = config["database"]["password"]
+			self.config_info["db_name"] = config["database"]["db_name"]
+			# self.config_info["user"] = config["database"]["user"]
+			# self.config_info["password"] = config["database"]["password"]
 			self.config_info["backup_path"] = Tools.get_abs_path(config["database"]["backup_path"])
 			self.config_info["background_img_path"] = Tools.get_abs_path(config["graphics"]["background_img_path"])
 			self.config_info["logo_path"] = Tools.get_abs_path(config["graphics"]["logo_path"])
@@ -99,7 +101,7 @@ class WalletApp(App):
 		#     raise AppException("Credenziali mancanti")
 		self.wallet_instance = Wallet.Wallet(logging)
 		try:
-			self.wallet_instance.connect(self.config_info["host"], self.config_info["port"], user, pwd)
+			self.wallet_instance.connect(self.config_info["host"], self.config_info["port"], self.config_info["db_name"], user, pwd)
 		except SqlError as db_err:
 			self.update_log("errore connessione - %s", 40, str(db_err))
 			raise AppException("Connessione al database fallita, consulta il log per ulteriori dettagli")
@@ -267,10 +269,6 @@ class WalletApp(App):
 
 	def get_logo_path(self):
 		return self.config_info["logo_path"]
-
-	#remove
-	def get_bi_logo_path(self):
-		return self.config_info["bi_logo_path"]
 
 
 if __name__ == "__main__":

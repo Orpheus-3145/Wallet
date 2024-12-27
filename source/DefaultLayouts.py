@@ -99,7 +99,7 @@ class ButtonDynamicInputLayout(DynamicLayout, InputLayout):
 
     def id_active_widgets(self):
         if self.active_widgets:     # this class can have the list of only 0 or 1 active btn at the same time
-            return self.active_widgets[0].get_alt_id()
+            return str(self.active_widgets[0].get_alt_id())
         else:
             return ""
 

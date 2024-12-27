@@ -5,66 +5,17 @@ import psycopg2.extensions as psycopg2_ext                         # info: https
 from AppExceptions import *
 import Tools                            # funzioni generiche di supporto
 
-class CheckerWallet:
-	def check_exist(self, info, exist_field):
-		try:
-			info[exist_field]
-		except KeyError:
-			raise WrongInputException(f"Campo {exist_field} mancante")
-
-	def check_text(self, info, text_field):
-		try:
-			if info[text_field].strip() == "":
-				raise WrongInputException(f"Campo {text_field} vuoto")
-		except KeyError:
-			raise WrongInputException(f"Campo {text_field} mancante")
-		else:
-			info[text_field] = f"'{info[text_field]}'"
-
-	def check_date(self, info, date_field):
-		try:
-			datetime.strptime(info[date_field], "%Y-%m-%d")
-		except KeyError:
-			raise WrongInputException(f"Data mancante")
-		except ValueError:
-			raise WrongInputException(f"Data non valida: {info[date_field]}")
-		else:
-			info[date_field] = f"'{info[date_field]}'"
-
-	def check_num(self, info, num_field, check_positivity=False):
-		try:
-			info[num_field] = Tools.convert_to_float(info[num_field])
-		except KeyError:
-			raise WrongInputException(f"Importo {num_field} mancante")
-		except (TypeError, ValueError):
-			raise WrongInputException(f"Importo {num_field} non valido: {info[num_field]}")
-		else:
-			if check_positivity is True and info[num_field] <= 0:
-				raise WrongInputException(f"Importo {num_field} nullo o negativo")
-			# info[num_field] = str_number).replace(",", ".")
-
-	def check_id(self, info, id_field):
-		try:
-			if int(info[id_field]) <= 0:
-				raise WrongInputException("ID {id_field} negativo")
-		except KeyError:
-			raise WrongInputException(f"ID {id_field} mancante")
-		except ValueError:
-			raise WrongInputException(f"ID {id_field} non valido: {info[id_field]}")
-		else:
-			info[id_field] = int(info[id_field])
-
 
 class Wallet:
 	def __init__(self, logger=None):
-		self.db_name = "wallet"
 		self._logger = logger
-		self._checker = CheckerWallet()
+		self.db_name = ""
 
-	def connect(self, host_db, port_db, user, password):
+	def connect(self, host_db, port_db, db_name, user, password):
+		self.db_name = db_name
 		try:
 			self.connection = psycopg2.connect(
-				dbname=self.db_name,
+				dbname=db_name,
 				user=user,
 				password=password,
 				# password=sha256(str(password).encode()).hexdigest(),
@@ -130,12 +81,12 @@ class Wallet:
 	def get_open_deb_creds(self):
 		sql_string = Tools.format_sql_string_pgsql(operation="S",
 											table_name="V_DEBITI_CREDITI_APERTI",
-											order_by_dict={"convert(date, DATA, 103)": "DESC"})
+											order_by_dict={"DATA": "DESC"})
 		self._exec_sql_string(sql_string, check_return_rows=True)
 		column_list = []        # lista dei nomi dei campi
 		matrix_mov = []         # record di dati
 		for column in self.cursor.description:
-			if column[0] != "ID":
+			if column[0] != "id":
 				column_list.append(column[0])
 		for row in self.cursor:
 			matrix_mov.append([elem for elem in row])
@@ -200,159 +151,72 @@ class Wallet:
 		except EmptySelectException:
 			raise InternalError(f"Movimento id: {id_mov} non esistente")
 
-		proc_args = []
+		arg_names_list = []
+		proc_args = {}
+
 		if type_mov == "Spesa Varia":
-			proc_args = self._format_args_spesa_varia(data_info)
+			arg_names_list = ["data_mov", "id_conto", "importo", "id_tipo_s_varia", "descrizione"]
+			if "note" in data_info:
+				arg_names_list.append("note")
+		
 		elif type_mov == "Spesa Fissa":
-			proc_args = self._format_args_spesa_fissa(data_info)
+			arg_names_list = ["data_mov", "id_conto", "importo", "descrizione"]
+			if "note" in data_info:
+				arg_names_list.append("note")
+			
 		elif type_mov == "Stipendio":
-			proc_args = self._format_args_stipendio(data_info)
+			arg_names_list = ["data_mov", "id_conto", "importo", "ddl"]
+			if "note" in data_info:
+				arg_names_list.append("note")
+			if "netto" in data_info:
+				if "note" not in data_info:
+					data_info["note"] = ""
+				arg_names_list.append("netto")
+			if "rimborso_spese" in data_info:
+				if "note" not in data_info:
+					data_info["note"] = ""
+				if "netto" not in data_info:
+					data_info["netto"] = ""
+				arg_names_list.append("rimborso_spese")
+
 		elif type_mov == "Entrata":
-			proc_args = self._format_args_entrata(data_info)
+			arg_names_list = ["data_mov", "id_conto", "importo", "id_tipo_entrata", "descrizione"]
+			if "note" in data_info:
+				arg_names_list.append("note")
+
 		elif type_mov == "Debito - Credito":
-			proc_args = self._format_args_debito_credito(data_info)
+			arg_names_list = ["data_mov", "id_conto", "importo", "deb_cred", "origine", "descrizione"]
+			if "note" in data_info:
+				arg_names_list.append("note")
+
 		elif type_mov == "Saldo Debito - Credito":
-			proc_args = self._format_args_saldo_debito_credito(data_info)
+			arg_names_list = ["data_mov", "id_conto", "id_saldo_deb_cred"]
+			if "importo" in data_info:
+				arg_names_list.append("importo")
+			if "note" in data_info:
+				arg_names_list.append("note")
+
 		elif type_mov == "Spesa di Mantenimento":
-			proc_args = self._format_args_spesa_mantenimento(data_info)
+			arg_names_list = ["data_mov", "id_conto", "importo", "descrizione"]
+			if "note" in data_info:
+				arg_names_list.append("note")
+
 		elif type_mov == "Spesa di Viaggio":
-			proc_args = self._format_args_spesa_viaggio(data_info)
-		print(proc_args)
-		sql_string = Tools.format_sql_string_pgsql(operation="C", proc_name=proc_name, proc_args=proc_args)
-		self._exec_sql_string(sql_string, True)
+			arg_names_list = ["data_mov", "id_conto", "importo", "viaggio", "descrizione"]
+			if "note" in data_info:
+				arg_names_list.append("note")
 
-	def _format_args_spesa_varia(self, data):
-		self._checker.check_date(data, "data_mov")
-		self._checker.check_id(data, "id_conto")
-		self._checker.check_num(data, "importo", True)
-		self._checker.check_text(data, "descrizione")
-		self._checker.check_id(data, "id_tipo_s_varia")
-		
-		proc_args = [data["data_mov"], data["id_conto"], data["importo"], data["id_tipo_s_varia"], data["descrizione"]]
-		
-		if "note" in data:
-			self._checker.check_text(data, "note")
-			proc_args.append(data["note"])
+		# because the order of the arguments matters!
+		for arg in arg_names_list:
+			proc_args[arg] = data_info[arg]
 
-		return proc_args
+		sql_string = Tools.format_sql_string_pgsql(operation="C", proc_name=proc_name, proc_args=proc_args.keys())
+		self._exec_sql_string(sql_query=sql_string, arguments=proc_args, do_commit=True)
 
-	def _format_args_spesa_fissa(self, data):
-		self._checker.check_date(data, "data_mov")
-		self._checker.check_id(data, "id_conto")
-		self._checker.check_num(data, "importo", True)
-		self._checker.check_text(data, "descrizione")
-		
-		proc_args = [data["data_mov"], data["id_conto"], data["importo"], data["descrizione"]]
-		
-		if "note" in data:
-			self._checker.check_text(data, "note")
-			proc_args.append(data["note"])
-
-		return proc_args
-	
-	def _format_args_stipendio(self, data):
-		self._checker.check_date(data, "data_mov")
-		self._checker.check_id(data, "id_conto")
-		self._checker.check_num(data, "importo", True)
-		self._checker.check_text(data, "ddl")
-		
-		proc_args = [data["data_mov"], data["id_conto"], data["importo"], data["ddl"]]
-
-		if "note" in data:
-			self._checker.check_text(data, "note")
-			proc_args.append(data["note"])
-
-		if "netto" in data:
-			self._checker.check_num(data, "netto", True)
-			proc_args.append(data["netto"])
-		
-		if "rimborso_spese" in data:
-			self._checker.check_num(data, "rimborso_spese", True)
-			proc_args.append(data["rimborso_spese"])
-
-		return proc_args
-	
-	def _format_args_entrata(self, data):
-		self._checker.check_date(data, "data_mov")
-		self._checker.check_id(data, "id_conto")
-		self._checker.check_num(data, "importo", True)
-		self._checker.check_id(data, "id_tipo_entrata")
-		self._checker.check_text(data, "descrizione")
-
-		proc_args = [data["data_mov"], data["id_conto"], data["importo"], data["id_tipo_entrata"], data["descrizione"]]
-		
-		if "note" in data:
-			self._checker.check_text(data, "note")
-			proc_args.append(data["note"])
-
-		return proc_args
-
-	def _format_args_debito_credito(self, data):
-		self._checker.check_date(data, "data_mov")
-		self._checker.check_id(data, "id_conto")
-		self._checker.check_num(data, "importo", True)
-		self._checker.check_exist(data, "deb_cred")
-		self._checker.check_text(data, "origine")
-		self._checker.check_text(data, "descrizione")
-		
-		proc_args = [data["data_mov"], data["id_conto"], data["importo"], data["deb_cred"], data["origine"], data["descrizione"]]
-		
-		if "note" in data:
-			self._checker.check_text(data, "note")
-			proc_args.append(data["note"])
-
-		return proc_args
-
-	def _format_args_saldo_debito_credito(self, data):
-		self._checker.check_date(data, "data_mov")
-		self._checker.check_id(data, "id_conto")
-		self._checker.check_text(data, "id_saldo_deb_cred")
-
-		proc_args = [data["data_mov"], data["id_conto"], data["id_saldo_deb_cred"]]
-		
-		if "importo" in data:
-			self._checker.check_num(data, "importo", True)
-			proc_args.append(data["importo"])
-
-		if "note" in data:
-			self._checker.check_text(data, "note")
-			proc_args.append(data["note"])
-
-		return proc_args
-
-	def _format_args_spesa_mantenimento(self, data):
-		self._checker.check_date(data, "data_mov")
-		self._checker.check_id(data, "id_conto")
-		self._checker.check_num(data, "importo", True)
-		self._checker.check_text(data, "descrizione")
-
-		proc_args = [data["data_mov"], data["id_conto"], data["importo"], data["descrizione"]]
-		
-		if "note" in data:
-			self._checker.check_text(data, "note")
-			proc_args.append(data["note"])
-
-		return proc_args
-
-	def _format_args_spesa_viaggio(self, data):
-		self._checker.check_date(data, "data_mov")
-		self._checker.check_id(data, "id_conto")
-		self._checker.check_num(data, "importo", True)
-		self._checker.check_text(data, "viaggio")
-		self._checker.check_text(data, "descrizione")
-
-		proc_args = [data["data_mov"], data["id_conto"], data["importo"], data["viaggio"], data["descrizione"]]
-		
-		if "note" in data:
-			self._checker.check_text(data, "note")
-			proc_args.append(data["note"])
-
-		return proc_args
-
-	def _exec_sql_string(self, sql_query, do_commit=False, check_return_rows=False):
-		self._logger.debug("esecuzione query SQL: '%s'", sql_query)
+	def _exec_sql_string(self, sql_query, arguments={}, do_commit=False, check_return_rows=False):
+		self._logger.debug(f"esecuzione query SQL: '{sql_query % arguments}'")
 		try:
-			self.cursor.execute(sql_query)
+			self.cursor.execute(sql_query, arguments)
 		except (psycopg2.Warning, psycopg2.Error) as error:
 			self.connection.rollback()
 			raise SqlError(f"errore query SQL - trace: {str(error)}")
