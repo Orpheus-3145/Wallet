@@ -1,10 +1,13 @@
+-- \set map_schema :'w_map'
+-- \set data_schema :'w_data'
+
 CREATE DATABASE wallet;
 \c wallet;
 
 DO $$
 DECLARE
-	map_schema_name text := 'w_map';
-	data_schema_name text := 'w_data';
+	map_schema_name text := :map_schema;
+	data_schema_name text := :data_schema;
 BEGIN
 
 	-- schema for mapped values

@@ -9,12 +9,20 @@ DECLARE
     table_name text DEFAULT '';
 
 BEGIN
-    SELECT mv.ID_TIPO_MOV INTO STRICT id_tipo_mov FROM MOVIMENTI mv WHERE ID = id_mov_to_drop;
-    SELECT mm.ID_TABLE INTO STRICT id_table FROM MAP_MOVIMENTI mm WHERE ID = id_tipo_mov;
-    SELECT NOME INTO STRICT table_name FROM MAP_TABELLE WHERE ID = id_table;
+    SELECT mv.ID_TIPO_MOV INTO STRICT id_tipo_mov
+        FROM w_data.MOVIMENTI mv
+        WHERE ID = id_mov_to_drop;
 
-    EXECUTE FORMAT('DELETE FROM %s WHERE ID_MOV = %s', table_name, id_mov_to_drop);
-    DELETE FROM MOVIMENTI WHERE ID = id_mov_to_drop;
+    SELECT mm.ID_TABLE INTO STRICT id_table
+        FROM w_map.MAP_MOVIMENTI mm
+        WHERE ID = id_tipo_mov;
+
+    SELECT NOME INTO STRICT table_name 
+        FROM w_map.MAP_TABELLE WHERE ID = id_table;
+
+    EXECUTE FORMAT('DELETE FROM %s.%s WHERE ID_MOV = %s','w_data',  table_name, id_mov_to_drop);
+
+    DELETE FROM w_data.MOVIMENTI WHERE ID = id_mov_to_drop;
 
 EXCEPTION
 	WHEN NO_DATA_FOUND THEN

@@ -11,25 +11,40 @@ DECLARE
     new_description text DEFAULT '';
 
 BEGIN
-    SELECT CAST(DATA_MOV AS text) INTO STRICT date_deb_cred FROM MOVIMENTI mv WHERE ID = id_record;
-    SELECT mv.DARE_AVERE INTO STRICT dare_avere FROM MOVIMENTI mv WHERE ID = id_record;
-    SELECT DESCRIZIONE INTO STRICT desc_deb_cred FROM DEBITI_CREDITI WHERE ID_MOV = id_record;
-    SELECT ORIGINE INTO STRICT src_deb_cred FROM DEBITI_CREDITI WHERE ID_MOV = id_record;
+    SELECT CAST(DATA_MOV AS text) INTO STRICT date_deb_cred
+        FROM w_data.MOVIMENTI mv
+        WHERE ID = id_record;
 
-	DELETE FROM DEBITI_CREDITI WHERE ID_MOV = id_record AND SALDATO = FALSE;
+    SELECT mv.DARE_AVERE INTO STRICT dare_avere
+        FROM w_data.MOVIMENTI mv
+        WHERE ID = id_record;
+
+    SELECT DESCRIZIONE INTO STRICT desc_deb_cred
+        FROM w_data.DEBITI_CREDITI
+        WHERE ID_MOV = id_record;
+
+    SELECT ORIGINE INTO STRICT src_deb_cred
+        FROM w_data.DEBITI_CREDITI
+        WHERE ID_MOV = id_record;
+
+	DELETE FROM w_data.DEBITI_CREDITI WHERE ID_MOV = id_record AND SALDATO = FALSE;
 
     IF DARE_AVERE = FALSE THEN
         new_description = format('Credito verso %s [%s] diventato spesa, note: %s', src_deb_cred, date_deb_cred, desc_deb_cred);
 
         -- ID_TIPO_MOV is hardcoded with 1 ('Spesa Varia')
-        UPDATE MOVIMENTI SET ID_TIPO_MOV = 1 WHERE id = id_record;
-		INSERT INTO SPESE_VARIE(ID_MOV, ID_TIPO_SPESA, DESCRIZIONE) VALUES (id_record, 5, new_description);
+        UPDATE w_data.MOVIMENTI SET ID_TIPO_MOV = 1 WHERE id = id_record;
+
+		INSERT INTO w_data.SPESE_VARIE(ID_MOV, ID_TIPO_SPESA, DESCRIZIONE)
+            VALUES (id_record, 5, new_description);
     ELSE
         new_description = format('Debito verso %s [%s] diventato entrata, note: %s', src_deb_cred, date_deb_cred, desc_deb_cred);
 
         -- ID_TIPO_MOV is hardcoded with 4 ('Entrata')
-        UPDATE MOVIMENTI SET ID_TIPO_MOV = 4 WHERE ID = id_record;
-		INSERT INTO ENTRATE(ID_MOV, ID_TIPO_ENTRATA, DESCRIZIONE) VALUES (id_record, 4, new_description);
+        UPDATE w_data.MOVIMENTI SET ID_TIPO_MOV = 4 WHERE ID = id_record;
+
+		INSERT INTO w_data.ENTRATE(ID_MOV, ID_TIPO_ENTRATA, DESCRIZIONE)
+            VALUES (id_record, 4, new_description);
     END IF;
 
 EXCEPTION

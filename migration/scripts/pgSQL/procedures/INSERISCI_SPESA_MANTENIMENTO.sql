@@ -16,16 +16,22 @@ DECLARE
 
 BEGIN
     -- assigning id_tipo_mov
-	SELECT ID INTO STRICT id_tipo_mov FROM MAP_MOVIMENTI AS map_mov WHERE map_mov.DESCRIZIONE = type_mov;
+	SELECT ID INTO STRICT id_tipo_mov
+		FROM w_map.MAP_MOVIMENTI AS map_mov 
+		WHERE map_mov.DESCRIZIONE = type_mov;
 
 	-- inserting main mov
-	INSERT INTO MOVIMENTI(ID_TIPO_MOV, ID_CONTO, DATA_INS, DATA_MOV, DARE_AVERE, IMPORTO, NOTE) VALUES (id_tipo_mov, id_conto, CURRENT_TIMESTAMP, data_mov, dare_avere, importo, note);
+	INSERT INTO w_data.MOVIMENTI(ID_TIPO_MOV, ID_CONTO, DATA_INS, DATA_MOV, DARE_AVERE, IMPORTO, NOTE) 
+		VALUES (id_tipo_mov, id_conto, CURRENT_TIMESTAMP, data_mov, dare_avere, importo, note);
 
 	-- assigning id_mov_main
-	SELECT ID INTO id_mov_main FROM MOVIMENTI ORDER BY ID DESC LIMIT 1; 
+	SELECT ID INTO id_mov_main 
+		FROM w_data.MOVIMENTI 
+		ORDER BY ID DESC LIMIT 1; 
 
     --inserting spesa di mantenimento
-	INSERT INTO SPESE_MANTENIMENTO(ID_MOV, DESCRIZIONE) VALUES (id_mov_main, descrizione);
+	INSERT INTO w_data.SPESE_MANTENIMENTO(ID_MOV, DESCRIZIONE) 
+		VALUES (id_mov_main, descrizione);
 
 EXCEPTION
 	WHEN NO_DATA_FOUND THEN

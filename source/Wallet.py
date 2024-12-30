@@ -19,8 +19,8 @@ class Wallet:
 				user=user,
 				password=password,
 				# host=host_db,
-				port=port_db
-				# require_auth="scram-sha-256"
+				port=port_db,
+				require_auth="scram-sha-256"
 			)
 		except psycopg2.Error as err:
 			if "password authentication failed" in str(err):
@@ -149,12 +149,12 @@ class Wallet:
 			arg_names_list = ["data_mov", "id_conto", "importo", "id_tipo_s_varia", "descrizione"]
 			if "note" in data_info:
 				arg_names_list.append("note")
-		
+
 		elif type_mov == "Spesa Fissa":
 			arg_names_list = ["data_mov", "id_conto", "importo", "descrizione"]
 			if "note" in data_info:
 				arg_names_list.append("note")
-			
+
 		elif type_mov == "Stipendio":
 			arg_names_list = ["data_mov", "id_conto", "importo", "ddl"]
 			if "note" in data_info:
@@ -205,7 +205,7 @@ class Wallet:
 		self._exec_sql_string(sql_query=sql_string, arguments=proc_args, do_commit=True)
 
 	def _exec_sql_string(self, sql_query, arguments={}, do_commit=False, check_return_rows=False):
-		self._logger.debug(f"esecuzione query SQL: '{sql_query % arguments}'")
+		self._logger.debug(f"esecuzione query SQL: '{self.cursor.mogrify(sql_query, arguments).decode('utf-8')}'")
 		try:
 			self.cursor.execute(sql_query, arguments)
 		except (psycopg2.Warning, psycopg2.Error) as error:

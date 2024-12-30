@@ -39,28 +39,36 @@ BEGIN
 	
 	-- se é stato passato manualmente un importo, allora il saldo devo riguardare solo debiti o solo crediti
 	IF importo <> 0 THEN
-		IF (SELECT count(DISTINCT dc.DEB_CRED) FROM DEBITI_CREDITI dc WHERE ID_MOV = ANY (ids_to_close)) > 1 THEN
+		IF (
+			SELECT count(DISTINCT dc.DEB_CRED) 
+				FROM w_data.DEBITI_CREDITI dc 
+				WHERE ID_MOV = ANY (ids_to_close)
+			) > 1 THEN
 			RAISE EXCEPTION 'Selezionati debiti e crediti in contemporanea da saldare in modo parziale';
 		END IF;
 		manually_close = TRUE;
 	END IF;
 
 	-- controllo di non considerare movimenti gia' saldati
-	IF (SELECT count(*) FROM DEBITI_CREDITI dc WHERE ID_MOV = ANY (ids_to_close) AND SALDATO = TRUE) > 0 THEN
+	IF (
+		SELECT count(*)
+			FROM w_data.DEBITI_CREDITI dc
+			WHERE ID_MOV = ANY (ids_to_close) AND SALDATO = TRUE
+		) > 0 THEN
 		RAISE EXCEPTION 'Selezionati debiti e crediti gia'' saldati';
 	END IF;
 
 	-- importo totale da saldare dei deb/cred selezionati
 	SELECT CAST(SUM(CASE WHEN mv.DARE_AVERE = TRUE THEN mv.IMPORTO * -1 ELSE mv.IMPORTO END) AS DECIMAL(9,2))
 		INTO tot_importo 
-		FROM MOVIMENTI mv
+		FROM w_data.MOVIMENTI mv
 		WHERE mv.ID = ANY (ids_to_close);
 
 	-- origine comune dei deb/cred selezionati
 	BEGIN
 		SELECT DISTINCT dc.ORIGINE
 			INTO STRICT origine 
-			FROM DEBITI_CREDITI dc
+			FROM w_data.DEBITI_CREDITI dc
 			WHERE dc.ID_MOV = ANY (ids_to_close);
 	EXCEPTION
 		WHEN TOO_MANY_ROWS THEN
@@ -70,7 +78,7 @@ BEGIN
 	-- assigning id_tipo_mov
 	SELECT map_mov.ID 
 		INTO STRICT id_tipo_mov 
-		FROM MAP_MOVIMENTI AS map_mov 
+		FROM w_map.MAP_MOVIMENTI AS map_mov 
 		WHERE map_mov.DESCRIZIONE = type_mov;
 
 	-- dare-avere del futuro movimento
@@ -88,13 +96,13 @@ BEGIN
 	END IF;
 
 	-- inserting main mov
-	INSERT INTO MOVIMENTI(ID_TIPO_MOV, 
-						  ID_CONTO,
-						  DATA_INS,
-						  DATA_MOV,
-						  DARE_AVERE,
-						  IMPORTO,
-						  NOTE) 
+	INSERT INTO w_data.MOVIMENTI(ID_TIPO_MOV, 
+									ID_CONTO,
+									DATA_INS,
+									DATA_MOV,
+									DARE_AVERE,
+									IMPORTO,
+						  			NOTE) 
 	VALUES (id_tipo_mov,
 			id_conto,
 			CURRENT_TIMESTAMP,
@@ -104,12 +112,14 @@ BEGIN
 			note);
 
 	-- assigning id_mov_main
-	SELECT ID INTO id_mov_main FROM MOVIMENTI ORDER BY ID DESC LIMIT 1; 
+	SELECT ID INTO id_mov_main 
+		FROM w_data.MOVIMENTI
+		ORDER BY ID DESC LIMIT 1; 
 
 	FOREACH current_id IN ARRAY ids_to_close 
 	LOOP
 		IF manually_close = FALSE THEN
-			UPDATE DEBITI_CREDITI SET 
+			UPDATE w_data.DEBITI_CREDITI SET 
 				SALDATO = TRUE, 
 				ID_MOV_SALDO = COALESCE(ID_MOV_SALDO || ' ', '') || CAST(id_mov_main AS text),
 				DATA_SALDO = data_mov 
@@ -117,11 +127,11 @@ BEGIN
 		ELSE
 			SELECT mv.IMPORTO 
 				INTO STRICT curr_importo 
-				FROM MOVIMENTI mv
+				FROM w_data.MOVIMENTI mv
 				WHERE ID = current_id;
 
 			IF importo >= curr_importo THEN
-				UPDATE DEBITI_CREDITI SET 
+				UPDATE w_data.DEBITI_CREDITI SET 
 					SALDATO = TRUE, 
 					ID_MOV_SALDO = COALESCE(ID_MOV_SALDO || ' ', '') || CAST(id_mov_main AS text),
 					DATA_SALDO = data_mov 
@@ -133,11 +143,11 @@ BEGIN
 				END IF;
 			ELSE
 				-- in questo caso non riesco a saldare lo specifico deb/cred, modifico l'importo di quello che riesco a saldare ed esco dal loop
-				UPDATE DEBITI_CREDITI SET 
+				UPDATE w_data.DEBITI_CREDITI SET 
 					ID_MOV_SALDO = COALESCE(ID_MOV_SALDO || ' ', '') || CAST(id_mov_main AS text)
 				WHERE ID_MOV = current_id;
 
-				UPDATE MOVIMENTI SET 
+				UPDATE w_data.MOVIMENTI SET 
 					NOTE = COALESCE(MOVIMENTI.NOTE || ' - ', '') || 'importo originale: ' || CAST(curr_importo AS text) || ', abbassato di: ' || CAST(SALDA_DEBITO_CREDITO.importo AS text) || ' a seguito del saldo parziale id: ' || CAST(id_mov_main AS text),
 					IMPORTO = curr_importo - SALDA_DEBITO_CREDITO.importo
 				WHERE ID = current_id;
@@ -149,7 +159,13 @@ BEGIN
 
 	-- se diff > 0 allora viene creato un altro debito/credito oltre al saldo, che rappresenta il credito/debito che tiene conto dell'avanzo, che a sua volta dovrà essere saldato
 	IF diff > 0 THEN
-		CALL INSERISCI_DEBITO_CREDITO(data_mov, id_conto, diff, NOT dare_avere, origine, 'Eccesso del saldo id: ' || CAST(id_mov_main AS text), note); 
+		CALL INSERISCI_DEBITO_CREDITO(data_mov,
+										id_conto,
+										diff,
+										NOT dare_avere,
+										origine,
+										'Eccesso del saldo id: ' || CAST(id_mov_main AS text),
+										note); 
 	END IF;
 END;
 $$;

@@ -69,7 +69,7 @@ def format_sql_string_pgsql(operation, table_name="", field_select_list=[], wher
 
 		if limit != -1:
 			sql_string = f"{sql_string} LIMIT {limit}"
-		
+
 	elif operation == 'U':
 		fields_to_update = ""
 		fields_to_filter = ""
@@ -112,7 +112,7 @@ def format_sql_string_pgsql(operation, table_name="", field_select_list=[], wher
 		if proc_args:
 			arguments = ", ".join([f"%({arg_name})s" for arg_name in proc_args])
 		sql_string = f"CALL {proc_name} ({arguments})"
-	
+
 	return sql_string + ';'
 
 # NB fix con $$

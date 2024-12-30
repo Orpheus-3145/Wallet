@@ -1,9 +1,13 @@
+-- \set map_schema :'w_map'
+-- \set data_schema :'w_data'
+-- \set path_csvs :'../../data/export/'
+
 DO $$
 DECLARE
-	csv_folder text := '/var/lib/pgsql/17/Wallet/migration/data/test_exp/';
+	csv_folder text := :path_csvs;
+	map_schema_name text := :map_schema;
+	data_schema_name text := :data_schema;
 	table_name text := '';
-	map_schema_name text := 'w_map';
-	data_schema_name text := 'w_data';
 	tables text[] := ARRAY[
 		'MAP_TABELLE',
 		'MAP_CONTI',

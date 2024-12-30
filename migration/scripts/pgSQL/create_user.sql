@@ -1,9 +1,15 @@
+-- \set map_schema :'w_map'
+-- \set data_schema :'w_data'
+-- \set user :'fra'
+-- \set pwd :'91913881'
+
+
 DO $$
 DECLARE
-	data_schema_name text := 'w_data';
-	map_schema_name text := 'w_map';
-	user_name text := 'fra';
-	user_pwd text := '91913881';
+	map_schema_name text := :map_schema;
+	data_schema_name text := :data_schema;
+	user_name text := :user;
+	user_pwd text := :pwd;
 BEGIN
 
 	EXECUTE format(

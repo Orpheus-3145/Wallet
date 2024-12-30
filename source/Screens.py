@@ -139,28 +139,45 @@ class InsertMovementScreen(Screen):
 	def insert_movement(self):
 		try:
 			movement_data = self.ids.layout_date.get_data()
+			movement_data.update(self.ids.layout_main.get_data())
+			movement_data.update(self.data_layouts[self.id_mov].get_data())
 
-			if self.movements[self.id_mov] == "Saldo Debito - Credito":
-				movement_data.update(self.ids.layout_main.get_data(fields_not_mandatory=["importo", "note"]))
-				if "importo" not in movement_data and "note" in movement_data:
-					movement_data["importo"] = 0
-				movement_data.update(self.data_layouts[self.id_mov].get_data())
-				# movement_data.update({"id_saldo_deb_cred": Tools.list_to_str(self.ids_deb_cred)})
+			fields_existance = ["data_mov", "importo", "id_conto"]
+
+			if self.movements[self.id_mov] == "Spesa Varia":
+				fields_existance.extend(["id_tipo_s_varia", "descrizione"])
+
+			elif self.movements[self.id_mov] == "Spesa Fissa":
+				fields_existance.append("descrizione")
+
 			elif self.movements[self.id_mov] == "Stipendio":
-				movement_data.update(self.ids.layout_main.get_data(fields_not_mandatory=["note"]))
-				movement_data.update(self.data_layouts[self.id_mov].get_data(fields_not_mandatory=["netto", "rimborso_spese"]))
-			else:
-				movement_data.update(self.ids.layout_main.get_data(fields_not_mandatory=["note"]))
-				movement_data.update(self.data_layouts[self.id_mov].get_data())
-			
-				# movement_data.update(self.ids.layout_main.get_data(["importo", "note"]))
-				# movement_data.update({"id_saldo_deb_cred": Tools.list_to_str(self.ids_deb_cred)})
-			# else:
-			# 	movement_data.update(self.data_layouts[self.id_mov].get_data())
-			
+				fields_existance.append("ddl")
+
+			elif self.movements[self.id_mov] == "Entrata":
+				fields_existance.extend(["id_tipo_entrata", "descrizione"])
+
+			elif self.movements[self.id_mov] == "Debito - Credito":
+				fields_existance.extend(["deb_cred", "origine", "descrizione"])
+
+			elif self.movements[self.id_mov] == "Saldo Debito - Credito":
+				fields_existance.remove("importo")
+				fields_existance.append("id_saldo_deb_cred")
+
+			elif self.movements[self.id_mov] == "Spesa di Mantenimento":
+				fields_existance.append("descrizione")
+
+			elif self.movements[self.id_mov] == "Spesa di Viaggio":
+				fields_existance.extend(["viaggio", "descrizione"])
+
+			for field_to_check in fields_existance:
+				try:
+					movement_data[field_to_check]
+				except:
+					raise WrongInputException(f"campo {field_to_check} mancante")
+
 			App.get_running_app().insert_movement(self.id_mov, movement_data)
 
-		except (AppException, WrongInputException) as error:
+		except (WrongInputException, AppException) as error:
 			Factory.ErrorPopup(err_text=str(error)).open()
 	
 		else:
