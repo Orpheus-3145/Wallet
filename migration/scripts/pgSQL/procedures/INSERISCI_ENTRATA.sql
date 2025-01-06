@@ -1,4 +1,4 @@
-CREATE OR REPLACE PROCEDURE INSERISCI_ENTRATA(
+CREATE OR REPLACE PROCEDURE w_data.INSERISCI_ENTRATA(
 	data_mov date,
 	id_conto int,
 	importo real,

@@ -39,7 +39,10 @@ V	15. rinominare tabella [NB: anche tabella map_movimenti], sql e python di INSE
 	32. fix Wallet.get_last_n_records()
 V	33. script esportazione in csv
 	34. rimuovere login manuale, legando utente wallet a quello del db, rimuovere WALLET_USERS
-
+X	35. conversione procedure in funzioni per argomenti non posizionali
+	36. in init db aggiungere INSERT per tabelle di MAP
+	37. creare tabella UTENTI
+	38. procedure di export e import automatiche (leggono tabella MAP_TABELLE) al posto che leggere un array statico
 
 Alla fine:
 	. vedere se MAP_TABELLE e' aggiornata

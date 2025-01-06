@@ -1,110 +1,89 @@
--- \set map_schema :'w_map'
--- \set data_schema :'w_data'DO $$
+BEGIN;
 
+CREATE VIEW w_data.V_DEBITI_CREDITI_APERTI AS
+SELECT
+	TO_CHAR(mv.DATA_MOV, 'dd/MM/yyyy')								AS DATA,
+	ROUND(mv.IMPORTO::numeric, 2)									AS IMPORTO,
+	CASE WHEN mv.DARE_AVERE = true THEN 'Debito' else 'Credito' END	AS DEBITO_CREDITO,
+	dc.ORIGINE														AS ORIGINE,
+	dc.DESCRIZIONE													AS DESCRIZIONE,
+	mv.NOTE															AS NOTE,
+	mv.ID															AS ID
+FROM w_data.MOVIMENTI mv
+INNER JOIN w_data.DEBITI_CREDITI dc ON
+	mv.ID = ID_MOV
+WHERE SALDATO = false;
 
-DECLARE
-	map_schema_name text := :map_schema;
-	data_schema_name text := :data_schema;
-BEGIN
+CREATE VIEW w_data.V_ENTRATE AS
+SELECT TO_CHAR(mv.DATA_MOV, 'dd/MM/yyyy')		AS DATA,
+	ROUND(IMPORTO::numeric, 2)					AS IMPORTO,
+	COALESCE(mnt.DESCRIZIONE, '')				AS TIPO,
+	ent.DESCRIZIONE								AS DESCRIZIONE,
+	COALESCE(mv.NOTE, '')						AS NOTE,
+	mv.ID										AS ID
+FROM w_data.MOVIMENTI mv
+INNER JOIN w_data.ENTRATE ent ON
+	ent.ID_MOV = mv.id
+LEFT JOIN w_map.MAP_ENTRATE mnt ON
+	mnt.id = ent.ID_TIPO_ENTRATA;
 
-	EXECUTE format( $query$
-		create view %s.V_DEBITI_CREDITI_APERTI as
-		select
-			TO_CHAR(mv.DATA_MOV, 'dd/MM/yyyy')								as DATA,
-			ROUND(mv.IMPORTO::numeric, 2)											as IMPORTO,
-			case when mv.DARE_AVERE = true then 'Debito' else 'Credito' end	as DEBITO_CREDITO,
-			dc.ORIGINE														as ORIGINE,
-			dc.DESCRIZIONE													as DESCRIZIONE,
-			mv.NOTE															as NOTE,
-			mv.ID															as ID
-		from %s.MOVIMENTI mv
-		inner join %s.DEBITI_CREDITI dc on
-			mv.ID = ID_MOV
-		where SALDATO = false
-	$query$ , data_schema_name, data_schema_name, data_schema_name);
+CREATE VIEW w_data.V_SPESE_FISSE AS
+SELECT TO_CHAR(mv.DATA_MOV, 'dd/MM/yyyy')		AS DATA,
+	ROUND(IMPORTO::numeric, 2)					AS IMPORTO,
+	sf.DESCRIZIONE								AS DESCRIZIONE,
+	mc.DESCRIZIONE								AS PAGAMENTO,
+	COALESCE(mv.NOTE, '')						AS NOTE,
+	mv.ID										AS ID
+FROM w_data.MOVIMENTI mv
+INNER JOIN w_data.SPESE_FISSE sf ON
+	sf.ID_MOV = mv.id
+INNER JOIN w_map.MAP_conti mc ON
+	mv.ID_CONTO = mc.id;
 
-	EXECUTE format( $query$
-		create view %s.V_ENTRATE as
-		select TO_CHAR(mv.DATA_MOV, 'dd/MM/yyyy')				as DATA,
-			ROUND(IMPORTO::numeric, 2)			as IMPORTO,
-			COALESCE(mnt.DESCRIZIONE, '')	as TIPO,
-			ent.DESCRIZIONE				as DESCRIZIONE,
-			COALESCE(mv.NOTE, '')			as NOTE,
-			mv.ID						as ID
-		from %s.MOVIMENTI mv
-		inner join %s.ENTRATE ent on
-			ent.ID_MOV = mv.id
-		left join %s.MAP_ENTRATE mnt on
-			mnt.id = ent.ID_TIPO_ENTRATA
-	$query$ , data_schema_name, data_schema_name, data_schema_name, map_schema_name);
+CREATE VIEW w_data.V_SPESE_MANTENIMENTO AS
+SELECT TO_CHAR(mv.DATA_MOV, 'dd/MM/yyyy')		AS DATA,
+	ROUND(IMPORTO::numeric, 2)					AS IMPORTO,
+	sm.DESCRIZIONE								AS DESCRIZIONE,
+	COALESCE(mv.NOTE, '')						AS NOTE,
+	mv.ID										AS ID
+FROM w_data.MOVIMENTI mv
+INNER JOIN w_data.SPESE_MANTENIMENTO sm ON
+	sm.ID_MOV = mv.id;
 
-	EXECUTE format( $query$
-		create view %s.V_SPESE_FISSE as
-		select TO_CHAR(mv.DATA_MOV, 'dd/MM/yyyy')				as DATA,
-			ROUND(IMPORTO::numeric, 2)			as IMPORTO,
-			sf.DESCRIZIONE				as DESCRIZIONE,
-			mc.DESCRIZIONE				as PAGAMENTO,
-			COALESCE(mv.NOTE, '')			as NOTE,
-			mv.ID						as ID
-		from %s.MOVIMENTI mv
-		inner join %s.SPESE_FISSE sf on
-			sf.ID_MOV = mv.id
-		inner join %s.MAP_conti mc on
-			mv.ID_CONTO = mc.id
-	$query$ , data_schema_name, data_schema_name, data_schema_name, map_schema_name);
+CREATE VIEW w_data.V_SPESE_VARIE AS
+SELECT TO_CHAR(mv.DATA_MOV, 'dd/MM/yyyy')	AS DATA,
+	ROUND(IMPORTO::numeric, 2)				AS IMPORTO,
+	msv.DESCRIZIONE							AS TIPO,
+	sv.DESCRIZIONE							AS DESCRIZIONE,
+	COALESCE(mv.NOTE, '')					AS NOTE,
+	mv.ID									AS ID
+FROM w_data.MOVIMENTI mv
+INNER JOIN w_data.SPESE_VARIE sv ON
+	sv.ID_MOV = mv.id
+INNER JOIN w_map.MAP_SPESE_VARIE msv ON
+	msv.id = sv.ID_TIPO_SPESA;
 
-	EXECUTE format( $query$
-		create view %s.V_SPESE_MANTENIMENTO as
-		select TO_CHAR(mv.DATA_MOV, 'dd/MM/yyyy')				as DATA,
-			ROUND(IMPORTO::numeric, 2)									as IMPORTO,
-			sm.DESCRIZIONE										as DESCRIZIONE,
-			COALESCE(mv.NOTE, '')									as NOTE,
-			mv.ID												as ID
-		from %s.MOVIMENTI mv
-		inner join %s.SPESE_MANTENIMENTO sm on
-			sm.ID_MOV = mv.id
-	$query$ , data_schema_name, data_schema_name, data_schema_name);
+CREATE VIEW w_data.V_SPESE_VIAGGI AS
+SELECT TO_CHAR(mv.DATA_MOV, 'dd/MM/yyyy')	AS DATA,
+	ROUND(IMPORTO::numeric, 2)				AS IMPORTO,
+	sv.VIAGGIO								AS VIAGGIO,
+	sv.DESCRIZIONE							AS DESCRIZIONE,
+	COALESCE(mv.NOTE, '')					AS NOTE,
+	mv.ID									AS ID
+FROM w_data.MOVIMENTI mv
+INNER JOIN w_data.SPESE_VIAGGI sv ON
+	sv.ID_MOV = mv.id;
 
-	EXECUTE format( $query$
-		create view %s.V_SPESE_VARIE as
-		select TO_CHAR(mv.DATA_MOV, 'dd/MM/yyyy')	as DATA,
-			ROUND(IMPORTO::numeric, 2)						as IMPORTO,
-			msv.DESCRIZIONE							as TIPO,
-			sv.DESCRIZIONE							as DESCRIZIONE,
-			COALESCE(mv.NOTE, '')						as NOTE,
-			mv.ID									as ID
-		from %s.MOVIMENTI mv
-		inner join %s.SPESE_VARIE sv on
-			sv.ID_MOV = mv.id
-		inner join %s.MAP_SPESE_VARIE msv on
-			msv.id = sv.ID_TIPO_SPESA
-	$query$ , data_schema_name, data_schema_name, data_schema_name, map_schema_name);
+CREATE VIEW w_data.V_STIPENDI AS
+SELECT
+	ROUND(stp.NETTO::numeric, 2)			AS NETTO,
+	ROUND(stp.TRATTENUTE::numeric, 2)		AS TRATTENUTE,
+	ROUND(stp.RIMBORSO_SPESE::numeric, 2)	AS R_SPESE,
+	MESE									AS MESE,
+	stp.DDL									AS DDL,
+	mv.ID									AS ID
+FROM w_data.MOVIMENTI mv
+INNER JOIN w_data.STIPENDI stp ON
+	stp.ID_MOV = mv.id;
 
-	EXECUTE format( $query$
-		create view %s.V_SPESE_VIAGGI as
-		select TO_CHAR(mv.DATA_MOV, 'dd/MM/yyyy')				as DATA,
-			ROUND(IMPORTO::numeric, 2)									as IMPORTO,
-			sv.VIAGGIO										as VIAGGIO,
-			sv.DESCRIZIONE										as DESCRIZIONE,
-			COALESCE(mv.NOTE, '')									as NOTE,
-			mv.ID												as ID
-		from %s.MOVIMENTI mv
-		inner join %s.SPESE_VIAGGI sv on
-			sv.ID_MOV = mv.id
-	$query$ , data_schema_name, data_schema_name, data_schema_name);
-
-	EXECUTE format( $query$
-		create view %s.V_STIPENDI as
-		select
-			ROUND(stp.NETTO::numeric, 2)				as NETTO,
-			ROUND(stp.TRATTENUTE::numeric, 2)		as TRATTENUTE,
-			ROUND(stp.RIMBORSO_SPESE::numeric, 2)	as R_SPESE,
-			MESE,
-			stp.DDL							as DDL,
-			mv.ID							as ID
-		from %s.MOVIMENTI mv
-		inner join %s.STIPENDI stp on
-			stp.ID_MOV = mv.id
-	$query$ , data_schema_name, data_schema_name, data_schema_name);
-
-END $$;
+COMMIT;

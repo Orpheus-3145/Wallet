@@ -1,4 +1,4 @@
-CREATE OR REPLACE PROCEDURE SALDA_DEBITO_CREDITO(
+CREATE OR REPLACE PROCEDURE w_data.SALDA_DEBITO_CREDITO(
     data_mov date,
     id_conto int,
     id_saldo_deb_cred text,
@@ -159,7 +159,7 @@ BEGIN
 
 	-- se diff > 0 allora viene creato un altro debito/credito oltre al saldo, che rappresenta il credito/debito che tiene conto dell'avanzo, che a sua volta dovrà essere saldato
 	IF diff > 0 THEN
-		CALL INSERISCI_DEBITO_CREDITO(data_mov,
+		CALL w_data.INSERISCI_DEBITO_CREDITO(data_mov,
 										id_conto,
 										diff,
 										NOT dare_avere,

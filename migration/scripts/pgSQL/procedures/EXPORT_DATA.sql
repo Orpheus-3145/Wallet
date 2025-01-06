@@ -1,12 +1,9 @@
--- \set map_schema :'w_map'
--- \set data_schema :'w_data'
--- \set path_csvs :'../../data/export/'
-
-DO $$
+CREATE OR REPLACE PROCEDURE w_data.EXPORT_DATA(
+	csv_folder text
+)
+LANGUAGE plpgsql AS $$
 DECLARE
-	csv_folder text := :path_csvs;
-	map_schema_name text := :map_schema;
-	data_schema_name text := :data_schema;
+  -- procedure variables
 	table_name text := '';
 	tables text[] := ARRAY[
 		'MAP_TABELLE',
@@ -21,24 +18,22 @@ DECLARE
 		'SPESE_MANTENIMENTO',
 		'SPESE_VARIE',
 		'SPESE_VIAGGI',
-		'STIPENDI'
-		];
+		'STIPENDI'];
 BEGIN
+	
+	SET search_path TO w_data, w_map;
 
-	EXECUTE format(
-		'SET search_path TO %s, %s'
-	, map_schema_name, data_schema_name);
-
+	-- FOR table_name IN SELECT NOME FROM w_map.MAP_TABELLE LOOP
 	FOR table_name IN SELECT UNNEST(tables) LOOP
-
+		
 		EXECUTE format( $query$
-			COPY %s
-			TO %L
-			WITH (
-				FORMAT csv,
-				HEADER true,
-				DELIMITER ','
-			)
+				COPY %s
+				TO %L
+				WITH (
+					FORMAT csv,
+					HEADER true,
+					DELIMITER ','
+				)
 			$query$ , table_name, csv_folder || table_name || '.csv');
 
 	END LOOP;

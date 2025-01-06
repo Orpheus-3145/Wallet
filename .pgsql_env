@@ -1,5 +1,0 @@
-ADMIN_DB="postgres"
-USER_DB="fra"
-PWD_DB="91913881"
-PORT_DB="6543"
-NAME_DB="wallet"

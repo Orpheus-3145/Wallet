@@ -1,0 +1,11 @@
+export DB_ADMIN="postgres"
+export DB_USER="fra"
+export DB_USER_PWD="91913881"
+export DB_PORT="6543"
+export DB_NAME="wallet"
+export DB_DATA_SCHEMA="w_data"
+export DB_MAP_SCHEMA="w_map"
+
+export ROOT="${PWD}/.."
+export PATH_SQL_SCRIPTS="${ROOT/}/migration/scripts/pgSQL"
+export PATH_SQL_DATA_CSV="${ROOT/}/migration/data/import"

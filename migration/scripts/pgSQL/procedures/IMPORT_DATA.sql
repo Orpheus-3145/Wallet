@@ -1,12 +1,9 @@
--- \set map_schema :'w_map'
--- \set data_schema :'w_data'
--- \set path_csvs :'../../data/import/'
-
-DO $$
+CREATE OR REPLACE PROCEDURE w_data.IMPORT_DATA(
+	csv_folder text
+)
+LANGUAGE plpgsql AS $$
 DECLARE
-	csv_folder text := :path_csvs;
-	map_schema_name text := :map_schema;
-	data_schema_name text := :data_schema;
+  -- procedure variables
 	table_name text := '';
 	tables text[] := ARRAY[
 		'MAP_TABELLE',
@@ -21,17 +18,13 @@ DECLARE
 		'SPESE_MANTENIMENTO',
 		'SPESE_VARIE',
 		'SPESE_VIAGGI',
-		'STIPENDI'
-	];
+		'STIPENDI'];
 BEGIN
 
-	EXECUTE format(
-		'SET search_path TO %s, %s'
-	, map_schema_name, data_schema_name);
+	SET search_path TO w_data, w_map;
 
 	FOR table_name IN SELECT UNNEST(tables) LOOP
 
-		-- import .csv into table
 		EXECUTE format( $query$
 			COPY %s
 			FROM %L
@@ -40,7 +33,7 @@ BEGIN
 				HEADER true,
 				DELIMITER ','
 			)
-			$query$ , table_name, csv_folder || table_name || '.csv');
+			$query$, table_name, csv_folder || table_name || '.csv');
 
 		-- update last index value counter
 		EXECUTE format (
