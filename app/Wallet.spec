@@ -5,7 +5,7 @@ block_cipher = None
 
 added_files = [("../kv", "kv"),
 	("../media", "media" ),
-	("../settings", "settings"),
+	("../config", "config"),
 	("../qlik", "qlik")]
 	
 a = Analysis(['../source/WalletApp.py'],

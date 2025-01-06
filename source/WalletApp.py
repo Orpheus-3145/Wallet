@@ -2,21 +2,23 @@ import logging
 import os
 from datetime import date
 import tkinter as tk
+from dotenv import load_dotenv
 
 import Tools
 import Wallet
 from AppExceptions import *
 
 from kivy.config import Config
-DEF_LOG_LVL = 20
 
-LOG_PATH = Tools.get_abs_path("logs")
-CONFIG_PATH = Tools.get_abs_path("settings/config_wallet.ini")
 
-Config.read(CONFIG_PATH)
+PATH_ENV_FILE = Tools.get_abs_path("config/wallet.env")
+load_dotenv(PATH_ENV_FILE)
+
+PATH_INI_FILE = Tools.get_abs_path(os.getenv("PATH_INI_FILE", "config/wallet.ini"))
+Config.read(PATH_INI_FILE)
 
 from kivy.lang import Builder
-from kivy.core.window import Window
+# from kivy.core.window import Window
 from Screens import *
 from Popups import *
 
@@ -27,32 +29,35 @@ class WalletApp(App):
 		self._stopped = False
 		self.wallet_instance = None
 		self.config_info = {}
-		self.create_logger(LOG_PATH, Config.get("log", "log_level", fallback=DEF_LOG_LVL))
 		self.read_config(Config)
+		self.create_logger(self.config_info["log_path"], self.config_info["log_level"])
 
 	def read_config(self, config):
 		try:
+			# generic env vars
+			self.config_info["log_path"] = os.getenv("LOG_PATH", "logs/")
+			self.config_info["log_level"] = int(os.getenv("LOG_LEVEL", "20"))
+			self.config_info["host"] = os.getenv("DB_HOST", "localhost")
+			self.config_info["port"] = int(os.getenv("DB_PORT", "6543"))
+			self.config_info["db_name"] = os.getenv("DB_NAME")
+			self.config_info["user"] = os.getenv("DB_USER_NAME")
+			self.config_info["pwd"] = os.getenv("DB_USER_PWD")
+			self.config_info["backup_path"] = Tools.get_abs_path(os.getenv("LOG_PATH", "backup/"))
+			# kivy data
 			self.config_info["kivy_files"] = [Tools.get_abs_path(kv_file) for kv_file in config["kivy_files"].values()]
-			self.config_info["host"] = config["database"]["host"]
-			self.config_info["port"] = config["database"]["port"]
-			self.config_info["db_name"] = config["database"]["db_name"]
-			# self.config_info["user"] = config["database"]["user"]
-			# self.config_info["password"] = config["database"]["password"]
-			self.config_info["backup_path"] = Tools.get_abs_path(config["database"]["backup_path"])
 			self.config_info["background_img_path"] = Tools.get_abs_path(config["graphics"]["background_img_path"])
 			self.config_info["logo_path"] = Tools.get_abs_path(config["graphics"]["logo_path"])
 			self.config_info["font_name"] = config["kivy"]["font_name"]
 			self.config_info["font_size"] = config.getint("kivy", "font_size")
-			self.config_info["width_app"] = config.getint("graphics", "width")
-			self.config_info["height_app"] = config.getint("graphics", "height")
+			# self.config_info["width_app"] = config.getint("graphics", "width")
+			# self.config_info["height_app"] = config.getint("graphics", "height")
 			self.config_info["max_rows_to_show"] = config.getint("widgets", "max_rows_to_show")  # max righe mostrate in SowMovementScreen
 			self.config_info["default_rows_to_show"] = config.getint("widgets", "default_rows_to_show")  # default righe mostrate in SowMovementScreen
 			self.config_info["colors"] = {}
 			for color_rgba in config["colors"].keys():
 				self.config_info["colors"][color_rgba] = Tools.str_to_list_float(config["colors"][color_rgba])
 		except (KeyError, ValueError) as error:
-			self.update_log("errore nel file .ini - trace: %s", 40, str(error))
-			raise AppException("Errore nel file .ini - trace: {}".format(str(error)))
+			raise AppException("Errore lettura config - trace: {}".format(str(error)))
 
 	def create_logger(self, log_path, log_level):
 		log_name = "Logfile_{}.log".format(date.today().strftime("%d-%m-%Y"))
@@ -94,14 +99,13 @@ class WalletApp(App):
 			self.update_log("invalid log level provided: {}, original message: '{}'".format(level, message), 30, *args)
 
 	def connect(self, user, pwd):
-		# if autologin is False:
-		#     self.connect()
-		#     return True
-		# elif user == "" or pwd == "":
-		#     raise AppException("Credenziali mancanti")
 		self.wallet_instance = Wallet.Wallet(logging)
 		try:
-			self.wallet_instance.connect(self.config_info["host"], self.config_info["port"], self.config_info["db_name"], user, pwd)
+			self.wallet_instance.connect(self.config_info["host"],
+										 self.config_info["port"],
+										 self.config_info["db_name"],
+										 self.config_info["user"],
+										 self.config_info["pwd"])
 		except SqlError as db_err:
 			self.update_log("errore connessione - %s", 40, str(db_err))
 			raise AppException("Connessione al database fallita, consulta il log per ulteriori dettagli")
@@ -118,8 +122,8 @@ class WalletApp(App):
 		width_screen = root.winfo_screenwidth()
 		height_screen = root.winfo_screenheight()
 		
-		Window.left = (width_screen - self.config_info["width_app"]) // 2
-		Window.top = (height_screen - self.config_info["height_app"]) // 2
+		# Window.left = (width_screen - self.config_info["width_app"]) // 2
+		# Window.top = (height_screen - self.config_info["height_app"]) // 2
 		for kv_file in self.config_info["kivy_files"]:
 			try:
 				Builder.load_file(kv_file)

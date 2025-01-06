@@ -1,32 +1,42 @@
 VENV_DIR = wallet_venv
-PYTHON = $(VENV_DIR)/bin/python
-PIP = $(VENV_DIR)/bin/pip
+LOG_DIR = logs
+BACKUP_DIR = backup
 SOURCE_DIR = source
+
+PYTHON = $(VENV_DIR)/bin/python3.12
+PIP = $(VENV_DIR)/bin/pip3.12
 MAIN = $(SOURCE_DIR)/WalletApp.py
 
-GREEN := \x1b[32;01m
+GREEN = \x1b[32;01m
 YELLOW = \x1b[33;01m
-RESET := \x1b[0m
+BOLD = \033[1m
+RESET = \x1b[0m
 
 all: run
 
-run: build
-	@$(PYTHON) $(MAIN)
+run: $(VENV_DIR) $(BACKUP_DIR) $(LOG_DIR)
+	@source $(VENV_DIR)/bin/activate && \
+	$(PYTHON) $(MAIN)
 
-build: $(VENV_DIR)/bin/activate
-
-$(VENV_DIR)/bin/activate: requirements.txt
-	@mkdir -p logs/
-	@mkdir -p backup/
-	@printf "$(GREEN)Folders logs and backup created$(RESET)\n"
-	@python3 -m venv $(VENV_DIR) >/dev/null
-	@$(PIP) install --upgrade pip >/dev/null
+$(VENV_DIR): requirements.txt
+	@python3.12 -m venv $(VENV_DIR) && \
+	source $(VENV_DIR)/bin/activate
+	@$(PIP) install --upgrade pip
 	@$(PIP) install -r requirements.txt
-	@printf "$(GREEN)Virtual environment created$(RESET)\n"
+	@printf "$(GREEN)Virtual environment created in $(BOLD)$(VENV_DIR)$(RESET)\n"
+
+$(BACKUP_DIR):
+	@mkdir -p $@
+	@printf "$(GREEN)Backup folder created$(RESET)\n"
+
+$(LOG_DIR):
+	@mkdir -p $@
+	@printf "$(GREEN)Log folder created$(RESET)\n"
 
 clean:
 	@rm -rf $(SOURCE_DIR)/__pycache__
 	@rm -rf $(VENV_DIR)
+	@rm -rf $(LOG_DIR)/*
 	@printf "$(YELLOW)Cleaned virtual cache and environment$(RESET)\n"
 
 re: clean run

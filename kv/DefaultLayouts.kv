@@ -1,15 +1,15 @@
 <DefaultLayout>:
-    border_color: DARKGREY_RGBA
-    color_widgets: BLUE_RGBA
-    font_size_chars: FONT_SIZE
+    border_color: app.get_color("darkgrey_rgba")
+    color_widgets: app.get_color("blue_rgba")
+    font_size_chars: app.get_font_size()
     orientation: "vertical"
     spacing: 5
     padding: 5
 
 <BorderLayout>:
-    border_color: LIGHTGREY_RGBA
+    border_color: app.get_color("lightgrey_rgba")
 
 <TableDynamicInputLayout>:
-    color_widgets: ORANGE_RGBA
+    color_widgets: app.get_color("orange_rgba")
     size_hint_y: None
     size_records: 50

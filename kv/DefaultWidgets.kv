@@ -1,28 +1,28 @@
 <Writable>:
-    font_name: FONT_NAME
-    font_size: FONT_SIZE
+    font_name: app.get_font_name()
+    font_size: app.get_font_size()
     font_size_scale: 1
 
 <DefaultLabel>:
-    background_color: ORANGE_RGBA
-    border_color: DARKGREY_RGBA
-    color: DARKGREY_RGBA
+    background_color: app.get_color("orange_rgba")
+    border_color: app.get_color("darkgrey_rgba")
+    color: app.get_color("darkgrey_rgba")
     text_size: self.width - 20, self.height - 20
     valign: "center"
     halign: "center"
 
 <DefaultButton>:
     background_normal: ""
-    background_color: BLUE_RGBA
-    color: WHITE_RGBA
+    background_color: app.get_color("blue_rgba")
+    color: app.get_color("white_rgba")
     text_size: self.size
     multiline: True
     valign: "center"
     halign: "center"
 
 <SelectionButton>:
-    bk_active: GREEN_RGBA
-    bk_inactive: BLUE_RGBA
+    bk_active: app.get_color("green_rgba")
+    bk_inactive: app.get_color("blue_rgba")
 
 <DefaultTextInput>:
     multiline: True
@@ -33,6 +33,6 @@
 <DefaultScrollView>:
     do_scroll_x: False
     do_scroll_y: True
-    bar_color: DARKGREY_RGBA
+    bar_color: app.get_color("darkgrey_rgba")
     bar_width: 8
     scroll_type: ["bars", "content"]

@@ -1,10 +1,10 @@
 <ErrorPopup>:
     title: "ERRORE"
-    title_size: FONT_SIZE
+    title_size: app.get_font_size()
     title_align: "center"
     size_hint: 0.3, 0.5
     auto_dismiss: False
-    title_color: RED_RGBA
+    title_color: app.get_color("red_rgba")
     separator_color: 1, 1, 1, 0
 
     FloatLayout:
@@ -13,9 +13,9 @@
 
         DefaultLabel:
             id: lbl_error
-            background_color: RED_RGBA
+            background_color: app.get_color("red_rgba")
             font_size_scale: 0.7
-            color: WHITE_RGBA
+            color: app.get_color("white_rgba")
             size_hint_y: 0.64
             pos_hint: {"x": 0, "y": 0.35}
 

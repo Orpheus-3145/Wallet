@@ -3,11 +3,11 @@
 <ManagerScreen>:
 	canvas:
 		Color:
-			rgba: WHITE_RGBA
+			rgba: app.get_color("white_rgba")
 
 		Rectangle:
 			size: self.size
-			source: BK_PATH
+			source: app.get_background_path()
 
 
 <LoginScreen>:
@@ -15,11 +15,11 @@
 		BorderLayout:
 			size_hint: 0.3 , 0.38
 			pos_hint: {"x": 0.35, "y": 0.52}
-			border_color: BLUE_RGBA
+			border_color: app.get_color("blue_rgba")
 			Image:
 				size: self.texture_size
 				fit_mode: "fill"
-				source: LOGO_PATH
+				source: app.get_logo_path()
 
 		GridLayout:
 			cols: 2
@@ -70,28 +70,28 @@
 			DefaultButton:
 				text: "Nuovo movimento"
 				font_size_scale: 1.2
-				background_color: LIGHTBLUE_RGBA
+				background_color: app.get_color("lightblue_rgba")
 				on_release:
 					root.show_movements()
 
 			DefaultButton:
 				text: "Saldo debito - credito"
 				font_size_scale: 1.2
-				background_color: YELLOW_RGBA
+				background_color: app.get_color("yellow_rgba")
 				on_press:
 					root.manager.go_to_payoff_screen()
 
 			DefaultButton:
 				text: "Movimenti inseriti"
 				font_size_scale: 1.2
-				background_color: PURPLE_RGBA
+				background_color: app.get_color("purple_rgba")
 				on_release:
 					root.manager.go_to_show_movements_screen()
 
 			DefaultButton:
 				text: "Backup"
 				font_size_scale: 1.2
-				background_color: LIGHTGREEN_RGBA
+				background_color: app.get_color("lightgreen_rgba")
 				on_release:
 					root.backup()
 
@@ -109,9 +109,9 @@
 			size_hint: 0.75, 0.18
 			pos_hint: {"x": 0.125, "y": 0.81}
 			font_size_scale: 1.5
-			color: WHITE_RGBA
-			background_color: BLUE_RGBA
-			border_color: WHITE_RGBA
+			color: app.get_color("white_rgba")
+			background_color: app.get_color("blue_rgba")
+			border_color: app.get_color("white_rgba")
 
 		LayoutDate:
 			id: layout_date
@@ -173,8 +173,8 @@
 			DefaultButton:
 				text: "INSERISCI"
 				font_size_scale: 1.1
-				background_color: LIGHTGREEN_RGBA
-				color: WHITE_RGBA
+				background_color: app.get_color("lightgreen_rgba")
+				color: app.get_color("white_rgba")
 				on_release:
 					root.insert_movement()
 
@@ -183,7 +183,7 @@
 			font_size_scale: 1.5
 			size_hint: 0.15, 0.1
 			pos_hint: {"x": 0.83, "y": 0.03}
-			background_color: RED_RGBA
+			background_color: app.get_color("red_rgba")
 			on_press:
 				root.manager.go_to_main_screen()
 
@@ -199,7 +199,7 @@
 		LabelDynamicLayout:
 			id: deb_cred_columns
 			orientation: "horizontal"
-			font_size_chars: FONT_SIZE * 0.8
+			font_size_chars: app.get_font_size() * 0.8
 			pos_hint: {"x": 0.05, "y": 0.6}
 			size_hint: 0.9, None
 			height: 80
@@ -211,7 +211,7 @@
 			TableDynamicInputLayout:
 				id: deb_cred_tab
 				f_to_launch: root.add_new_id
-				font_size_chars: FONT_SIZE * 0.6
+				font_size_chars: app.get_font_size() * 0.6
 
 		BorderLayout:
 			id: appearing_box
@@ -223,22 +223,22 @@
 
 			DefaultButton:
 				text: "SALDA"
-				background_color: LIGHTGREEN_RGBA
-				color: DARKGREY_RGBA
+				background_color: app.get_color("lightgreen_rgba")
+				color: app.get_color("darkgrey_rgba")
 				on_release:
 					root.go_to_insert_screen()
 
 			DefaultButton:
 				text: "CONVERTI IN MOVIMENTO"
-				background_color: LIGHTBLUE_RGBA
-				color: WHITE_RGBA
+				background_color: app.get_color("lightblue_rgba")
+				color: app.get_color("white_rgba")
 				on_release:
 					root.turn_deb_cred_into_mov()
 
 			DefaultButton:
 				text: "ELIMINA"
-				background_color: RED_RGBA
-				color: WHITE_RGBA
+				background_color: app.get_color("red_rgba")
+				color: app.get_color("white_rgba")
 				on_release:
 					root.remove_records()
 
@@ -247,7 +247,7 @@
 			font_size_scale: 1.5
 			size_hint: 0.15, 0.1
 			pos_hint: {"x": 0.83, "y": 0.03}
-			background_color: RED_RGBA
+			background_color: app.get_color("red_rgba")
 			on_press:
 				root.manager.go_to_main_screen(direction="down")
 
@@ -281,14 +281,14 @@
 			size_hint: 0.2, 0.65
 			pos_hint: {"x": 0.01, "y": 0.23}
 			f_to_launch: root.set_movement
-			font_size_chars: FONT_SIZE * 0.9
+			font_size_chars: app.get_font_size() * 0.9
 
 		LabelDynamicLayout:      # list of field names
 			id: mov_columns
 			orientation: "horizontal"
 			pos_hint: {"x": 0.22, "y": 0.78}
 			size_hint: 0.77, 0.1
-			font_size_chars: FONT_SIZE * 0.6
+			font_size_chars: app.get_font_size() * 0.6
 
 		DefaultScrollView
 			pos_hint: {"x": 0.22, "y": 0.24}
@@ -296,7 +296,7 @@
 
 			TableDynamicInputLayout:
 				id: rows_box
-				font_size_chars: FONT_SIZE * 0.6
+				font_size_chars: app.get_font_size() * 0.6
 				f_to_launch: root.add_record_to_remove
 
 		BorderLayout:
@@ -306,8 +306,8 @@
 
 			DefaultButton:
 				text: "ELIMINA"
-				color: WHITE_RGBA
-				background_color: RED_RGBA
+				color: app.get_color("white_rgba")
+				background_color: app.get_color("red_rgba")
 				font_size_scale: 1.2
 				on_release:
 					root.remove_records()
@@ -319,8 +319,8 @@
 
 			DefaultButton:
 				text: "AGGIORNA"
-				color: WHITE_RGBA
-				background_color: PURPLE_RGBA
+				color: app.get_color("white_rgba")
+				background_color: app.get_color("purple_rgba")
 				font_size_scale: 1.2
 				on_release:
 					root.update_rows()
@@ -330,6 +330,6 @@
 			font_size_scale: 1.5
 			size_hint: 0.15, 0.1
 			pos_hint: {"x": 0.83, "y": 0.03}
-			background_color: RED_RGBA
+			background_color: app.get_color("red_rgba")
 			on_press:
 				root.manager.go_to_main_screen(direction="down")
