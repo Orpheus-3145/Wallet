@@ -8,8 +8,8 @@ V	2. added DEFAULTS:
 		- SPESE_FISSE(MESE)
 		- STIPENDI(TOTALE, TRATTENUTE, RIMBORSO_SPESE)  (aggiunto check NETTO, TOTALE, TRATTENUTE, RIMBORSO_SPESE > 0)
 V	3. controllare se con l'aggiunta di vincoli di chiavi esterne alcuni controlli nelle sp possono essere rimossi
-	4. unificare creazione ed instanziazione del db wallet (creazione tables, views, sp) riempimento (tabelle con i valori di mapping e dummy data)
-	5. check file stipendi_con_note.csv
+V	4. unificare creazione ed instanziazione del db wallet (creazione tables, views, sp) riempimento (tabelle con i valori di mapping e dummy data)
+V	5. check file stipendi_con_note.csv
 	6. fix italian characters
 V	7. check BK_DATABASE
 V	8. file .py correzione campo IMPORTO di MOVIMENTTI.csv

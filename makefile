@@ -18,7 +18,8 @@ run: $(VENV_DIR) $(BACKUP_DIR) $(LOG_DIR)
 	@source $(VENV_DIR)/bin/activate && \
 	$(PYTHON) $(MAIN)
 
-$(VENV_DIR): requirements.txt
+$(VENV_DIR):
+	@mkdir -p $@
 	@python3.12 -m venv $(VENV_DIR) && \
 	source $(VENV_DIR)/bin/activate
 	@$(PIP) install --upgrade pip
@@ -41,4 +42,4 @@ clean:
 
 re: clean run
 
-.PHONY: all run build clean re
+.PHONY: all run clean re

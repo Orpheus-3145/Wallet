@@ -31,7 +31,7 @@ BEGIN
 			WITH (
 				FORMAT csv,
 				HEADER true,
-				DELIMITER ','
+				DELIMITER '|'
 			)
 			$query$, table_name, csv_folder || table_name || '.csv');
 
