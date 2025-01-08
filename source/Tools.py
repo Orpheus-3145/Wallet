@@ -33,7 +33,7 @@ def format_sql_string_pgsql(operation, table_name="", field_select_list=[], wher
 		- where_dict -> dizionario che contiene n condizioni che devono essere interamente soddisfatte (AND ... AND ... ) nella forma chiave = valore inseriti nel costrutto WHERE
 		- update_dict -> dizionario in cui chaive (<-campo) = valore nel costrutto SET di UPDATE
 		- insert_dict -> dizionario contenete il campo (chiave) e il valore da inserire in esso nel costrutto INSERT INTO
-		- join -> tipo di join da eseguire -> 'I' inner, 'L' left, 'R' right, 'C' cross
+		- join_type -> tipo di join da eseguire -> 'I' inner, 'L' left, 'R' right, 'C' cross
 		- join_table -> tabella da joinare
 		- join_fields -> dizionario di campi da uguagliare per il join
 		- keys_varchar -> lista di valori varchar da inserire in select, where, insert o update, restituisce il valore nello statement SQL racchiuso da singoli apici

@@ -84,20 +84,37 @@ class Wallet:
 		return column_list, matrix_mov
 
 	def get_last_n_records(self, id_mov, n_records):
-		pass
-		# sql_query = Tools.format_sql_string_pgsql(operation='S',
-		# 								   proc_name="READ_MOVEMENTS",
-		# 								   proc_args={"id_tipo_mov": id_mov, "n_records": n_records})
+		try:
+			sql_query = Tools.format_sql_string_pgsql(operation='S',
+							table_name="w_map.MAP_MOVIMENTI",
+							field_select_list=["VIEW"],
+							where_dict={"ID": id_mov})
 
-		# self._exec_sql_string(sql_query, check_return_rows=True)
-		# column_list = []        # lista dei nomi dei campi
-		# matrix_mov = []         # record di dati
-		# for column in self.cursor.description:
-		# 	if column[0] != "ID":
-		# 		column_list.append(column[0])
-		# for row in self.cursor:
-		# 	matrix_mov.append([elem for elem in row])
-		# return column_list, matrix_mov
+			self._exec_sql_string(sql_query=sql_query,check_return_rows=True);
+			view_name = self.cursor.fetchone()[0]
+			
+			sql_query = Tools.format_sql_string_pgsql(operation='S',
+							table_name=f"w_data.{view_name} v",
+							field_select_list=["v.*"],
+							limit=n_records,
+							join_type='I',
+							join_table="w_data.MOVIMENTI mv",
+							join_dict={"v.ID": "mv.ID"},
+							order_by_dict={"mv.DATA_MOV": "DESC"})
+
+			self._exec_sql_string(sql_query=sql_query,check_return_rows=True);
+
+			column_list = []        # lista dei nomi dei campi
+			matrix_mov = []         # record di dati
+			for column in self.cursor.description:
+				if column[0] != "id":
+					column_list.append(column[0])
+			for row in self.cursor:
+				matrix_mov.append([elem for elem in row])
+			return column_list, matrix_mov
+
+		except EmptySelectException:
+			raise InternalError(f"vista non trovata con id mov: {id_mov}");
 
 	def get_movements(self,):
 		sql_string = Tools.format_sql_string_pgsql(operation="S",

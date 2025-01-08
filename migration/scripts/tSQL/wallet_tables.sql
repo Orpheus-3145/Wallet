@@ -37,12 +37,11 @@ GO
 create table [dbo].[MAP_MOVIMENTI](
 	[ID] [int] identity(1,1) primary key,
 	[ID_TABLE] [int] not null,
-	--[ID_SP] [int] not null,   when there's gonna be a table MAP_SP references foreign key MAP_SP(ID), remove STORED_PROCEDURE column then
 	[DESCRIZIONE] [varchar](max) not null,
 	[STORED_PROCEDURE] [varchar](max) not null,
+	[VIEW] [varchar](max) not null,
 
 	foreign key (ID_TABLE) references MAP_TABELLE(ID)
-	--foreign key (ID_SP) references MAP_SP(ID)
 )
 GO
 

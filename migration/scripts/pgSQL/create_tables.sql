@@ -24,7 +24,8 @@ CREATE TABLE w_map.MAP_MOVIMENTI(
 	ID serial primary key,
 	ID_TABLE int references w_map.MAP_TABELLE(ID),
 	DESCRIZIONE text NOT NULL,
-	STORED_PROCEDURE text NOT NULL);
+	STORED_PROCEDURE text NOT NULL,
+	VIEW text NOT NULL);
 
 CREATE TABLE w_map.MAP_SPESE_VARIE(
 	ID serial primary key,
