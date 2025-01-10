@@ -6,6 +6,12 @@ BEGIN;
 CREATE SCHEMA w_map;
 CREATE SCHEMA w_data;
 
+-- for dates in format (GG/MM/AA)
+ALTER DATABASE wallet SET DateStyle = 'SQL, DMY';
+
+-- so the prefixes w_data/w_map are not necessary
+ALTER DATABASE wallet SET SEARCH_PATH TO w_data, w_map
+
 CREATE TABLE w_map.MAP_TABELLE(
 	ID serial primary key,
 	NOME text NOT NULL,

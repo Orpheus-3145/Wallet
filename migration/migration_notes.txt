@@ -24,7 +24,7 @@ V	15. rinominare tabella [NB: anche tabella map_movimenti], sql e python di INSE
 V	17. aggiustare i campi boolean dati in input dal back-end al database (deb_cred,...)
 V	18. fare sp che rimuove tutti i movimenti che hanno 'TEST' nei campi testuali
 V	19. rimossa sp READ_MOVEMENTS, adeguare codice
-	20. settare date_mov nella tabella MOVIMENTI e derivati, in formato [GG-MM-AA]
+V	20. settare date_mov nella tabella MOVIMENTI e derivati, in formato [GG-MM-AA]
 	21. riadattare BK_DATABASE (ora lo script genera un comando che crea il backup, deve essere eseguito lato python)
 	22. modifica SALDO_DEBITO_CREDITO.sql, passaggio di id da saldare in formato di array al posto che stringa 'id1,id2,id3,...'
 X	23. REMOVE_MOVEMENT non dovrebbe modificare movimenti di tipo saldo dc
