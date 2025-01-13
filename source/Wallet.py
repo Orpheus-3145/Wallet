@@ -1,7 +1,7 @@
-from datetime import datetime
-from hashlib import sha256              # per creare l'hash di una pwd in input e verificare con quella salvata nel db
 import psycopg2                         # info: https://www.psycopg.org/docs/usage.html
-import psycopg2.extensions as psycopg2_ext                         # info: https://www.psycopg.org/docs/usage.html
+import subprocess
+import os
+
 from AppExceptions import *
 import Tools                            # funzioni generiche di supporto
 
@@ -35,11 +35,12 @@ class Wallet:
 		self.cursor.close()
 		self.connection.close()
 
-	def backup_database(self, backup_path):
-		sql_query = Tools.format_sql_string_pgsql(operation='C',
-												proc_name="BK_DATABASE",
-												proc_args=[f"'{self.db_name}'", f"'{backup_path}'"])
-		self._exec_sql_string(sql_query)
+	def backup_database(self):
+		
+		try:
+			subprocess.run(["bash", os.getenv("PATH_BACKUP_SCRIPT")], check=True)
+		except Exception as err:
+			raise InternalError(f"Errore creazione backup: {str(err)}")
 
 	# READ DATABASE
 	def get_map_data(self, info_type):

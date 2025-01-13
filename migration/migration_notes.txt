@@ -25,15 +25,15 @@ V	17. aggiustare i campi boolean dati in input dal back-end al database (deb_cre
 V	18. fare sp che rimuove tutti i movimenti che hanno 'TEST' nei campi testuali
 V	19. rimossa sp READ_MOVEMENTS, adeguare codice
 V	20. settare date_mov nella tabella MOVIMENTI e derivati, in formato [GG-MM-AA]
-	21. riadattare BK_DATABASE (ora lo script genera un comando che crea il backup, deve essere eseguito lato python)
+V	21. riadattare BK_DATABASE (ora lo script genera un comando che crea il backup, deve essere eseguito lato python)
 	22. modifica SALDO_DEBITO_CREDITO.sql, passaggio di id da saldare in formato di array al posto che stringa 'id1,id2,id3,...'
 X	23. REMOVE_MOVEMENT non dovrebbe modificare movimenti di tipo saldo dc
 	24. check su python di inserimento di id in formato [id1 id2 id3 ...] per saldo dc multipli
-	25. fixare chiamata stored procedures
+V	25. fixare chiamata stored procedures
 	26. app non e' accentrata
-	27. fixare handling except for postgreSQL
+V	27. fixare handling except for postgreSQL
 V	28. automatizzare procedura di creazione nuovo utente, anche alla creazione dell'app
-	29. mantenere connessioni e operazioni sul db agnostiche sul db usato
+V	29. mantenere connessioni e operazioni sul db agnostiche sul db usato
 	30. aggiungere opzione per fare movimento di test
 X	31. come riorganizare MAP_MOVIMENTI
 V	32. fix Wallet.get_last_n_records()
@@ -41,8 +41,8 @@ V	33. script esportazione in csv
 ?	34. rimuovere login manuale, legando utente wallet a quello del db, rimuovere WALLET_USERS
 X	35. conversione procedure in funzioni per argomenti non posizionali
 	36. in init db aggiungere INSERT per tabelle di MAP
-	37. creare tabella UTENTI
-	38. procedure di export e import automatiche (leggono tabella MAP_TABELLE) al posto che leggere un array statico
+X	37. creare tabella UTENTI
+X	38. procedure di export e import automatiche (leggono tabella MAP_TABELLE) al posto che leggere un array statico
 
 Alla fine:
 	. vedere se MAP_TABELLE e' aggiornata

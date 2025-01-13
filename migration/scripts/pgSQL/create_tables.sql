@@ -10,7 +10,7 @@ CREATE SCHEMA w_data;
 ALTER DATABASE wallet SET DateStyle = 'SQL, DMY';
 
 -- so the prefixes w_data/w_map are not necessary
-ALTER DATABASE wallet SET SEARCH_PATH TO w_data, w_map
+ALTER DATABASE wallet SET SEARCH_PATH TO w_data, w_map;
 
 CREATE TABLE w_map.MAP_TABELLE(
 	ID serial primary key,

@@ -171,25 +171,13 @@ class WalletApp(App):
 			raise AppException("Errore nella trasformazione record(s), consulta il log per ulteriori dettagli")
 
 	def backup_database(self):
-		backup_path = self.config_info["backup_path"]
-		backup_name = "Wallet_{}.bak".format(datetime.now().strftime("%d-%m-%Y"))
-		if not os.path.isabs(backup_path):
-			backup_path = os.path.normpath(os.path.join(os.getcwd(), backup_path))
-		for i in range(1, 100):
-			if not os.path.exists(os.path.join(backup_path, backup_name)):
-				break
-			backup_name = "Wallet_{}_{}.bak".format(datetime.now().strftime("%d-%m-%Y"), i)
-		else:
-			self.update_log("max 100 backup al giorno", 40, os.path.dirname(backup_path))
-			raise AppException("Raggiunto limite numero backup in {}".format(os.path.dirname(backup_path)))
-		backup_path = os.path.join(backup_path, backup_name)
 		try:
-			self.wallet_instance.backup_database(backup_path)
-		except SqlError as error:
-			self.update_log("creazione backup %s in %s fallita - %s", 40, os.path.basename(backup_path), os.path.dirname(backup_path), str(error))
+			self.wallet_instance.backup_database()
+		except InternalError as error:
+			self.update_log("creazione backup fallita - %s", 40, str(error))
 			raise AppException("Backup fallito, consulta il log per ulteriori dettagli")
 		else:
-			self.update_log("creato backup in %s", 20, os.path.dirname(backup_path))
+			self.update_log("creato backup in %s", 20, self.config_info["backup_path"])
 
 	def on_stop(self):
 		"""Non è chiaro perchè ma il metodo app.stop() viene chiamato due volte, per evitare di scrivere due volte sul log
