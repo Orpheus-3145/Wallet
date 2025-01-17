@@ -6,11 +6,11 @@ DECLARE
   -- procedure variables
 	table_name text := '';
 	tables text[] := ARRAY[
-		'MAP_TABELLE',
-		'MAP_CONTI',
-		'MAP_ENTRATE',
-		'MAP_MOVIMENTI',
-		'MAP_SPESE_VARIE',
+		-- 'MAP_TABELLE',
+		-- 'MAP_CONTI',
+		-- 'MAP_ENTRATE',
+		-- 'MAP_MOVIMENTI',
+		-- 'MAP_SPESE_VARIE',
 		'MOVIMENTI',
 		'DEBITI_CREDITI',
 		'ENTRATE',

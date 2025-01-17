@@ -43,23 +43,16 @@ class ManagerScreen(ScreenManager):
 
 
 class LoginScreen(Screen):
-	def login(self, autologin=False):
-		if autologin is True:
-			username, password = "fra", "91913881"
-		else:
-			username = self.ids.input_user.text.strip()
-			password = self.ids.input_pwd.text.strip()
-		if autologin == False and (not username or not password):
-			Factory.ErrorPopup(err_text="Credenziali mancanti").open()
-			return
+	def enter_key_pressed(self, window, key, *args):
+		if key == 13:
+			self.login()
+	
+	def login(self):
 		try:
-			login_status = App.get_running_app().connect(username, password)
+			App.get_running_app().connect()
 		except AppException as error:
 			Factory.ErrorPopup(err_text=str(error)).open()
 		else:
-			# if login_status is False:
-			#     Factory.ErrorPopup(err_text="Login fallito").open()
-			# else:
 			self.manager.create_screens()
 			self.manager.go_to_main_screen()
 
@@ -89,13 +82,22 @@ class MainScreen(Screen):
 		else:
 			Factory.SingleChoicePopup(info="Backup creato con successo").open()
 
+	def drop_test_mov(self):
+		try:
+			App.get_running_app().drop_test_mov()
+		except AppException as err:
+			Factory.ErrorPopup(err_text=str(err)).open()
+		else:
+			Factory.SingleChoicePopup(info="Movimenti di test rimossi con successo").open()
+
 
 class InsertMovementScreen(Screen):
 	def __init__(self, movements, **kw):
 		super().__init__(**kw)
 		self.id_mov = -1
 		self.movements = movements          # dict {id_mov: name_mov}
-		# self.ids_deb_cred = []
+		self.isTest = False
+
 		self.data_layouts = {1: self.ids.layout_s_varia,
 							 2: self.ids.layout_s_fissa,
 							 3: self.ids.layout_stipendio,
@@ -123,10 +125,13 @@ class InsertMovementScreen(Screen):
 		self.ids.layout_main.refresh_data()
 		if self.movements[self.id_mov] == "Saldo Debito - Credito":
 			self.ids.layout_saldo_deb_cred.set_data(self.manager.get_screen("open_deb_cred").get_ids())
-			# self.ids_deb_cred = self.manager.get_screen("open_deb_cred").get_ids()
 		else:
 			self.data_layouts[self.id_mov].refresh_data()
 			self.data_layouts[self.id_mov].show_widget()
+		
+		self.isTest = False
+		if self.ids.test_btn.is_active():
+			self.ids.test_btn.on_press()
 
 	def on_leave(self):
 		if self.id_mov in self.movements:
@@ -138,7 +143,8 @@ class InsertMovementScreen(Screen):
 
 	def insert_movement(self):
 		try:
-			movement_data = self.ids.layout_date.get_data()
+			movement_data = {'isTest': self.isTest}
+			movement_data.update(self.ids.layout_date.get_data())
 			movement_data.update(self.ids.layout_main.get_data())
 			movement_data.update(self.data_layouts[self.id_mov].get_data())
 
@@ -174,7 +180,7 @@ class InsertMovementScreen(Screen):
 					movement_data[field_to_check]
 				except:
 					raise WrongInputException(f"campo {field_to_check} mancante")
-			print(movement_data)
+
 			App.get_running_app().insert_movement(self.id_mov, movement_data)
 
 		except (WrongInputException, AppException) as error:
@@ -182,6 +188,9 @@ class InsertMovementScreen(Screen):
 	
 		else:
 			Factory.SingleChoicePopup(info="MOVIMENTO INSERITO", func_to_exec=self.manager.go_to_main_screen).open()
+		
+	def updateTestStatus(self):
+		self.isTest = not self.isTest
 
 
 class PayOffScreen(Screen):

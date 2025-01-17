@@ -20,40 +20,18 @@
 				size: self.texture_size
 				fit_mode: "fill"
 				source: app.get_logo_path()
+        
+		DefaultButton:
+			id: start_btn
+            text: "START!"
+            font_size_scale: 2
+			background_color: app.get_color("green_rgba")
+			size_hint: 0.2 , 0.15
+			pos_hint: {"x": 0.4, "y": 0.22}
+			focus: True
+            on_release:
+                root.login()
 
-		GridLayout:
-			cols: 2
-			spacing: 15
-			padding: 10
-			size_hint: 0.5, 0.25
-			pos_hint: {"x": 0.25, "y": 0.2}
-
-			DefaultLabel:
-				text: "USERNAME"
-				size_hint_x: 0.37
-
-			DefaultTextInput:
-				id: input_user
-				font_size_scale: 0.8
-				size_hint_x: 0.63
-				valign: "middle"
-				halign: "center"
-				focus: True
-
-			DefaultLabel:
-				text: "PASSWORD"
-				size_hint_x: 0.37
-
-			DefaultTextInput:
-				id: input_pwd
-				font_size_scale: 0.8
-				size_hint_x: 0.63
-				valign: "middle"
-				halign: "center"
-				multiline: False
-				password: True
-				on_text_validate:
-					root.login(True)
 
 <MainScreen>:
 	FloatLayout:
@@ -64,8 +42,8 @@
 			font_size_scale: 2.8
 
 		DefaultLayout:
-			size_hint: 0.25, 0.63
-			pos_hint: {"x": 0.05, "y": 0.1}
+			size_hint: 0.25, 0.68
+			pos_hint: {"x": 0.05, "y": 0.06}
 
 			DefaultButton:
 				text: "Nuovo movimento"
@@ -94,6 +72,13 @@
 				background_color: app.get_color("lightgreen_rgba")
 				on_release:
 					root.backup()
+
+			DefaultButton:
+				text: "Rimuovi movimenti di test"
+				font_size_scale: 1.2
+				background_color: app.get_color("red_rgba")
+				on_release:
+					root.drop_test_mov()
 
 		ButtonDynamicInputLayout:
 			id: general_mov
@@ -165,8 +150,23 @@
 			pos_hint: {"x": 0.375, "y": 0.52}
 
 		BorderLayout:
-			size_hint: 0.2, 0.1
-			pos_hint: {"x": 0.76, "y": 0.35}
+			size_hint: 0.15, 0.1
+			pos_hint: {"x": 0.7825, "y": 0.35}
+			spacing: 5
+			padding: 5
+			
+			SelectionButton:
+				id: test_btn	
+				text: "Test"
+				font_size_scale: 1.1
+				bk_active: app.get_color("yellow_rgba")
+				color: app.get_color("white_rgba")
+				on_release:
+					root.updateTestStatus()
+
+		BorderLayout:
+			size_hint: 0.15, 0.1
+			pos_hint: {"x": 0.7825, "y": 0.2}
 			spacing: 5
 			padding: 5
 

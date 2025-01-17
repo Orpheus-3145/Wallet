@@ -34,16 +34,17 @@ V	26. app non e' accentrata
 V	27. fixare handling except for postgreSQL
 V	28. automatizzare procedura di creazione nuovo utente, anche alla creazione dell'app
 V	29. mantenere connessioni e operazioni sul db agnostiche sul db usato
-	30. aggiungere opzione per fare movimento di test
+V	30. aggiungere opzione per fare movimento di test
 X	31. come riorganizare MAP_MOVIMENTI
 V	32. fix Wallet.get_last_n_records()
 V	33. script esportazione in csv
 ?	34. rimuovere login manuale, legando utente wallet a quello del db, rimuovere WALLET_USERS
 X	35. conversione procedure in funzioni per argomenti non posizionali
-	36. in init db aggiungere INSERT per tabelle di MAP
+V	36. in init db aggiungere INSERT per tabelle di MAP
 X	37. creare tabella UTENTI
 X	38. procedure di export e import automatiche (leggono tabella MAP_TABELLE) al posto che leggere un array statico
-	39. aumentare dimensione font
+V	39. aumentare dimensione font
+V	40. fix login front-end
 
 Alla fine:
 	. vedere se MAP_TABELLE e' aggiornata

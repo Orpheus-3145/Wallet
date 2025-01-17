@@ -16,7 +16,7 @@ DECLARE
 	id_mov_main int DEFAULT -1;
 
 BEGIN
-    -- assigning id_tipo_mov
+	-- assigning id_tipo_mov
 	SELECT ID INTO STRICT id_tipo_mov 
 		FROM w_map.MAP_MOVIMENTI AS map_mov 
 		WHERE map_mov.DESCRIZIONE = type_mov;
@@ -30,7 +30,7 @@ BEGIN
 		FROM w_data.MOVIMENTI 
 		ORDER BY ID DESC LIMIT 1; 
 
-    --inserting entrata
+	--inserting entrata
 	INSERT INTO w_data.ENTRATE(ID_MOV, ID_TIPO_ENTRATA, DESCRIZIONE) 
 		VALUES (id_mov_main, id_tipo_entrata, descrizione);
 

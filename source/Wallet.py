@@ -9,10 +9,30 @@ import Tools                            # funzioni generiche di supporto
 class Wallet:
 	def __init__(self, logger=None):
 		self._logger = logger
-		self.db_name = ""
+		
+		self.config_info = {}
+		self.config_info["backup_path"] = Tools.get_abs_path(os.getenv("LOG_PATH", "."))
+		self.config_info["host"] = os.getenv("DB_HOST", "localhost")
+		self.config_info["port"] = int(os.getenv("DB_PORT", "6543"))
+		self.config_info["db_name"] = os.getenv("DB_NAME", "wallet")
+		self.config_info["user"] = os.getenv("DB_USER_NAME")
+		self.config_info["pwd"] = os.getenv("DB_USER_PWD")
+		self.config_info["auth_mode"] = os.getenv("DB_AUTH_MODE", "scram-sha-256")
+		self.config_info["test_sequence"] = os.getenv("WALLET_TEST_MOV_SEQUENCE", "scram-sha-256")
 
-	def connect(self, host_db, port_db, db_name, user, password):
-		self.db_name = db_name
+	def connect(self, host_db='', port_db='', db_name='', user='', password='', auth_mode=''):
+		if not db_name:
+			db_name = self.config_info["db_name"]
+		if not user:
+			user = self.config_info["user"]
+		if not password:
+			password = self.config_info["pwd"]
+		if not host_db:
+			host_db = self.config_info["host"]
+		if not port_db:
+			port_db = self.config_info["port"]
+		if not auth_mode:
+			auth_mode = self.config_info["auth_mode"]
 		try:
 			self.connection = psycopg2.connect(
 				dbname=db_name,
@@ -20,7 +40,7 @@ class Wallet:
 				password=password,
 				# host=host_db,
 				port=port_db,
-				require_auth="scram-sha-256"
+				require_auth=auth_mode
 			)
 		except psycopg2.Error as err:
 			if "password authentication failed" in str(err):
@@ -36,7 +56,6 @@ class Wallet:
 		self.connection.close()
 
 	def backup_database(self):
-		
 		try:
 			subprocess.run(["bash", os.getenv("PATH_BACKUP_SCRIPT")], check=True)
 		except Exception as err:
@@ -150,14 +169,21 @@ class Wallet:
 	def drop_record(self, id_record):
 		sql_query = Tools.format_sql_string_pgsql(operation='C',
 										   proc_name="REMOVE_MOVEMENT",
-										   proc_args=[id_record])
-		self._exec_sql_string(sql_query, True)
+										   proc_args=['id_record'])
+		self._exec_sql_string(sql_query, {'id_record': id_record}, True)
+
+	def drop_test_mov(self):
+		sql_query = Tools.format_sql_string_pgsql(operation='C',
+										   proc_name="DROP_TESTS",
+										   proc_args=['test_sequence_raw'])
+		self._exec_sql_string(sql_query, {'test_sequence_raw': self.config_info["test_sequence"]}, True)
+
 
 	def turn_deb_cred_into_mov(self, id_record):
 		sql_query = Tools.format_sql_string_pgsql(operation='C',
 										   proc_name="TURN_INTO_MOVEMENT",
-										   proc_args=[id_record])
-		self._exec_sql_string(sql_query, True)
+										   proc_args=['id_record'])
+		self._exec_sql_string(sql_query, {'id_record': id_record}, True)
 
 	def insert_movement(self, id_mov, data_info):
 		try:
@@ -167,21 +193,40 @@ class Wallet:
 
 		arg_names_list = []
 		proc_args = {}
+		isTest = data_info.pop('isTest')
 
 		if type_mov == "Spesa Varia":
 			arg_names_list = ["data_mov", "id_conto", "importo", "id_tipo_s_varia", "descrizione"]
 			if "note" in data_info:
 				arg_names_list.append("note")
+				if isTest == True:
+					data_info["note"] += f" -- {self.config_info["test_sequence"]}"
+			elif isTest == True:
+				data_info["note"] = f" -- {self.config_info["test_sequence"]}"
+			
+			if isTest == True:
+				data_info["descrizione"] += f" -- {self.config_info["test_sequence"]}"
 
 		elif type_mov == "Spesa Fissa":
 			arg_names_list = ["data_mov", "id_conto", "importo", "descrizione"]
 			if "note" in data_info:
 				arg_names_list.append("note")
+				if isTest == True:
+					data_info["note"] += f" -- {self.config_info["test_sequence"]}"
+			elif isTest == True:
+				data_info["note"] = f" -- {self.config_info["test_sequence"]}"
+			
+			if isTest == True:
+				data_info["descrizione"] += f" -- {self.config_info["test_sequence"]}"
 
 		elif type_mov == "Stipendio":
 			arg_names_list = ["data_mov", "id_conto", "importo", "ddl"]
 			if "note" in data_info:
 				arg_names_list.append("note")
+				if isTest == True:
+					data_info["note"] += f" -- {self.config_info["test_sequence"]}"
+			elif isTest == True:
+				data_info["note"] = f" -- {self.config_info["test_sequence"]}"
 			if "lordo" in data_info:
 				if "note" not in data_info:
 					data_info["note"] = ""
@@ -192,16 +237,34 @@ class Wallet:
 				if "lordo" not in data_info:
 					data_info["lordo"] = ""
 				arg_names_list.append("rimborso_spese")
+			
+			if isTest == True:
+				data_info["ddl"] += f" -- {self.config_info["test_sequence"]}"
 
 		elif type_mov == "Entrata":
 			arg_names_list = ["data_mov", "id_conto", "importo", "id_tipo_entrata", "descrizione"]
 			if "note" in data_info:
 				arg_names_list.append("note")
+				if isTest == True:
+					data_info["note"] += f" -- {self.config_info["test_sequence"]}"
+			elif isTest == True:
+				data_info["note"] = f" -- {self.config_info["test_sequence"]}"
+			
+			if isTest == True:
+				data_info["descrizione"] += f" -- {self.config_info["test_sequence"]}"
 
 		elif type_mov == "Debito - Credito":
 			arg_names_list = ["data_mov", "id_conto", "importo", "deb_cred", "origine", "descrizione"]
 			if "note" in data_info:
 				arg_names_list.append("note")
+				if isTest == True:
+					data_info["note"] += f" -- {self.config_info["test_sequence"]}"
+			elif isTest == True:
+				data_info["note"] = f" -- {self.config_info["test_sequence"]}"
+			
+			if isTest == True:
+				data_info["origine"] += f" -- {self.config_info["test_sequence"]}"
+				data_info["descrizione"] += f" -- {self.config_info["test_sequence"]}"
 
 		elif type_mov == "Saldo Debito - Credito":
 			arg_names_list = ["data_mov", "id_conto", "id_saldo_deb_cred"]
@@ -209,17 +272,36 @@ class Wallet:
 				arg_names_list.append("importo")
 			if "note" in data_info:
 				arg_names_list.append("note")
+				if isTest == True:
+					data_info["note"] += f" -- {self.config_info["test_sequence"]}"
+			elif isTest == True:
+				data_info["note"] = f" -- {self.config_info["test_sequence"]}"
 
 		elif type_mov == "Spesa di Mantenimento":
 			arg_names_list = ["data_mov", "id_conto", "importo", "descrizione"]
 			if "note" in data_info:
 				arg_names_list.append("note")
+				if isTest == True:
+					data_info["note"] += f" -- {self.config_info["test_sequence"]}"
+			elif isTest == True:
+				data_info["note"] = f" -- {self.config_info["test_sequence"]}"
+			
+			if isTest == True:
+				data_info["descrizione"] += f" -- {self.config_info["test_sequence"]}"
 
 		elif type_mov == "Spesa di Viaggio":
 			arg_names_list = ["data_mov", "id_conto", "importo", "viaggio", "descrizione"]
+			if isTest == True:
+				data_info["viaggio"] += f" -- {self.config_info["test_sequence"]}"
+				data_info["descrizione"] += f" -- {self.config_info["test_sequence"]}"
+		
 			if "note" in data_info:
 				arg_names_list.append("note")
-
+				if isTest == True:
+					data_info["note"] += f" -- {self.config_info["test_sequence"]}"
+			elif isTest == True:
+				data_info["note"] = f" -- {self.config_info["test_sequence"]}"
+			
 		# because the order of the arguments matters!
 		for arg in arg_names_list:
 			proc_args[arg] = data_info[arg]

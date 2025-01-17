@@ -70,6 +70,8 @@ class SelectionButton(DefaultButton):
     def on_state(self, instance, pressed):  # override of DefaultButton.on_state() to not execute that functionality
         pass
 
+    def is_active(self):
+        return self.active
 
 class DefaultTextInput(TextInput, Writable):
     pass

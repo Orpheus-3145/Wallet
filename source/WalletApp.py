@@ -1,17 +1,13 @@
 import logging
 import os
 from datetime import date
-# import tkinter as tk
 from dotenv import load_dotenv
-from kivy.core.window import Window
 from screeninfo import get_monitors
 
 import Tools
-import Wallet
-from AppExceptions import *
 
+from kivy.core.window import Window
 from kivy.config import Config
-
 
 PATH_ENV_FILE = Tools.get_abs_path("config/wallet.env")
 load_dotenv(PATH_ENV_FILE)
@@ -20,9 +16,10 @@ PATH_INI_FILE = Tools.get_abs_path(os.getenv("PATH_INI_FILE", "config/wallet.ini
 Config.read(PATH_INI_FILE)
 
 from kivy.lang import Builder
-# from kivy.core.window import Window
 from Screens import *
 from Popups import *
+from AppExceptions import *
+import Wallet
 
 
 class WalletApp(App):
@@ -39,12 +36,6 @@ class WalletApp(App):
 			# generic env vars
 			self.config_info["log_path"] = os.getenv("LOG_PATH", "logs/")
 			self.config_info["log_level"] = int(os.getenv("LOG_LEVEL", "20"))
-			self.config_info["host"] = os.getenv("DB_HOST", "localhost")
-			self.config_info["port"] = int(os.getenv("DB_PORT", "6543"))
-			self.config_info["db_name"] = os.getenv("DB_NAME")
-			self.config_info["user"] = os.getenv("DB_USER_NAME")
-			self.config_info["pwd"] = os.getenv("DB_USER_PWD")
-			self.config_info["backup_path"] = Tools.get_abs_path(os.getenv("LOG_PATH", "backup/"))
 			# kivy data
 			self.config_info["kivy_files"] = [Tools.get_abs_path(kv_file) for kv_file in config["kivy_files"].values()]
 			self.config_info["background_img_path"] = Tools.get_abs_path(config["graphics"]["background_img_path"])
@@ -100,47 +91,27 @@ class WalletApp(App):
 		except KeyError:
 			self.update_log("invalid log level provided: {}, original message: '{}'".format(level, message), 30, *args)
 
-	def connect(self, user, pwd):
+	def connect(self, host_db='', port_db='', db_name='', user='', password='', auth_mode=''):
 		self.wallet_instance = Wallet.Wallet(logging)
 		try:
-			self.wallet_instance.connect(self.config_info["host"],
-										 self.config_info["port"],
-										 self.config_info["db_name"],
-										 self.config_info["user"],
-										 self.config_info["pwd"])
+			self.wallet_instance.connect(user=user,
+										password=password,
+										auth_mode=auth_mode,
+										host_db=host_db,
+										port_db=port_db,
+										db_name=db_name)
 		except SqlError as db_err:
 			self.update_log("errore connessione - %s", 40, str(db_err))
 			raise AppException("Connessione al database fallita, consulta il log per ulteriori dettagli")
 		else:
 			self.update_log("connessione al database effettuata", 10)
-		# login_success = self.wallet_instance.connect_database(user.strip(), pwd.strip())
-		# if login_success is True:
 		self.update_log("utente %s ha effettuato l'accesso", 20, user)
-		# return True
 
 	def build(self):
-		# root = tk.Tk()
-		# root.withdraw()
-		# width_screen = root.winfo_screenwidth()
-		# height_screen = root.winfo_screenheight()
-		
-		monitor = get_monitors()[0]  # Usa il primo monitor
-		# screen_width = monitor.width
-		# screen_height = monitor.height
-        # Dimensioni della finestra
-		# window_width, window_height = 800, 600  # Adatta alla tua app
-
-        # Calcola le coordinate per centrare la finestra
-		# x = (screen_width - window_width) // 2
-		# y = (screen_height - window_height) // 2
-
-        # Imposta dimensioni e posizione della finestra
-		# Window.size = (window_width, window_height)
-		# Window.left = x
-		# Window.top = y
+		active_monitor = get_monitors()[0]
 		Window.size = (self.config_info["width_app"], self.config_info["height_app"])
-		Window.left = (monitor.width - self.config_info["width_app"]) // 2
-		Window.top = (monitor.height - self.config_info["height_app"]) // 2
+		Window.left = (active_monitor.width - self.config_info["width_app"]) // 2
+		Window.top = (active_monitor.height - self.config_info["height_app"]) // 2
 		
 		for kv_file in self.config_info["kivy_files"]:
 			try:
@@ -149,7 +120,11 @@ class WalletApp(App):
 				self.update_log("caricamento front-end - errore in %s - %s", 40, kv_file, str(error))
 				raise AppException("Caricamento front-end, errore: ".format(str(error)))
 			self.update_log("caricamento front-end - %s", 10, kv_file)
-		return ManagerScreen()
+
+		manager = ManagerScreen()
+		Window.bind(on_key_down=manager.get_screen('login').enter_key_pressed)
+		
+		return manager
 
 	def insert_movement(self, id_mov, data_movement):
 		try:
@@ -196,6 +171,15 @@ class WalletApp(App):
 			raise AppException("Backup fallito, consulta il log per ulteriori dettagli")
 		else:
 			self.update_log("creato backup in %s", 20, self.config_info["backup_path"])
+
+	def drop_test_mov(self):
+		try:
+			self.wallet_instance.drop_test_mov()
+		except InternalError as error:
+			self.update_log("rimozione movimenti di test fallita - %s", 40, str(error))
+			raise AppException("Eliminazione fallita, consulta il log per ulteriori dettagli")
+		else:
+			self.update_log("rimossi movimenti di test", 20)
 
 	def on_stop(self):
 		"""Non è chiaro perchè ma il metodo app.stop() viene chiamato due volte, per evitare di scrivere due volte sul log
