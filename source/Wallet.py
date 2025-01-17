@@ -71,14 +71,19 @@ class Wallet:
 		return self.cursor.fetchval()
 
 	def get_open_deb_creds(self):
-		sql_string = Tools.format_sql_string_pgsql(operation="S",
-											table_name="V_DEBITI_CREDITI_APERTI",
-											order_by_dict={"DATA": "DESC"})
-		self._exec_sql_string(sql_string, check_return_rows=True)
+		sql_query = Tools.format_sql_string_pgsql(operation='S',
+							table_name=f"V_DEBITI_CREDITI_APERTI v",
+							field_select_list=["v.*"],
+							join_type='I',
+							join_table="w_data.MOVIMENTI mv",
+							join_dict={"v.ID": "mv.ID"},
+							order_by_dict={"mv.DATA_MOV": "DESC"})
+		self._exec_sql_string(sql_query=sql_query,check_return_rows=True);
+
 		column_list = []        # lista dei nomi dei campi
 		matrix_mov = []         # record di dati
 		for column in self.cursor.description:
-			if column[0] != "id":
+			if column[0] not in "id":
 				column_list.append(column[0])
 		for row in self.cursor:
 			matrix_mov.append([elem for elem in row])
@@ -225,7 +230,7 @@ class Wallet:
 	def _exec_sql_string(self, sql_query, arguments={}, do_commit=False, check_return_rows=False):
 		self._logger.debug(f"esecuzione query SQL: '{self.cursor.mogrify(sql_query, arguments).decode('utf-8')}'")
 		try:
-			self.cursor.execute(sql_query, arguments)
+			self.cursor.execute(sql_query, (arguments))
 		except (psycopg2.Warning, psycopg2.Error) as error:
 			self.connection.rollback()
 			raise SqlError(f"errore query SQL - trace: {str(error)}")

@@ -234,7 +234,7 @@ class LayoutSaldoDebitoCredito(LayoutInfo):
 		self.ids_deb_cred = selected_ids
 
 	def get_data(self):
-		return {"id_saldo_deb_cred": Tools.list_to_str(self.ids_deb_cred)}
+		return {"id_saldo_deb_cred": self.ids_deb_cred}
 
 	def refresh_data(self):
 		self.ids_deb_cred.clear()

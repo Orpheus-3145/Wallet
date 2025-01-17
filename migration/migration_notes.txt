@@ -28,7 +28,7 @@ V	20. settare date_mov nella tabella MOVIMENTI e derivati, in formato [GG-MM-AA]
 V	21. riadattare BK_DATABASE (ora lo script genera un comando che crea il backup, deve essere eseguito lato python)
 V	22. modifica SALDO_DEBITO_CREDITO.sql, passaggio di id da saldare in formato di array al posto che stringa 'id1,id2,id3,...'
 X	23. REMOVE_MOVEMENT non dovrebbe modificare movimenti di tipo saldo dc
-	24. check su python di inserimento di id in formato [id1 id2 id3 ...] per saldo dc multipli
+V	24. check su python di inserimento di id in formato [id1 id2 id3 ...] per saldo dc multipli
 V	25. fixare chiamata stored procedures
 	26. app non e' accentrata
 V	27. fixare handling except for postgreSQL

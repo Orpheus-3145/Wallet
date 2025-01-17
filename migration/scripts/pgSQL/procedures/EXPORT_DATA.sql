@@ -1,5 +1,5 @@
 CREATE OR REPLACE PROCEDURE w_data.EXPORT_DATA(
-	csv_folder text
+	csv_folder text default ''
 )
 LANGUAGE plpgsql AS $$
 DECLARE
@@ -23,7 +23,6 @@ BEGIN
 	
 	SET search_path TO w_data, w_map;
 
-	-- FOR table_name IN SELECT NOME FROM w_map.MAP_TABELLE LOOP
 	FOR table_name IN SELECT UNNEST(tables) LOOP
 		
 		EXECUTE format( $query$

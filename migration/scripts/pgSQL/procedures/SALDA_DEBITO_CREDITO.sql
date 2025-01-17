@@ -1,14 +1,13 @@
 CREATE OR REPLACE PROCEDURE w_data.SALDA_DEBITO_CREDITO(
     data_mov date,
-    id_conto int,
-    id_saldo_deb_cred text,
+    id_conto integer,
+    id_saldo_deb_cred integer[],
     importo real DEFAULT 0,
     note text DEFAULT ''
 )
 LANGUAGE plpgsql AS $$
 DECLARE
     -- procedure variables
-    ids_to_close int[];
 	manually_close boolean DEFAULT FALSE;
 	type_mov CONSTANT text DEFAULT 'Saldo Debito - Credito';
 	id_tipo_mov integer DEFAULT -1;
@@ -24,25 +23,16 @@ DECLARE
 BEGIN
     -- split behaviour into simpler procedures
 
-	IF id_saldo_deb_cred = '' THEN
+	IF array_length(id_saldo_deb_cred, 1) = 0 THEN
 		RAISE EXCEPTION 'No input ids to close';
 	END IF;
 
-	-- converto in lista la stringa 'id1[,id2,...]' in array, cosi' posso iterare le operazione per ogni id
-	BEGIN
-		ids_to_close = string_to_array(id_saldo_deb_cred, ' ')::int[];
-
-	EXCEPTION
-		WHEN OTHERS THEN
-			RAISE EXCEPTION 'Invalid input ids to close [usage: id1 id2 ...], details: %', SQLERRM;
-	END;
-	
 	-- se é stato passato manualmente un importo, allora il saldo devo riguardare solo debiti o solo crediti
 	IF importo <> 0 THEN
 		IF (
 			SELECT count(DISTINCT dc.DEB_CRED) 
 				FROM w_data.DEBITI_CREDITI dc 
-				WHERE ID_MOV = ANY (ids_to_close)
+				WHERE ID_MOV = ANY (id_saldo_deb_cred)
 			) > 1 THEN
 			RAISE EXCEPTION 'Selezionati debiti e crediti in contemporanea da saldare in modo parziale';
 		END IF;
@@ -53,7 +43,7 @@ BEGIN
 	IF (
 		SELECT count(*)
 			FROM w_data.DEBITI_CREDITI dc
-			WHERE ID_MOV = ANY (ids_to_close) AND SALDATO = TRUE
+			WHERE ID_MOV = ANY (id_saldo_deb_cred) AND SALDATO = TRUE
 		) > 0 THEN
 		RAISE EXCEPTION 'Selezionati debiti e crediti gia'' saldati';
 	END IF;
@@ -62,14 +52,14 @@ BEGIN
 	SELECT CAST(SUM(CASE WHEN mv.DARE_AVERE = TRUE THEN mv.IMPORTO * -1 ELSE mv.IMPORTO END) AS DECIMAL(9,2))
 		INTO tot_importo 
 		FROM w_data.MOVIMENTI mv
-		WHERE mv.ID = ANY (ids_to_close);
+		WHERE mv.ID = ANY (id_saldo_deb_cred);
 
 	-- origine comune dei deb/cred selezionati
 	BEGIN
 		SELECT DISTINCT dc.ORIGINE
 			INTO STRICT origine 
 			FROM w_data.DEBITI_CREDITI dc
-			WHERE dc.ID_MOV = ANY (ids_to_close);
+			WHERE dc.ID_MOV = ANY (id_saldo_deb_cred);
 	EXCEPTION
 		WHEN TOO_MANY_ROWS THEN
 			RAISE EXCEPTION 'Selezionati deb/cred da diversa origine % ' , id_saldo_deb_cred;
@@ -116,7 +106,7 @@ BEGIN
 		FROM w_data.MOVIMENTI
 		ORDER BY ID DESC LIMIT 1; 
 
-	FOREACH current_id IN ARRAY ids_to_close 
+	FOREACH current_id IN ARRAY id_saldo_deb_cred 
 	LOOP
 		IF manually_close = FALSE THEN
 			UPDATE w_data.DEBITI_CREDITI SET 
