@@ -108,7 +108,7 @@ class Wallet:
 			column_list = []        # lista dei nomi dei campi
 			matrix_mov = []         # record di dati
 			for column in self.cursor.description:
-				if column[0] != "id":
+				if column[0] not in "id":
 					column_list.append(column[0])
 			for row in self.cursor:
 				matrix_mov.append([elem for elem in row])
@@ -177,15 +177,15 @@ class Wallet:
 			arg_names_list = ["data_mov", "id_conto", "importo", "ddl"]
 			if "note" in data_info:
 				arg_names_list.append("note")
-			if "netto" in data_info:
+			if "lordo" in data_info:
 				if "note" not in data_info:
 					data_info["note"] = ""
-				arg_names_list.append("netto")
+				arg_names_list.append("lordo")
 			if "rimborso_spese" in data_info:
 				if "note" not in data_info:
 					data_info["note"] = ""
-				if "netto" not in data_info:
-					data_info["netto"] = ""
+				if "lordo" not in data_info:
+					data_info["lordo"] = ""
 				arg_names_list.append("rimborso_spese")
 
 		elif type_mov == "Entrata":

@@ -10,7 +10,7 @@ V	2. added DEFAULTS:
 V	3. controllare se con l'aggiunta di vincoli di chiavi esterne alcuni controlli nelle sp possono essere rimossi
 V	4. unificare creazione ed instanziazione del db wallet (creazione tables, views, sp) riempimento (tabelle con i valori di mapping e dummy data)
 V	5. check file stipendi_con_note.csv
-	6. fix italian characters
+X	6. fix italian characters
 V	7. check BK_DATABASE
 V	8. file .py correzione campo IMPORTO di MOVIMENTTI.csv
 V	9. aggiungere altri CHECK nella definizione delle tabelle
@@ -20,13 +20,13 @@ V	12. ogni inserimento di numero ha il punto come separatore decimale, rimuovere
 V	13. rimuovere variabile type_mov da ogni INSERT_*.sql e la gestione eccezioni relativa
 V	14. ridefinire tabelle, sp e viste, re-importare i csv
 V	15. rinominare tabella [NB: anche tabella map_movimenti], sql e python di INSERISCI_S_MANTENIMENTO in INSERISCI_SPESA_MANTENIMENTO
-	16. modificare gestione di importo-netto-totale per gli stipendi (sql [tabella e sp], python [back-end e front-end])
+V	16. modificare gestione di importo-netto-totale per gli stipendi (sql [tabella e sp], python [back-end e front-end])
 V	17. aggiustare i campi boolean dati in input dal back-end al database (deb_cred,...)
 V	18. fare sp che rimuove tutti i movimenti che hanno 'TEST' nei campi testuali
 V	19. rimossa sp READ_MOVEMENTS, adeguare codice
 V	20. settare date_mov nella tabella MOVIMENTI e derivati, in formato [GG-MM-AA]
 V	21. riadattare BK_DATABASE (ora lo script genera un comando che crea il backup, deve essere eseguito lato python)
-	22. modifica SALDO_DEBITO_CREDITO.sql, passaggio di id da saldare in formato di array al posto che stringa 'id1,id2,id3,...'
+V	22. modifica SALDO_DEBITO_CREDITO.sql, passaggio di id da saldare in formato di array al posto che stringa 'id1,id2,id3,...'
 X	23. REMOVE_MOVEMENT non dovrebbe modificare movimenti di tipo saldo dc
 	24. check su python di inserimento di id in formato [id1 id2 id3 ...] per saldo dc multipli
 V	25. fixare chiamata stored procedures
@@ -43,6 +43,7 @@ X	35. conversione procedure in funzioni per argomenti non posizionali
 	36. in init db aggiungere INSERT per tabelle di MAP
 X	37. creare tabella UTENTI
 X	38. procedure di export e import automatiche (leggono tabella MAP_TABELLE) al posto che leggere un array statico
+	39. aumentare dimensione font
 
 Alla fine:
 	. vedere se MAP_TABELLE e' aggiornata

@@ -91,8 +91,7 @@ CREATE TABLE w_data.STIPENDI(
 	ID_MOV int references w_data.MOVIMENTI(ID),
 	DDL text NOT NULL,
 	MESE int NOT NULL check (MESE between 1 and 12),
-	NETTO real NOT NULL check (NETTO > 0),
-	TOTALE real default 0 check (TOTALE >= 0),
+	LORDO real default 0 check (LORDO >= 0),
 	TRATTENUTE real default 0 check (TRATTENUTE >= 0),
 	RIMBORSO_SPESE real default 0 check (RIMBORSO_SPESE >= 0));
 

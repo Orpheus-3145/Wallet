@@ -174,7 +174,7 @@ class InsertMovementScreen(Screen):
 					movement_data[field_to_check]
 				except:
 					raise WrongInputException(f"campo {field_to_check} mancante")
-
+			print(movement_data)
 			App.get_running_app().insert_movement(self.id_mov, movement_data)
 
 		except (WrongInputException, AppException) as error:

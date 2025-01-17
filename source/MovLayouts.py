@@ -167,8 +167,8 @@ class LayoutStipendio(LayoutInfo):
 		if self.ids.input_ddl.text:
 			data_info["ddl"] = self.parse_text(self.ids.input_ddl.text, "datore di lavoro")
 
-		if self.ids.input_netto.text:
-			data_info["netto"] = self.parse_float(self.ids.input_netto.text, "netto")
+		if self.ids.input_lordo.text:
+			data_info["lordo"] = self.parse_float(self.ids.input_lordo.text, "lordo")
 
 		if self.ids.input_r_spese.text:
 			data_info["rimborso_spese"] = self.parse_float(self.ids.input_r_spese.text, "rimborso_spese")
@@ -176,7 +176,7 @@ class LayoutStipendio(LayoutInfo):
 		return data_info
 
 	def refresh_data(self):
-		self.ids.input_netto.text = ""
+		self.ids.input_lordo.text = ""
 		self.ids.input_r_spese.text = ""
 		self.ids.input_ddl.text = ""
 
