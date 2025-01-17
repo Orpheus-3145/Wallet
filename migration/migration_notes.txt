@@ -30,7 +30,7 @@ V	22. modifica SALDO_DEBITO_CREDITO.sql, passaggio di id da saldare in formato d
 X	23. REMOVE_MOVEMENT non dovrebbe modificare movimenti di tipo saldo dc
 V	24. check su python di inserimento di id in formato [id1 id2 id3 ...] per saldo dc multipli
 V	25. fixare chiamata stored procedures
-	26. app non e' accentrata
+V	26. app non e' accentrata
 V	27. fixare handling except for postgreSQL
 V	28. automatizzare procedura di creazione nuovo utente, anche alla creazione dell'app
 V	29. mantenere connessioni e operazioni sul db agnostiche sul db usato

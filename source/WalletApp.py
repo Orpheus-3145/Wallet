@@ -1,8 +1,10 @@
 import logging
 import os
 from datetime import date
-import tkinter as tk
+# import tkinter as tk
 from dotenv import load_dotenv
+from kivy.core.window import Window
+from screeninfo import get_monitors
 
 import Tools
 import Wallet
@@ -49,8 +51,8 @@ class WalletApp(App):
 			self.config_info["logo_path"] = Tools.get_abs_path(config["graphics"]["logo_path"])
 			self.config_info["font_name"] = config["kivy"]["font_name"]
 			self.config_info["font_size"] = config.getint("kivy", "font_size")
-			# self.config_info["width_app"] = config.getint("graphics", "width")
-			# self.config_info["height_app"] = config.getint("graphics", "height")
+			self.config_info["width_app"] = config.getint("graphics", "width")
+			self.config_info["height_app"] = config.getint("graphics", "height")
 			self.config_info["max_rows_to_show"] = config.getint("widgets", "max_rows_to_show")  # max righe mostrate in SowMovementScreen
 			self.config_info["default_rows_to_show"] = config.getint("widgets", "default_rows_to_show")  # default righe mostrate in SowMovementScreen
 			self.config_info["colors"] = {}
@@ -117,13 +119,29 @@ class WalletApp(App):
 		# return True
 
 	def build(self):
-		root = tk.Tk()
-		root.withdraw()
-		width_screen = root.winfo_screenwidth()
-		height_screen = root.winfo_screenheight()
+		# root = tk.Tk()
+		# root.withdraw()
+		# width_screen = root.winfo_screenwidth()
+		# height_screen = root.winfo_screenheight()
 		
-		# Window.left = (width_screen - self.config_info["width_app"]) // 2
-		# Window.top = (height_screen - self.config_info["height_app"]) // 2
+		monitor = get_monitors()[0]  # Usa il primo monitor
+		# screen_width = monitor.width
+		# screen_height = monitor.height
+        # Dimensioni della finestra
+		# window_width, window_height = 800, 600  # Adatta alla tua app
+
+        # Calcola le coordinate per centrare la finestra
+		# x = (screen_width - window_width) // 2
+		# y = (screen_height - window_height) // 2
+
+        # Imposta dimensioni e posizione della finestra
+		# Window.size = (window_width, window_height)
+		# Window.left = x
+		# Window.top = y
+		Window.size = (self.config_info["width_app"], self.config_info["height_app"])
+		Window.left = (monitor.width - self.config_info["width_app"]) // 2
+		Window.top = (monitor.height - self.config_info["height_app"]) // 2
+		
 		for kv_file in self.config_info["kivy_files"]:
 			try:
 				Builder.load_file(kv_file)
