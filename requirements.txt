@@ -19,3 +19,17 @@ Pygments==2.18.0
 python-dotenv==1.0.1
 requests==2.32.3
 urllib3==2.2.3
+certifi==2024.8.30
+charset-normalizer==3.4.0
+docutils==0.21.2
+idna==3.10
+Kivy==2.3.0
+Kivy-Garden==0.1.5
+psycopg2-binary==2.9.10
+PyGetWindow==0.0.9
+Pygments==2.18.0
+PyRect==0.2.0
+python-dotenv==1.0.1
+requests==2.32.3
+screeninfo==0.8.1
+urllib3==2.2.3
