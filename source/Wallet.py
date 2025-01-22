@@ -9,30 +9,9 @@ import Tools                            # funzioni generiche di supporto
 class Wallet:
 	def __init__(self, logger=None):
 		self._logger = logger
-		
-		self.config_info = {}
-		self.config_info["backup_path"] = Tools.get_abs_path(os.getenv("LOG_PATH", "."))
-		self.config_info["host"] = os.getenv("DB_HOST", "localhost")
-		self.config_info["port"] = int(os.getenv("DB_PORT", "6543"))
-		self.config_info["db_name"] = os.getenv("DB_NAME", "wallet")
-		self.config_info["user"] = os.getenv("DB_USER_NAME")
-		self.config_info["pwd"] = os.getenv("DB_USER_PWD")
-		self.config_info["auth_mode"] = os.getenv("DB_AUTH_MODE", "scram-sha-256")
-		self.config_info["test_sequence"] = os.getenv("WALLET_TEST_MOV_SEQUENCE", "scram-sha-256")
+		self._seq_test_mov = os.getenv("WALLET_TEST_MOV_SEQUENCE", "scram-sha-256")
 
-	def connect(self, host_db='', port_db='', db_name='', user='', password='', auth_mode=''):
-		if not db_name:
-			db_name = self.config_info["db_name"]
-		if not user:
-			user = self.config_info["user"]
-		if not password:
-			password = self.config_info["pwd"]
-		if not host_db:
-			host_db = self.config_info["host"]
-		if not port_db:
-			port_db = self.config_info["port"]
-		if not auth_mode:
-			auth_mode = self.config_info["auth_mode"]
+	def connect(self, host_db, port_db, db_name, user, password, auth_mode):
 		try:
 			self.connection = psycopg2.connect(
 				dbname=db_name,
@@ -46,13 +25,12 @@ class Wallet:
 			if "password authentication failed" in str(err):
 				raise WrongInputException(f"Wrong password for user {user}")
 			else:
-				raise WrongInputException(f"Login failed: {str(err)}")
+				raise SqlError(f"Login failed: {str(err)}")
 		else:
 			self.cursor = self.connection.cursor()
 			self.connection.autocommit = False
 
 	def disconnect_database(self):
-		self.cursor.close()
 		self.connection.close()
 
 	def backup_database(self):
@@ -125,7 +103,7 @@ class Wallet:
 							join_type='I',
 							join_table="w_data.MOVIMENTI mv",
 							join_dict={"v.ID": "mv.ID"},
-							order_by_dict={"mv.DATA_MOV": "DESC"})
+							order_by_dict={"mv.DATA_MOV": "DESC", "mv.ID": "DESC"})
 
 			self._exec_sql_string(sql_query=sql_query,check_return_rows=True);
 
@@ -176,8 +154,7 @@ class Wallet:
 		sql_query = Tools.format_sql_string_pgsql(operation='C',
 										   proc_name="DROP_TESTS",
 										   proc_args=['test_sequence_raw'])
-		self._exec_sql_string(sql_query, {'test_sequence_raw': self.config_info["test_sequence"]}, True)
-
+		self._exec_sql_string(sql_query, {'test_sequence_raw': self._seq_test_mov}, True)
 
 	def turn_deb_cred_into_mov(self, id_record):
 		sql_query = Tools.format_sql_string_pgsql(operation='C',
@@ -200,107 +177,124 @@ class Wallet:
 			if "note" in data_info:
 				arg_names_list.append("note")
 				if isTest == True:
-					data_info["note"] += f" -- {self.config_info["test_sequence"]}"
+					data_info["note"] += f" -- {self._seq_test_mov}"
 			elif isTest == True:
-				data_info["note"] = f" -- {self.config_info["test_sequence"]}"
+				arg_names_list.append("note")
+				data_info["note"] = f" -- {self._seq_test_mov}"
 			
 			if isTest == True:
-				data_info["descrizione"] += f" -- {self.config_info["test_sequence"]}"
+				data_info["descrizione"] += f" -- {self._seq_test_mov}"
 
 		elif type_mov == "Spesa Fissa":
 			arg_names_list = ["data_mov", "id_conto", "importo", "descrizione"]
 			if "note" in data_info:
 				arg_names_list.append("note")
 				if isTest == True:
-					data_info["note"] += f" -- {self.config_info["test_sequence"]}"
+					data_info["note"] += f" -- {self._seq_test_mov}"
 			elif isTest == True:
-				data_info["note"] = f" -- {self.config_info["test_sequence"]}"
+				arg_names_list.append("note")
+				data_info["note"] = f" -- {self._seq_test_mov}"
 			
 			if isTest == True:
-				data_info["descrizione"] += f" -- {self.config_info["test_sequence"]}"
+				data_info["descrizione"] += f" -- {self._seq_test_mov}"
 
 		elif type_mov == "Stipendio":
 			arg_names_list = ["data_mov", "id_conto", "importo", "ddl"]
 			if "note" in data_info:
 				arg_names_list.append("note")
 				if isTest == True:
-					data_info["note"] += f" -- {self.config_info["test_sequence"]}"
+					data_info["note"] += f" -- {self._seq_test_mov}"
 			elif isTest == True:
-				data_info["note"] = f" -- {self.config_info["test_sequence"]}"
+				arg_names_list.append("note")
+				data_info["note"] = f" -- {self._seq_test_mov}"
+			
 			if "lordo" in data_info:
 				if "note" not in data_info:
+					arg_names_list.append("note")
 					data_info["note"] = ""
 				arg_names_list.append("lordo")
+
 			if "rimborso_spese" in data_info:
-				if "note" not in data_info:
-					data_info["note"] = ""
 				if "lordo" not in data_info:
-					data_info["lordo"] = ""
+					arg_names_list.append("lordo")
+					data_info["lordo"] = 0
+				if "note" not in data_info:
+					arg_names_list.append("note")
+					data_info["note"] = ""
 				arg_names_list.append("rimborso_spese")
 			
 			if isTest == True:
-				data_info["ddl"] += f" -- {self.config_info["test_sequence"]}"
+				data_info["ddl"] += f" -- {self._seq_test_mov}"
 
 		elif type_mov == "Entrata":
 			arg_names_list = ["data_mov", "id_conto", "importo", "id_tipo_entrata", "descrizione"]
 			if "note" in data_info:
 				arg_names_list.append("note")
 				if isTest == True:
-					data_info["note"] += f" -- {self.config_info["test_sequence"]}"
+					data_info["note"] += f" -- {self._seq_test_mov}"
 			elif isTest == True:
-				data_info["note"] = f" -- {self.config_info["test_sequence"]}"
+				arg_names_list.append("note")
+				data_info["note"] = f" -- {self._seq_test_mov}"
 			
 			if isTest == True:
-				data_info["descrizione"] += f" -- {self.config_info["test_sequence"]}"
+				data_info["descrizione"] += f" -- {self._seq_test_mov}"
 
 		elif type_mov == "Debito - Credito":
 			arg_names_list = ["data_mov", "id_conto", "importo", "deb_cred", "origine", "descrizione"]
 			if "note" in data_info:
 				arg_names_list.append("note")
 				if isTest == True:
-					data_info["note"] += f" -- {self.config_info["test_sequence"]}"
+					data_info["note"] += f" -- {self._seq_test_mov}"
 			elif isTest == True:
-				data_info["note"] = f" -- {self.config_info["test_sequence"]}"
+				arg_names_list.append("note")
+				data_info["note"] = f" -- {self._seq_test_mov}"
 			
 			if isTest == True:
-				data_info["origine"] += f" -- {self.config_info["test_sequence"]}"
-				data_info["descrizione"] += f" -- {self.config_info["test_sequence"]}"
+				data_info["origine"] += f" -- {self._seq_test_mov}"
+				data_info["descrizione"] += f" -- {self._seq_test_mov}"
 
 		elif type_mov == "Saldo Debito - Credito":
 			arg_names_list = ["data_mov", "id_conto", "id_saldo_deb_cred"]
-			if "importo" in data_info:
-				arg_names_list.append("importo")
 			if "note" in data_info:
 				arg_names_list.append("note")
 				if isTest == True:
-					data_info["note"] += f" -- {self.config_info["test_sequence"]}"
+					data_info["note"] += f" -- {self._seq_test_mov}"
 			elif isTest == True:
-				data_info["note"] = f" -- {self.config_info["test_sequence"]}"
-
+				arg_names_list.append("note")
+				data_info["note"] = f" -- {self._seq_test_mov}"
+	
+			if "importo" in data_info:
+				if "note" not in data_info:
+					arg_names_list.append("note")
+					data_info["note"] = ""
+				arg_names_list.append("importo")
+	
 		elif type_mov == "Spesa di Mantenimento":
 			arg_names_list = ["data_mov", "id_conto", "importo", "descrizione"]
 			if "note" in data_info:
 				arg_names_list.append("note")
 				if isTest == True:
-					data_info["note"] += f" -- {self.config_info["test_sequence"]}"
+					data_info["note"] += f" -- {self._seq_test_mov}"
 			elif isTest == True:
-				data_info["note"] = f" -- {self.config_info["test_sequence"]}"
+				arg_names_list.append("note")
+				data_info["note"] = f" -- {self._seq_test_mov}"
 			
 			if isTest == True:
-				data_info["descrizione"] += f" -- {self.config_info["test_sequence"]}"
+				data_info["descrizione"] += f" -- {self._seq_test_mov}"
 
 		elif type_mov == "Spesa di Viaggio":
 			arg_names_list = ["data_mov", "id_conto", "importo", "viaggio", "descrizione"]
 			if isTest == True:
-				data_info["viaggio"] += f" -- {self.config_info["test_sequence"]}"
-				data_info["descrizione"] += f" -- {self.config_info["test_sequence"]}"
+				data_info["viaggio"] += f" -- {self._seq_test_mov}"
+				data_info["descrizione"] += f" -- {self._seq_test_mov}"
 		
 			if "note" in data_info:
 				arg_names_list.append("note")
 				if isTest == True:
-					data_info["note"] += f" -- {self.config_info["test_sequence"]}"
+					data_info["note"] += f" -- {self._seq_test_mov}"
 			elif isTest == True:
-				data_info["note"] = f" -- {self.config_info["test_sequence"]}"
+				arg_names_list.append("note")
+				data_info["note"] = f" -- {self._seq_test_mov}"
 			
 		# because the order of the arguments matters!
 		for arg in arg_names_list:

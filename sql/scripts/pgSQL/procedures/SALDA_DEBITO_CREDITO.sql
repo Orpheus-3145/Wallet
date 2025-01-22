@@ -2,8 +2,8 @@ CREATE OR REPLACE PROCEDURE w_data.SALDA_DEBITO_CREDITO(
     data_mov date,
     id_conto integer,
     id_saldo_deb_cred integer[],
-    importo real DEFAULT 0,
-    note text DEFAULT ''
+    note text DEFAULT '',
+    importo real DEFAULT 0
 )
 LANGUAGE plpgsql AS $$
 DECLARE
@@ -99,7 +99,7 @@ BEGIN
 			data_mov,
 			dare_avere,
 			tot_importo,
-			note);
+			note || ' -- Saldo id:');
 
 	-- assigning id_mov_main
 	SELECT ID INTO id_mov_main 
@@ -108,6 +108,12 @@ BEGIN
 
 	FOREACH current_id IN ARRAY id_saldo_deb_cred 
 	LOOP
+
+		-- add id of deb/cred(s) closed
+		UPDATE w_data.MOVIMENTI SET 
+			NOTE = MOVIMENTI.NOTE || ' ' || CAST(current_id AS text)
+		WHERE ID = id_mov_main;
+
 		IF manually_close = FALSE THEN
 			UPDATE w_data.DEBITI_CREDITI SET 
 				SALDATO = TRUE, 
@@ -121,12 +127,13 @@ BEGIN
 				WHERE ID = current_id;
 
 			IF importo >= curr_importo THEN
+				importo = importo - curr_importo;
+				
 				UPDATE w_data.DEBITI_CREDITI SET 
 					SALDATO = TRUE, 
 					ID_MOV_SALDO = COALESCE(ID_MOV_SALDO || ' ', '') || CAST(id_mov_main AS text),
 					DATA_SALDO = data_mov 
 				WHERE ID_MOV = current_id;
-				importo = importo - curr_importo;
 
 				IF importo = 0 THEN
 					EXIT;
@@ -138,7 +145,11 @@ BEGIN
 				WHERE ID_MOV = current_id;
 
 				UPDATE w_data.MOVIMENTI SET 
-					NOTE = COALESCE(MOVIMENTI.NOTE || ' - ', '') || 'importo originale: ' || CAST(curr_importo AS text) || ', abbassato di: ' || CAST(SALDA_DEBITO_CREDITO.importo AS text) || ' a seguito del saldo parziale id: ' || CAST(id_mov_main AS text),
+					NOTE = MOVIMENTI.NOTE || ' [partial]'
+				WHERE ID = id_mov_main;
+
+				UPDATE w_data.MOVIMENTI SET 
+					NOTE = COALESCE(MOVIMENTI.NOTE || ' - ', '') || 'importo originale ' || CAST(curr_importo AS text) || ', ridotto a ' || CAST(curr_importo - SALDA_DEBITO_CREDITO.importo AS text) || ' a seguito del saldo parziale di ' || CAST(SALDA_DEBITO_CREDITO.importo AS text) || ', compreso nel movimento id: ' || CAST(id_mov_main AS text),
 					IMPORTO = curr_importo - SALDA_DEBITO_CREDITO.importo
 				WHERE ID = current_id;
 				

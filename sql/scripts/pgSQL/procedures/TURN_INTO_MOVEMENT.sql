@@ -21,24 +21,24 @@ BEGIN
 
     SELECT DESCRIZIONE INTO STRICT desc_deb_cred
         FROM w_data.DEBITI_CREDITI
-        WHERE ID_MOV = id_record;
+        WHERE ID_MOV = id_record AND SALDATO = FALSE;
 
     SELECT ORIGINE INTO STRICT src_deb_cred
         FROM w_data.DEBITI_CREDITI
-        WHERE ID_MOV = id_record;
+        WHERE ID_MOV = id_record AND SALDATO = FALSE;
 
-	DELETE FROM w_data.DEBITI_CREDITI WHERE ID_MOV = id_record AND SALDATO = FALSE;
+	DELETE FROM w_data.DEBITI_CREDITI WHERE ID_MOV = id_record;
 
     IF DARE_AVERE = FALSE THEN
-        new_description = format('Credito verso %s [%s] diventato spesa, note: %s', src_deb_cred, date_deb_cred, desc_deb_cred);
-
+        new_description = format('Credito verso %s [data: %s] diventato spesa, vecchie note: %s', src_deb_cred, date_deb_cred, desc_deb_cred);
+        
         -- ID_TIPO_MOV is hardcoded with 1 ('Spesa Varia')
         UPDATE w_data.MOVIMENTI SET ID_TIPO_MOV = 1 WHERE id = id_record;
-
+        
 		INSERT INTO w_data.SPESE_VARIE(ID_MOV, ID_TIPO_SPESA, DESCRIZIONE)
             VALUES (id_record, 5, new_description);
     ELSE
-        new_description = format('Debito verso %s [%s] diventato entrata, note: %s', src_deb_cred, date_deb_cred, desc_deb_cred);
+        new_description = format('Debito verso %s [data: %s] diventato entrata, vecchie note: %s', src_deb_cred, date_deb_cred, desc_deb_cred);
 
         -- ID_TIPO_MOV is hardcoded with 4 ('Entrata')
         UPDATE w_data.MOVIMENTI SET ID_TIPO_MOV = 4 WHERE ID = id_record;
@@ -49,7 +49,7 @@ BEGIN
 
 EXCEPTION
 	WHEN NO_DATA_FOUND THEN
-		RAISE EXCEPTION 'Unable to retrive movement data [DARE_AVERE, DESCRIZIONE, ORIGINE] for id movement: %', id_record USING HINT = 'Internal error';
+		RAISE EXCEPTION 'Unable to retrive movement data [DARE_AVERE, DESCRIZIONE, ORIGINE] from id movement: %', id_record USING HINT = 'Internal error';
 
 END;
 $$;

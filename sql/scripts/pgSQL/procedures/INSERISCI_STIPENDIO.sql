@@ -18,22 +18,26 @@ DECLARE
 	trattenute real DEFAULT 0;
 BEGIN
 
-	IF previous_month = 0 THEN
-			previous_month = 12;
+	if rimborso_spese != 0 THEN		-- rimborso_spese was given, not the default, need to check it
+		IF importo < rimborso_spese THEN
+			RAISE EXCEPTION 'Invalid input: rimborso spese [%] has to be less than importo [%]', rimborso_spese, importo;
+		END IF;
 	END IF;
 
 	IF lordo = 0 THEN
-			lordo = importo;
-	END IF;
-	
-	IF (rimborso_spese + importo) > lordo THEN
-        RAISE EXCEPTION 'Invalid input: lordo [%] is less than importo [%] plus rimborso spese [%]', lordo, importo, rimborso_spese;
-	ELSIF importo < rimborso_spese THEN
-        RAISE EXCEPTION 'Invalid input: rimborso spese [%] has to be equal of less than importo [%]', rimborso_spese, importo;
+		lordo = importo + rimborso_spese;
+	ELSE	-- lordo was given, not the default, need to check it
+		IF (rimborso_spese + importo) > lordo THEN
+			RAISE EXCEPTION 'Invalid input: lordo [%] is less than importo [%] plus rimborso spese [%]', lordo, importo, rimborso_spese;
+		END IF;
 	END IF;
 
 	IF (importo + rimborso_spese) < lordo THEN
 			trattenute = lordo - importo - rimborso_spese;
+	END IF;
+
+	IF previous_month = 0 THEN
+		previous_month = 12;
 	END IF;
 
     -- assigning id_tipo_mov

@@ -50,7 +50,7 @@ class LoginScreen(Screen):
 	def login(self):
 		try:
 			App.get_running_app().connect()
-		except AppException as error:
+		except Exception as error:
 			Factory.ErrorPopup(err_text=str(error)).open()
 		else:
 			self.manager.create_screens()
@@ -280,7 +280,6 @@ class ShowMovementsScreen(Screen):
 			self.ids.input_no_rows.text = str(self.current_rows_shown)
 			self.ids.box_movements.update_layout(mov_list)
 			self.ids.remove_record_btn.hide_widget()
-			self.ids.refresh_mov_btn.hide_widget()
 			self.curr_mov_id = -1
 
 	def on_leave(self):
@@ -288,11 +287,12 @@ class ShowMovementsScreen(Screen):
 		self.ids.rows_box.clear_widgets()           # svuoto la tabella
 		self.ids.remove_record_btn.hide_widget()    # faccio sparire il bottone per rimuovere i record
 		self.records_to_drop.clear()                # svuoto la lista di eventuali record selezionati
-		self.ids.refresh_mov_btn.hide_widget()
 		self.curr_mov_id = -1
 
 	def set_new_number(self, new_number):
 		try:
+			if int(new_number) == self.current_rows_shown:
+				return
 			self.current_rows_shown = int(new_number)
 			if self.current_rows_shown <= 0:
 				raise ValueError()
@@ -304,13 +304,14 @@ class ShowMovementsScreen(Screen):
 			if self.current_rows_shown > self.max_rows_to_show:
 				self.current_rows_shown = self.max_rows_to_show
 				self.ids.input_no_rows.text = str(self.max_rows_to_show)
-			self.ids.refresh_mov_btn.show_widget()
+			self.update_rows()
 
 	def set_movement(self, new_id_mov):
-		self.curr_mov_id = new_id_mov
-		self.records_to_drop.clear()
-		self.ids.remove_record_btn.hide_widget()
-		self.ids.refresh_mov_btn.show_widget()
+		if new_id_mov != self.curr_mov_id:
+			self.curr_mov_id = new_id_mov
+			self.records_to_drop.clear()
+			self.ids.remove_record_btn.hide_widget()
+			self.update_rows()
 
 	def update_rows(self):
 		try:
@@ -324,7 +325,6 @@ class ShowMovementsScreen(Screen):
 		else:
 			self.ids.mov_columns.update_layout(col_names)
 			self.ids.rows_box.update_layout(rows)
-			self.ids.refresh_mov_btn.hide_widget()
 
 	def add_record_to_remove(self, id_record):
 		"""Aggiunge/rimuove l'id corrispondente alla riga selezionata nella tabella, di conseguenza attiva/disattiva

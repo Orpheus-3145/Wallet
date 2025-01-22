@@ -210,10 +210,10 @@ class LayoutDebitoCredito(LayoutInfo):
 		if self.ids.input_deb_cred.id_active_widgets():
 			data_info["deb_cred"] = self.parse_bool(self.ids.input_deb_cred.id_active_widgets(), "debito/credito")
 		
-		if self.ids.input_origine.text or "origine" not in fields_not_mandatory:
+		if self.ids.input_origine.text:
 			data_info["origine"] = self.parse_text(self.ids.input_origine.text, "origine")
 		
-		if self.ids.input_descrizione.text or "descrizione" not in fields_not_mandatory:
+		if self.ids.input_descrizione.text:
 			data_info["descrizione"] = self.parse_text(self.ids.input_descrizione.text, "descrizione")
 		
 		return data_info

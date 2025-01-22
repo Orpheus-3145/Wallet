@@ -20,7 +20,7 @@ BEGIN
     SELECT NOME INTO STRICT table_name 
         FROM w_map.MAP_TABELLE WHERE ID = id_table;
 
-    EXECUTE FORMAT('DELETE FROM %s.%s WHERE ID_MOV = %s','w_data',  table_name, id_mov_to_drop);
+    EXECUTE FORMAT('DELETE FROM w_data.%s WHERE ID_MOV = %s',  table_name, id_mov_to_drop);
 
     DELETE FROM w_data.MOVIMENTI WHERE ID = id_mov_to_drop;
 

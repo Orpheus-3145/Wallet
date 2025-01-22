@@ -12,8 +12,8 @@ from kivy.config import Config
 PATH_ENV_FILE = Tools.get_abs_path("config/wallet.env")
 load_dotenv(PATH_ENV_FILE)
 
-PATH_INI_FILE = Tools.get_abs_path(os.getenv("PATH_INI_FILE", "config/wallet.ini"))
-Config.read(PATH_INI_FILE)
+PATH_KIVY_CONFIG = Tools.get_abs_path(os.getenv("PATH_KIVY_CONFIG", "config/wallet.ini"))
+Config.read(PATH_KIVY_CONFIG)
 
 from kivy.lang import Builder
 from Screens import *
@@ -36,6 +36,13 @@ class WalletApp(App):
 			# generic env vars
 			self.config_info["log_path"] = os.getenv("LOG_PATH", "logs/")
 			self.config_info["log_level"] = int(os.getenv("LOG_LEVEL", "20"))
+			self.config_info["backup_path"] = Tools.get_abs_path(os.getenv("PATH_BACKUP_DIR", "."))
+			self.config_info["host"] = os.getenv("DB_HOST", "localhost")
+			self.config_info["port"] = int(os.getenv("DB_PORT", "6543"))
+			self.config_info["db_name"] = os.getenv("DB_NAME", "wallet")
+			self.config_info["user"] = os.getenv("DB_USER")
+			self.config_info["pwd"] = os.getenv("DB_USER_PWD")
+			self.config_info["auth_mode"] = os.getenv("DB_AUTH_MODE", "scram-sha-256")
 			# kivy data
 			self.config_info["kivy_files"] = [Tools.get_abs_path(kv_file) for kv_file in config["kivy_files"].values()]
 			self.config_info["background_img_path"] = Tools.get_abs_path(config["graphics"]["background_img_path"])
@@ -93,6 +100,18 @@ class WalletApp(App):
 
 	def connect(self, host_db='', port_db='', db_name='', user='', password='', auth_mode=''):
 		self.wallet_instance = Wallet.Wallet(logging)
+		if not db_name:
+			db_name = self.config_info["db_name"]
+		if not user:
+			user = self.config_info["user"]
+		if not password:
+			password = self.config_info["pwd"]
+		if not host_db:
+			host_db = self.config_info["host"]
+		if not port_db:
+			port_db = self.config_info["port"]
+		if not auth_mode:
+			auth_mode = self.config_info["auth_mode"]
 		try:
 			self.wallet_instance.connect(user=user,
 										password=password,

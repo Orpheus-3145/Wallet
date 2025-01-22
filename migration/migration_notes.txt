@@ -15,7 +15,7 @@ V	7. check BK_DATABASE
 V	8. file .py correzione campo IMPORTO di MOVIMENTTI.csv
 V	9. aggiungere altri CHECK nella definizione delle tabelle
 X	10. in mancanza di qlik, script di esportazione dati da postgreSQL -> csv -> drive -> (pc Win) Qlik
-	11. check inserimento debito 1k luglio '24
+V	11. check inserimento debito 1k luglio '24
 V	12. ogni inserimento di numero ha il punto come separatore decimale, rimuovere inserimento di virgole dentro campi testuali per csv protection
 V	13. rimuovere variabile type_mov da ogni INSERT_*.sql e la gestione eccezioni relativa
 V	14. ridefinire tabelle, sp e viste, re-importare i csv
@@ -45,8 +45,3 @@ X	37. creare tabella UTENTI
 X	38. procedure di export e import automatiche (leggono tabella MAP_TABELLE) al posto che leggere un array statico
 V	39. aumentare dimensione font
 V	40. fix login front-end
-
-Alla fine:
-	. vedere se MAP_TABELLE e' aggiornata
-	. rimuovere movimenti TEST
-	. update per patch 2.0
