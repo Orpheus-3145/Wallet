@@ -26,7 +26,7 @@ SQL:
 	|X| unire WALLET_USERS e QLIK_USERS, hashing della password di qlik
 	
 
-	migration notes:
+migration notes:
 		
 		V	1. better primary/foreign key declarations
 		V	2. added DEFAULTS:

@@ -257,7 +257,7 @@ class WalletApp(App):
 	def get_last_n_records(self, id_mov, n_records):
 		try:
 			return self.wallet_instance.get_last_n_records(id_mov, n_records)
-		except SqlError as db_err:
+		except (SqlError, InternalError) as db_err:
 			self.update_log("errore nella lettura del database - trace: %s", 40, str(db_err))
 			raise AppException("Errore database, consulta il log per ulteriori dettagli")
 
