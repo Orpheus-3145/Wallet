@@ -1,6 +1,7 @@
 CREATE OR REPLACE PROCEDURE w_data.SALDA_DEBITO_CREDITO(
     data_mov date,
     id_conto integer,
+		test boolean,
     id_saldo_deb_cred integer[],
     note text DEFAULT '',
     importo real DEFAULT 0
@@ -85,6 +86,10 @@ BEGIN
 		END IF;
 	END IF;
 
+	if test = TRUE THEN
+		note = note || ' |TEST|';
+	END IF;
+
 	-- inserting main mov
 	INSERT INTO w_data.MOVIMENTI(ID_TIPO_MOV, 
 									ID_CONTO,
@@ -92,7 +97,7 @@ BEGIN
 									DATA_MOV,
 									DARE_AVERE,
 									IMPORTO,
-						  			NOTE) 
+									NOTE) 
 	VALUES (id_tipo_mov,
 			id_conto,
 			CURRENT_TIMESTAMP,

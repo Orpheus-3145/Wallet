@@ -26,7 +26,7 @@ BEGIN
 	FOR table_name IN SELECT UNNEST(tables) LOOP
 
 		EXECUTE format( $query$
-			COPY %s
+			\COPY %s
 			FROM %L
 			WITH (
 				FORMAT csv,

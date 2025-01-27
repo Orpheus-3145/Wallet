@@ -169,45 +169,22 @@ class Wallet:
 			raise InternalError(f"Movimento id: {id_mov} non esistente")
 
 		arg_names_list = []
-		proc_args = {}
-		isTest = data_info.pop('isTest')
 
 		if type_mov == "Spesa Varia":
-			arg_names_list = ["data_mov", "id_conto", "importo", "id_tipo_s_varia", "descrizione"]
+			arg_names_list = ["data_mov", "id_conto", "importo", "test", "id_tipo_s_varia", "descrizione"]
 			if "note" in data_info:
 				arg_names_list.append("note")
-				if isTest == True:
-					data_info["note"] += f" -- {self._seq_test_mov}"
-			elif isTest == True:
-				arg_names_list.append("note")
-				data_info["note"] = f" -- {self._seq_test_mov}"
-			
-			if isTest == True:
-				data_info["descrizione"] += f" -- {self._seq_test_mov}"
 
 		elif type_mov == "Spesa Fissa":
 			arg_names_list = ["data_mov", "id_conto", "importo", "descrizione"]
 			if "note" in data_info:
 				arg_names_list.append("note")
-				if isTest == True:
-					data_info["note"] += f" -- {self._seq_test_mov}"
-			elif isTest == True:
-				arg_names_list.append("note")
-				data_info["note"] = f" -- {self._seq_test_mov}"
-			
-			if isTest == True:
-				data_info["descrizione"] += f" -- {self._seq_test_mov}"
 
 		elif type_mov == "Stipendio":
 			arg_names_list = ["data_mov", "id_conto", "importo", "ddl"]
 			if "note" in data_info:
 				arg_names_list.append("note")
-				if isTest == True:
-					data_info["note"] += f" -- {self._seq_test_mov}"
-			elif isTest == True:
-				arg_names_list.append("note")
-				data_info["note"] = f" -- {self._seq_test_mov}"
-			
+
 			if "lordo" in data_info:
 				if "note" not in data_info:
 					arg_names_list.append("note")
@@ -215,96 +192,56 @@ class Wallet:
 				arg_names_list.append("lordo")
 
 			if "rimborso_spese" in data_info:
-				if "lordo" not in data_info:
-					arg_names_list.append("lordo")
-					data_info["lordo"] = 0
 				if "note" not in data_info:
 					arg_names_list.append("note")
 					data_info["note"] = ""
+				if "lordo" not in data_info:
+					arg_names_list.append("lordo")
+					data_info["lordo"] = 0
 				arg_names_list.append("rimborso_spese")
 			
-			if isTest == True:
-				data_info["ddl"] += f" -- {self._seq_test_mov}"
-
 		elif type_mov == "Entrata":
 			arg_names_list = ["data_mov", "id_conto", "importo", "id_tipo_entrata", "descrizione"]
 			if "note" in data_info:
 				arg_names_list.append("note")
-				if isTest == True:
-					data_info["note"] += f" -- {self._seq_test_mov}"
-			elif isTest == True:
-				arg_names_list.append("note")
-				data_info["note"] = f" -- {self._seq_test_mov}"
-			
-			if isTest == True:
-				data_info["descrizione"] += f" -- {self._seq_test_mov}"
 
 		elif type_mov == "Debito - Credito":
 			arg_names_list = ["data_mov", "id_conto", "importo", "deb_cred", "origine", "descrizione"]
 			if "note" in data_info:
 				arg_names_list.append("note")
-				if isTest == True:
-					data_info["note"] += f" -- {self._seq_test_mov}"
-			elif isTest == True:
-				arg_names_list.append("note")
-				data_info["note"] = f" -- {self._seq_test_mov}"
-			
-			if isTest == True:
-				data_info["origine"] += f" -- {self._seq_test_mov}"
-				data_info["descrizione"] += f" -- {self._seq_test_mov}"
 
 		elif type_mov == "Saldo Debito - Credito":
 			arg_names_list = ["data_mov", "id_conto", "id_saldo_deb_cred"]
 			if "note" in data_info:
 				arg_names_list.append("note")
-				if isTest == True:
-					data_info["note"] += f" -- {self._seq_test_mov}"
-			elif isTest == True:
-				arg_names_list.append("note")
-				data_info["note"] = f" -- {self._seq_test_mov}"
 	
 			if "importo" in data_info:
 				if "note" not in data_info:
 					arg_names_list.append("note")
 					data_info["note"] = ""
 				arg_names_list.append("importo")
-	
+ 
 		elif type_mov == "Spesa di Mantenimento":
 			arg_names_list = ["data_mov", "id_conto", "importo", "descrizione"]
 			if "note" in data_info:
 				arg_names_list.append("note")
-				if isTest == True:
-					data_info["note"] += f" -- {self._seq_test_mov}"
-			elif isTest == True:
-				arg_names_list.append("note")
-				data_info["note"] = f" -- {self._seq_test_mov}"
-			
-			if isTest == True:
-				data_info["descrizione"] += f" -- {self._seq_test_mov}"
 
 		elif type_mov == "Spesa di Viaggio":
 			arg_names_list = ["data_mov", "id_conto", "importo", "viaggio", "descrizione"]
-			if isTest == True:
-				data_info["viaggio"] += f" -- {self._seq_test_mov}"
-				data_info["descrizione"] += f" -- {self._seq_test_mov}"
-		
+
 			if "note" in data_info:
 				arg_names_list.append("note")
-				if isTest == True:
-					data_info["note"] += f" -- {self._seq_test_mov}"
-			elif isTest == True:
-				arg_names_list.append("note")
-				data_info["note"] = f" -- {self._seq_test_mov}"
-			
-		# because the order of the arguments matters!
-		for arg in arg_names_list:
-			proc_args[arg] = data_info[arg]
 
-		sql_string = Tools.format_sql_string_pgsql(operation="C", proc_name=proc_name, proc_args=proc_args.keys())
-		self._exec_sql_string(sql_query=sql_string, arguments=proc_args, do_commit=True)
+		sql_string = Tools.format_sql_string_pgsql(operation="C", proc_name=proc_name, proc_args=arg_names_list)
+		self._exec_sql_string(sql_query=sql_string, arguments=data_info, do_commit=True)
 
 	def _exec_sql_string(self, sql_query, arguments={}, do_commit=False, check_return_rows=False):
-		self._logger.debug(f"esecuzione query SQL: '{self.cursor.mogrify(sql_query, arguments).decode('utf-8')}'")
+		try:
+			self._logger.debug(f"esecuzione query SQL: '{self.cursor.mogrify(sql_query, arguments).decode('utf-8')}'")
+		except KeyError:
+			self._logger.error(f"errore logging, argomenti procedura e dati in input non combaciano: '{sql_query}' - args: '{arguments}' inserimento fallito")
+			raise AppException('Errore interno, consulta il log per ulteriori dettagli')
+
 		try:
 			self.cursor.execute(sql_query, (arguments))
 		except (psycopg2.Warning, psycopg2.Error) as error:

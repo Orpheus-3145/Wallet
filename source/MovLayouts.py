@@ -1,82 +1,9 @@
 from DefaultLayouts import *
 from kivy.factory import Factory
 from datetime import datetime, date
-import Tools
-
-class InputParser:
-
-	def parse_text(self, text_input: str, field_name: str):
-		if not text_input.strip():
-			raise WrongInputException(f"Campo '{field_name}' vuoto")
-		
-		return text_input.strip()
-
-	def parse_bool(self, bool_input: str, field_name: str):
-		if not bool_input.strip():
-			raise WrongInputException(f"Campo '{field_name}' vuoto")
-
-		try:
-			return bool(int(bool_input.strip()))
-		
-		except (TypeError, ValueError):
-			raise WrongInputException(f"Campo '{field_name}' non valido: '{bool_input}'")
-
-	def parse_int(self, int_input: str, field_name: str, check_positivity=True):
-		if not int_input.strip():
-			raise WrongInputException(f"Campo '{field_name}' vuoto")
-
-		try:
-			int_value = int(int_input.strip())
-		
-		except (TypeError, ValueError):
-			raise WrongInputException(f"Campo '{field_name}' non valido: '{int_input}'")
-		
-		else:
-			if check_positivity is True and int_value <= 0:
-				raise WrongInputException(f"Campo '{field_name}' nullo o negativo")
-			
-			return int_value
-
-	def parse_float(self, float_input: str, field_name: str, check_positivity=True):
-		if not float_input.strip():
-			raise WrongInputException(f"Campo '{field_name}' vuoto")
-
-		try:
-			float_value = float(float_input.strip())
-		
-		except (TypeError, ValueError):
-			raise WrongInputException(f"Campo '{field_name}' non valido: '{float_input}'")
-		
-		else:
-			if check_positivity is True and float_value <= 0:
-				raise WrongInputException(f"Campo '{field_name}' nullo o negativo")
-
-			return float_value
-
-	def parse_date(self, y_input: str, m_input: str, d_input: str, set_default_values=True):
-		try:
-			if set_default_values is True and not y_input.strip():
-				year = datetime.now().year
-			else:
-				year = int(y_input.strip())
-			
-			if set_default_values is True and not m_input.strip():
-				month = datetime.now().month
-			else:
-				month = int(m_input.strip())
-			
-			if set_default_values is True and not d_input.strip():
-				day = datetime.now().day
-			else:
-				day = int(d_input.strip())
-			
-			return date(year, month, day)
-		
-		except ValueError:
-			raise WrongInputException(f"Data non valida: '{d_input}/{m_input}/{y_input}'")
 
 
-class LayoutInfo(DefaultLayout, BKGrowLayout, InputParser):
+class LayoutInfo(DefaultLayout, BKGrowLayout):
 	def __init__(self, feeder=None, **kw):
 		super().__init__(**kw)
 		self.feeder = feeder        # function to call to get updated data
@@ -91,31 +18,50 @@ class LayoutInfo(DefaultLayout, BKGrowLayout, InputParser):
 class LayoutDate(LayoutInfo):
 
 	def get_data(self):
-		year = self.ids.input_year.text
-		month = self.ids.input_month.text
-		day = self.ids.input_day.text
-		
-		return {"data_mov": self.parse_date(year, month, day)}
+		return {"data_mov": self._parse_date()}
 
 	def refresh_data(self):
 		self.ids.input_day.text = ""
 		self.ids.input_month.text = ""
 		self.ids.input_year.text = ""
 
+	def _parse_date(self, set_default_values=True):
+		y_input = self.ids.input_year.get_text()
+		m_input = self.ids.input_month.get_text()
+		d_input = self.ids.input_day.get_text()
+
+		try:
+			if set_default_values is True and not y_input:
+				year = datetime.now().year
+			else:
+				year = int(y_input)
+			
+			if set_default_values is True and not m_input:
+				month = datetime.now().month
+			else:
+				month = int(m_input)
+			
+			if set_default_values is True and not d_input:
+				day = datetime.now().day
+			else:
+				day = int(d_input)
+			
+			return date(year, month, day)
+		
+		except ValueError:
+			raise WrongInputException(f"Data non valida: '{d_input}/{m_input}/{y_input}'")
+
 
 class LayoutMainMov(LayoutInfo):
 
-	def get_data(self):
+	def get_data(self, fields_to_skip=[]):
 		data_info = {}
-		if self.ids.input_importo.text:
-			data_info["importo"] = self.parse_float(self.ids.input_importo.text, "importo")
-		
-		if self.ids.input_payments.id_active_widgets():
-			data_info["id_conto"] = self.parse_int(self.ids.input_payments.id_active_widgets(), "conto corrente")
-		
+		if self.ids.input_importo.text and "importo" not in fields_to_skip:
+			data_info["importo"] = self.ids.input_importo.get_float()
+		data_info["id_conto"] = self.ids.input_payments.get_id()
+
 		if self.ids.input_note.text:
-			data_info["note"] = self.parse_text(self.ids.input_note.text, "note")
-	
+			data_info["note"] = self.ids.input_note.get_text()
 		return data_info
 
 	def refresh_data(self):
@@ -133,11 +79,8 @@ class LayoutSpesaVaria(LayoutInfo):
 
 	def get_data(self):
 		data_info = {}
-		if self.ids.input_tipo_spesa.id_active_widgets():
-			data_info["id_tipo_s_varia"] = self.parse_int(self.ids.input_tipo_spesa.id_active_widgets(), "tipo di spesa")
-		
-		if self.ids.input_descrizione.text:
-			data_info["descrizione"] = self.parse_text(self.ids.input_descrizione.text, "descrizione")
+		data_info["id_tipo_s_varia"] = self.ids.input_tipo_spesa.get_id()
+		data_info["descrizione"] = self.ids.input_descrizione.get_text()
 		
 		return data_info
 
@@ -154,7 +97,7 @@ class LayoutSpesaVaria(LayoutInfo):
 class LayoutSpesaFissa(LayoutInfo):
 
 	def get_data(self):
-		return {"descrizione": self.parse_text(self.ids.input_descrizione.text, "descrizione")}
+		return {"descrizione": self.ids.input_descrizione.get_text()}
 
 	def refresh_data(self):
 		self.ids.input_descrizione.text = ""
@@ -164,14 +107,13 @@ class LayoutStipendio(LayoutInfo):
 
 	def get_data(self):
 		data_info = {}
-		if self.ids.input_ddl.text:
-			data_info["ddl"] = self.parse_text(self.ids.input_ddl.text, "datore di lavoro")
+		data_info["ddl"] = self.ids.input_ddl.get_text()
 
 		if self.ids.input_lordo.text:
-			data_info["lordo"] = self.parse_float(self.ids.input_lordo.text, "lordo")
+			data_info["lordo"] = self.ids.input_lordo.get_float()
 
 		if self.ids.input_r_spese.text:
-			data_info["rimborso_spese"] = self.parse_float(self.ids.input_r_spese.text, "rimborso_spese")
+			data_info["rimborso_spese"] = self.ids.input_r_spese.get_float()
 		
 		return data_info
 
@@ -185,11 +127,8 @@ class LayoutEntrata(LayoutInfo):
 
 	def get_data(self):
 		data_info = {}
-		if self.ids.input_tipo_entrata.id_active_widgets():
-			data_info["id_tipo_entrata"] = self.parse_int(self.ids.input_tipo_entrata.id_active_widgets(), "tipo di entrata")
-
-		if self.ids.input_descrizione.text:
-			data_info["descrizione"] = self.parse_text(self.ids.input_descrizione.text, "descrizione")
+		data_info["id_tipo_entrata"] = self.ids.input_tipo_entrata.get_id()
+		data_info["descrizione"] = self.ids.input_descrizione.get_text()
 
 		return data_info
 
@@ -207,14 +146,9 @@ class LayoutDebitoCredito(LayoutInfo):
 
 	def get_data(self):
 		data_info = {}
-		if self.ids.input_deb_cred.id_active_widgets():
-			data_info["deb_cred"] = self.parse_bool(self.ids.input_deb_cred.id_active_widgets(), "debito/credito")
-		
-		if self.ids.input_origine.text:
-			data_info["origine"] = self.parse_text(self.ids.input_origine.text, "origine")
-		
-		if self.ids.input_descrizione.text:
-			data_info["descrizione"] = self.parse_text(self.ids.input_descrizione.text, "descrizione")
+		data_info["deb_cred"] = bool(self.ids.input_deb_cred.get_id())
+		data_info["origine"] = self.ids.input_origine.get_text()
+		data_info["descrizione"] = self.ids.input_descrizione.get_text()
 		
 		return data_info
 
@@ -243,7 +177,7 @@ class LayoutSaldoDebitoCredito(LayoutInfo):
 class LayoutSpesaMantenimento(LayoutInfo):
 
 	def get_data(self):
-		return {"descrizione": self.parse_text(self.ids.input_descrizione.text, "descrizione")}
+		return {"descrizione": self.ids.input_descrizione.get_text()}
 
 	def refresh_data(self):
 		self.ids.input_descrizione.text = ""
@@ -253,12 +187,8 @@ class LayoutSpesaViaggio(LayoutInfo):
 
 	def get_data(self):
 		data_info = {}
-
-		if self.ids.input_viaggio.text:
-			data_info["viaggio"] = self.parse_text(self.ids.input_viaggio.text, "viaggio")
-
-		if self.ids.input_descrizione.text:
-			data_info["descrizione"] = self.parse_text(self.ids.input_descrizione.text, "descrizione")
+		data_info["viaggio"] = self.ids.input_viaggio.get_text()
+		data_info["descrizione"] = self.ids.input_descrizione.get_text()
 		
 		return data_info
 

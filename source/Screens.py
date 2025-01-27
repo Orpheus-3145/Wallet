@@ -143,51 +143,21 @@ class InsertMovementScreen(Screen):
 
 	def insert_movement(self):
 		try:
-			movement_data = {'isTest': self.isTest}
+			fields_to_skip = []
+			if self.id_mov == 6:
+				fields_to_skip.append("importo")
+			movement_data = {}
+	
 			movement_data.update(self.ids.layout_date.get_data())
-			movement_data.update(self.ids.layout_main.get_data())
+			movement_data.update(self.ids.layout_main.get_data(fields_to_skip))
+			movement_data['test'] = self.isTest
 			movement_data.update(self.data_layouts[self.id_mov].get_data())
-
-			fields_existance = ["data_mov", "importo", "id_conto"]
-
-			if self.movements[self.id_mov] == "Spesa Varia":
-				fields_existance.extend(["id_tipo_s_varia", "descrizione"])
-
-			elif self.movements[self.id_mov] == "Spesa Fissa":
-				fields_existance.append("descrizione")
-
-			elif self.movements[self.id_mov] == "Stipendio":
-				fields_existance.append("ddl")
-
-			elif self.movements[self.id_mov] == "Entrata":
-				fields_existance.extend(["id_tipo_entrata", "descrizione"])
-
-			elif self.movements[self.id_mov] == "Debito - Credito":
-				fields_existance.extend(["deb_cred", "origine", "descrizione"])
-
-			elif self.movements[self.id_mov] == "Saldo Debito - Credito":
-				fields_existance.remove("importo")
-				fields_existance.append("id_saldo_deb_cred")
-
-			elif self.movements[self.id_mov] == "Spesa di Mantenimento":
-				fields_existance.append("descrizione")
-
-			elif self.movements[self.id_mov] == "Spesa di Viaggio":
-				fields_existance.extend(["viaggio", "descrizione"])
-
-			for field_to_check in fields_existance:
-				try:
-					movement_data[field_to_check]
-				except:
-					raise WrongInputException(f"campo {field_to_check} mancante")
-
 			App.get_running_app().insert_movement(self.id_mov, movement_data)
 
 		except (WrongInputException, AppException) as error:
 			Factory.ErrorPopup(err_text=str(error)).open()
-	
 		else:
-			Factory.SingleChoicePopup(info="MOVIMENTO INSERITO", func_to_exec=self.manager.go_to_main_screen).open()
+			Factory.SingleChoicePopup(info="MOVIMENTO\nINSERITO", func_to_exec=self.manager.go_to_main_screen).open()
 		
 	def updateTestStatus(self):
 		self.isTest = not self.isTest

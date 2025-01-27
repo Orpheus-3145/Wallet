@@ -1,0 +1,19 @@
+NEW FEATURE:
+  | | aggiungere in ShowMovementsScreen gli ultimi n generici movimenti inseriti
+	| | automatismo inserimento spese ed entrate periodiche
+	| | ricostruire BI su https://store.metabase.com/
+	| | esecuzione suono all'inserimento del movimento
+	| | traduzione italiano-inglese (codice sorgente e database)
+	| | aggiungere campo TEST in MOVIMENTI
+	| | cambio da venv a pipenv
+
+MODIFICHE:
+
+BUG:
+
+CHECK:
+
+FORSE:
+
+SQL:
+	

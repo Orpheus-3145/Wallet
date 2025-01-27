@@ -4,19 +4,20 @@ source ../config/wallet.env
 
 SCRIPT_SQL="${PATH_SQL_SCRIPTS}/create_tables.sql"
 psql --port="${DB_PORT}" \
-	--username="postgres" \
+	--username="${USER}" \
+	--dbname="postgres" \
 	--file="${SCRIPT_SQL}"
 
 SCRIPT_SQL="${PATH_SQL_SCRIPTS}/create_views.sql"
 psql --port="${DB_PORT}" \
-	--username="postgres" \
+	--username="${USER}" \
 	--dbname="${DB_NAME}" \
 	--file="${SCRIPT_SQL}" \
 	--no-password
 
 SCRIPT_SQL="${PATH_SQL_SCRIPTS}/create_users.sql"
 psql --port="${DB_PORT}" \
-	--username="postgres" \
+	--username="${USER}" \
 	--dbname="${DB_NAME}" \
 	--file="${SCRIPT_SQL}" \
 	--set=admin_name="${DB_ADMIN}" \
@@ -49,10 +50,10 @@ for sql_file in "${PROCS_SCRIPTS_DIR}"/*.sql; do
 done
 
 # import csv data
-psql --port="${DB_PORT}" \
-	--username="${DB_ADMIN}" \
-	--dbname="${DB_NAME}" \
-	--command="CALL w_data.import_data('${PATH_SQL_DATA_CSV/}/');" \
-	--no-password
+# psql --port="${DB_PORT}" \
+# 	--username="${DB_ADMIN}" \
+# 	--dbname="${DB_NAME}" \
+# 	--command="CALL w_data.import_data('${PATH_SQL_DATA_CSV/}/');" \
+# 	--no-password
 
 unset PGPASSWORD

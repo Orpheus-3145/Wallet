@@ -1,6 +1,7 @@
 from kivy.uix.boxlayout import BoxLayout
 from DefaultWidgets import *
 from AppExceptions import *
+import Tools
 
 
 class Showable(Widget):
@@ -32,21 +33,24 @@ class BorderLayout(DefaultLayout, BKGrowLayout):
 
 
 class InputLayout(DefaultLayout):
-    def __init__(self, f_to_launch=None, **kw):
+    def __init__(self, f_to_launch=None, optional=False, field_name="", **kw):
         super().__init__(**kw)
         self.f_to_launch = f_to_launch
         self.active_widgets = []
-
+        self.optional = optional
+        self.field_name = field_name
+        
     def update_state(self, active_widget):
         self.active_widgets.append(active_widget)
         if self.f_to_launch:
             self.f_to_launch(active_widget.get_alt_id())
 
-    def id_active_widgets(self):
-        if self.active_widgets:
-            return [active_widget.get_alt_id() for active_widget in self.active_widgets]
-        else:
-            return []
+    def get_id(self):
+        if not self.active_widgets and self.optional == False:
+            raise WrongInputException(f"campo {self.field_name} mancante")
+
+        return Tools.list_to_str([active_widget.get_alt_id() for active_widget in self.active_widgets])
+
 
 
 class DynamicLayout(DefaultLayout):
@@ -97,12 +101,15 @@ class ButtonDynamicInputLayout(DynamicLayout, InputLayout):
         if self.f_to_launch:
             self.f_to_launch(btn_instance.get_alt_id())
 
-    def id_active_widgets(self):
-        if self.active_widgets:     # this class can have the list of only 0 or 1 active btn at the same time
-            return str(self.active_widgets[0].get_alt_id())
-        else:
-            return ""
-
+    def get_id(self):
+        if not self.active_widgets and self.optional == False:
+            raise WrongInputException(f"campo {self.field_name} mancante")
+        
+        try:
+            return int(self.active_widgets[0].get_alt_id())
+        except (TypeError, ValueError):
+            raise WrongInputException(f"Campo '{self.field_name}' non valido: '{self.active_widgets[0].get_alt_id()}'")
+    
 
 class TableDynamicInputLayout(DynamicLayout, InputLayout):
 

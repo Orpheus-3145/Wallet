@@ -6,7 +6,7 @@ id|nome|descrizione
 5|STIPENDI|Tabella contenente informazione sugli stipendi percepiti
 6|DEBITI_CREDITI|Tabella che gestisce i prestiti
 7|MAP_SPESE_VARIE|Tabella che mappa i tipi di spese variabili
-8|MAP_PAGAMENTI|Tabella che mappa il modo in cui è stato fatto il movimento
+8|MAP_PAGAMENTI|Tabella che mappa il modo in cui � stato fatto il movimento
 9|UTENTI|Tabella che mappa gli utenti che hanno accesso al DB
 11|ENTRATE|Tabella che memorizza le entrate diverse dagli stipendi
 12|MAP_MOVIMENTI|Tabella che mappa i tipi generici di spese/entrate

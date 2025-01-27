@@ -115,12 +115,6 @@ def format_sql_string_pgsql(operation, table_name="", field_select_list=[], wher
 
 	return sql_string + ';'
 
-# NB fix con $$
-def escape_sql_chars(str_input):
-	"""Esegue l'escaping dei caratteri problematici per le stringe SQL , per esempio il carattere ' """
-	return str(str_input).replace("'", "''")
-
-
 def list_to_str(container):
 	"""Converte in stringa un contenitore passato (list, dict, ...)"""
 	str_elements = ""
@@ -138,6 +132,30 @@ def str_to_list_float(string_list):
 	except (TypeError, ValueError, IndexError):
 		raise ValueError("invalid format [usage: '[a, b, c, ..., k]']")
 
+
+class InputParser:
+
+	def parse_date(self, y_input: str, m_input: str, d_input: str, set_default_values=True):
+		try:
+			if set_default_values is True and not y_input.strip():
+				year = datetime.now().year
+			else:
+				year = int(y_input.strip())
+			
+			if set_default_values is True and not m_input.strip():
+				month = datetime.now().month
+			else:
+				month = int(m_input.strip())
+			
+			if set_default_values is True and not d_input.strip():
+				day = datetime.now().day
+			else:
+				day = int(d_input.strip())
+			
+			return date(year, month, day)
+		
+		except ValueError:
+			raise WrongInputException(f"Data non valida: '{d_input}/{m_input}/{y_input}'")
 
 if __name__ == "__main__":
 	pass
