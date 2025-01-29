@@ -11,7 +11,7 @@ RESET = \x1b[0m
 
 all: run
 
-run: $(PATH_VENV_DIR) $(PATH_BACKUP_DIR) $(PATH_LOG_DIR)
+run: $(PATH_VENV_DIR) $(PATH_BACKUP_DIR) $(PATH_LOG_DIR) $(PATH_SQL_DATA)
 	@source $(PATH_VENV_DIR)/bin/activate && \
 	$(PYTHON) $(PATH_MAIN)
 
@@ -30,6 +30,9 @@ $(PATH_BACKUP_DIR):
 $(PATH_LOG_DIR):
 	@mkdir -p $@
 	@printf "$(GREEN)Log folder created$(RESET)\n"
+
+$(PATH_SQL_DATA):
+	@mkdir -p $(PATH_SQL_DATA)/import $(PATH_SQL_DATA)/export
 
 clean:
 	@rm -rf $(SOURCE_DIR)/__pycache__

@@ -49,11 +49,4 @@ for sql_file in "${PROCS_SCRIPTS_DIR}"/*.sql; do
   fi
 done
 
-# # import csv data
-# psql --port="${DB_PORT}" \
-# 	--username="${DB_ADMIN}" \
-# 	--dbname="${DB_NAME}" \
-# 	--command="CALL w_data.import_data('${PATH_SQL_DATA_CSV/}/');" \
-# 	--no-password
-
 unset PGPASSWORD
