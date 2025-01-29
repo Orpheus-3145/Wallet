@@ -1,5 +1,5 @@
 NEW FEATURE:
-  | | aggiungere in ShowMovementsScreen gli ultimi n generici movimenti inseriti
+	| | aggiungere in ShowMovementsScreen gli ultimi n generici movimenti inseriti
 	| | automatismo inserimento spese ed entrate periodiche
 	| | ricostruire BI su https://store.metabase.com/
 	| | esecuzione suono all'inserimento del movimento
@@ -8,8 +8,11 @@ NEW FEATURE:
 	| | cambio da venv a pipenv
 
 MODIFICHE:
+	| | rimuovere limite interrogazione a 50 record
 
 BUG:
+	| | campo NOTE=None in open deb/cred
+	| | input numerici con virgole non accettati
 
 CHECK:
 

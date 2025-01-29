@@ -43,8 +43,8 @@ class Wallet:
 	def get_map_data(self, info_type):
 		"""Restituisce un dizionario sui tipi di pagamento nel formato {id_pagamento: nome_pagamento}"""
 		_types = {"conti": "MAP_CONTI",
-				  "spese_varie": "MAP_SPESE_VARIE",
-				  "entrate": "MAP_ENTRATE"}
+					"spese_varie": "MAP_SPESE_VARIE",
+					"entrate": "MAP_ENTRATE"}
 		
 		if info_type not in _types:
 			raise InternalError(f"Tabella di map non trovata con valore: {info_type} - disponibili: {str(_types.keys())}")
@@ -52,7 +52,7 @@ class Wallet:
 		sql_string = Tools.format_sql_string_pgsql(operation="S",
 											table_name=_types[info_type],
 											field_select_list=["ID", "DESCRIZIONE"],
-											order_by_dict={"ID": "DESC"})
+											order_by_dict={"DESCRIZIONE": "ASC"})
 		self._exec_sql_string(sql_string, check_return_rows=True)
 		info_data = {}
 		for row in self.cursor:
@@ -74,7 +74,7 @@ class Wallet:
 							join_type='I',
 							join_table="w_data.MOVIMENTI mv",
 							join_dict={"v.ID": "mv.ID"},
-							order_by_dict={"mv.DATA_MOV": "DESC"})
+							order_by_dict={"mv.DATA_MOV": "DESC", "mv.ID": "DESC"})
 		self._exec_sql_string(sql_query=sql_query,check_return_rows=True);
 
 		column_list = []        # lista dei nomi dei campi
@@ -146,20 +146,20 @@ class Wallet:
 	# WRITE DATABASE
 	def drop_record(self, id_record):
 		sql_query = Tools.format_sql_string_pgsql(operation='C',
-										   proc_name="REMOVE_MOVEMENT",
-										   proc_args=['id_record'])
+											 proc_name="REMOVE_MOVEMENT",
+											 proc_args=['id_record'])
 		self._exec_sql_string(sql_query, {'id_record': id_record}, True)
 
 	def drop_test_mov(self):
 		sql_query = Tools.format_sql_string_pgsql(operation='C',
-										   proc_name="DROP_TESTS",
-										   proc_args=['test_sequence_raw'])
+											 proc_name="DROP_TESTS",
+											 proc_args=['test_sequence_raw'])
 		self._exec_sql_string(sql_query, {'test_sequence_raw': self._seq_test_mov}, True)
 
 	def turn_deb_cred_into_mov(self, id_record):
 		sql_query = Tools.format_sql_string_pgsql(operation='C',
-										   proc_name="TURN_INTO_MOVEMENT",
-										   proc_args=['id_record'])
+											 proc_name="TURN_INTO_MOVEMENT",
+											 proc_args=['id_record'])
 		self._exec_sql_string(sql_query, {'id_record': id_record}, True)
 
 	def insert_movement(self, id_mov, data_info):
@@ -176,12 +176,12 @@ class Wallet:
 				arg_names_list.append("note")
 
 		elif type_mov == "Spesa Fissa":
-			arg_names_list = ["data_mov", "id_conto", "importo", "descrizione"]
+			arg_names_list = ["data_mov", "id_conto", "importo", "test", "descrizione"]
 			if "note" in data_info:
 				arg_names_list.append("note")
 
 		elif type_mov == "Stipendio":
-			arg_names_list = ["data_mov", "id_conto", "importo", "ddl"]
+			arg_names_list = ["data_mov", "id_conto", "importo", "test", "ddl"]
 			if "note" in data_info:
 				arg_names_list.append("note")
 
@@ -201,17 +201,17 @@ class Wallet:
 				arg_names_list.append("rimborso_spese")
 			
 		elif type_mov == "Entrata":
-			arg_names_list = ["data_mov", "id_conto", "importo", "id_tipo_entrata", "descrizione"]
+			arg_names_list = ["data_mov", "id_conto", "importo", "test", "id_tipo_entrata", "descrizione"]
 			if "note" in data_info:
 				arg_names_list.append("note")
 
 		elif type_mov == "Debito - Credito":
-			arg_names_list = ["data_mov", "id_conto", "importo", "deb_cred", "origine", "descrizione"]
+			arg_names_list = ["data_mov", "id_conto", "importo", "test", "deb_cred", "origine", "descrizione"]
 			if "note" in data_info:
 				arg_names_list.append("note")
 
 		elif type_mov == "Saldo Debito - Credito":
-			arg_names_list = ["data_mov", "id_conto", "id_saldo_deb_cred"]
+			arg_names_list = ["data_mov", "id_conto", "test", "id_saldo_deb_cred"]
 			if "note" in data_info:
 				arg_names_list.append("note")
 	
@@ -222,12 +222,12 @@ class Wallet:
 				arg_names_list.append("importo")
  
 		elif type_mov == "Spesa di Mantenimento":
-			arg_names_list = ["data_mov", "id_conto", "importo", "descrizione"]
+			arg_names_list = ["data_mov", "id_conto", "importo", "test", "descrizione"]
 			if "note" in data_info:
 				arg_names_list.append("note")
 
 		elif type_mov == "Spesa di Viaggio":
-			arg_names_list = ["data_mov", "id_conto", "importo", "viaggio", "descrizione"]
+			arg_names_list = ["data_mov", "id_conto", "importo", "test", "viaggio", "descrizione"]
 
 			if "note" in data_info:
 				arg_names_list.append("note")
@@ -243,7 +243,7 @@ class Wallet:
 			raise AppException('Errore interno, consulta il log per ulteriori dettagli')
 
 		try:
-			self.cursor.execute(sql_query, (arguments))
+			self.cursor.execute(sql_query, arguments)
 		except (psycopg2.Warning, psycopg2.Error) as error:
 			self.connection.rollback()
 			raise SqlError(f"errore query SQL - trace: {str(error)}")
