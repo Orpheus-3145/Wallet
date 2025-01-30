@@ -2,8 +2,8 @@
 logs/
 backup/
 versions/
-sql/data/export
-sql/data/import
+sql/data/export/
+sql/data/import/
 config/
 
 # Distribution / packaging
