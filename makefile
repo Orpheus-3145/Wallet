@@ -1,4 +1,5 @@
 -include config/wallet.env
+-include config/database.env
 
 PYTHON = $(PATH_VENV_DIR)/bin/python3.12
 PIP = $(PATH_VENV_DIR)/bin/pip3.12
