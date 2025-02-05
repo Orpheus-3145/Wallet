@@ -4,7 +4,6 @@
 PYTHON = $(PATH_VENV_DIR)/bin/python3.12
 PIP = $(PATH_VENV_DIR)/bin/pip3.12
 
-
 GREEN = \x1b[32;01m
 YELLOW = \x1b[33;01m
 BOLD = \033[1m
