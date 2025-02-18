@@ -4,8 +4,9 @@ NEW FEATURE:
 	| | ricostruire BI su https://store.metabase.com/
 	| | esecuzione suono all'inserimento del movimento
 	| | traduzione italiano-inglese (codice sorgente e database)
-	| | aggiungere campo TEST in MOVIMENTI
+	|V| aggiungere campo TEST in MOVIMENTI
 	| | cambio da venv a pipenv
+	| | opzione per esportazione in CSV oltre che backup
 
 MODIFICHE:
 	| | rimuovere limite interrogazione a 50 record
