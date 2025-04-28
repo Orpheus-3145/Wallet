@@ -23,6 +23,10 @@ BEGIN
 	
 	SET search_path TO w_data, w_map;
 
+	if RIGHT(csv_folder, 1) <> '/' THEN
+		csv_folder = csv_folder || '/';
+	END IF;
+
 	FOR table_name IN SELECT UNNEST(tables) LOOP
 		
 		EXECUTE format( $query$

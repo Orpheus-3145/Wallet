@@ -34,7 +34,7 @@ class WalletApp(App):
 	def read_config(self, config):
 		try:
 			# generic env vars
-			self.config_info["log_path"] = os.getenv("LOG_PATH", "logs/")
+			self.config_info["log_path"] = os.getenv("PATH_LOG_DIR", "logs/")
 			self.config_info["log_level"] = int(os.getenv("LOG_LEVEL", "20"))
 			self.config_info["backup_path"] = Tools.get_abs_path(os.getenv("PATH_BACKUP_DIR", "."))
 			self.config_info["host"] = os.getenv("DB_HOST", "localhost")

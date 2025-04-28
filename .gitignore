@@ -4,6 +4,7 @@ backup/
 versions/
 sql/data/export/
 sql/data/import/
+export/
 config/database.env
 
 # Distribution / packaging
@@ -36,9 +37,6 @@ env/
 .venv/
 venv.bak/
 env.bak/
-
-# Spyder project settings
-.spyproject
 
 # Jupyter Notebook
 .ipynb_checkpoints

@@ -30,8 +30,13 @@ PROCS_SCRIPTS_DIR="${PATH_SQL_SCRIPTS}/procedures"
 
 if [ ! -d "${PROCS_SCRIPTS_DIR}" ]; then
   echo "error: missing directory ${PROCS_SCRIPTS_DIR}"
-  unset PGPASSWORD
-  exit 1
+	
+	# if the script is run on the same process unset the password
+	if [ $? -ne 0 ]; then
+		unset PGPASSWORD
+	fi
+
+	exit 1
 fi
 
 for sql_file in "${PROCS_SCRIPTS_DIR}"/*.sql; do
@@ -43,10 +48,20 @@ for sql_file in "${PROCS_SCRIPTS_DIR}"/*.sql; do
 		--no-password
 
   if [ $? -ne 0 ]; then
-	echo "error while running ${sql_file}. Interrupt"
-  	unset PGPASSWORD
-	exit 1
+		echo "error while running ${sql_file}. Interrupt"
+	
+		# if the script is run on the same process unset the password
+		if [ $? -ne 0 ]; then
+			unset PGPASSWORD
+		fi
+
+		exit 1
   fi
 done
 
 unset PGPASSWORD
+
+# creating table that stores csv exports
+sudo mkdir -p ${WALLET_CSV_FOLDER}
+sudo chmod 777 ${WALLET_CSV_FOLDER}
+sudo chown -R postgres:postgres ${WALLET_CSV_FOLDER}

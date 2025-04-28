@@ -34,6 +34,9 @@ $(PATH_LOG_DIR):
 $(PATH_SQL_DATA):
 	@mkdir -p $(PATH_SQL_DATA)/import $(PATH_SQL_DATA)/export
 
+export_csv: $(PATH_SQL_DATA)
+	sudo ./bin/export_data.sh
+
 clean:
 	@rm -rf $(SOURCE_DIR)/__pycache__
 	@rm -rf $(PATH_VENV_DIR)
