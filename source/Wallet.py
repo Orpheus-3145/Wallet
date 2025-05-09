@@ -35,7 +35,7 @@ class Wallet:
 
 	def backup_database(self):
 		try:
-			subprocess.run(["bash", os.getenv("PATH_SCRIPT_BAKUP")], check=True)
+			subprocess.run(["bash", os.getenv("PATH_SCRIPT_BACKUP")], check=True)
 		except Exception as err:
 			raise InternalError(f"Errore creazione backup: {str(err)}")
 

@@ -6,7 +6,7 @@ NEW FEATURE:
 	| | traduzione italiano-inglese (codice sorgente e database)
 	|V| aggiungere campo TEST in MOVIMENTI
 	| | cambio da venv a pipenv
-	| | opzione per esportazione in CSV oltre che backup
+	|V| opzione per esportazione in CSV oltre che backup
 
 MODIFICHE:
 	| | rimuovere limite interrogazione a 50 record

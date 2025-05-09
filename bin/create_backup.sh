@@ -16,7 +16,11 @@ pg_dump --port "${DB_PORT}"             \
 
 if [ $? -ne 0 ]; then
 	echo "Errore durante il backup del database: ${DB_NAME}"
-	exit 1
+else
+	echo "Backup completato con successo: ${BACKUP_FILE}"
 fi
 
-echo "Backup completato con successo: ${BACKUP_FILE}"
+# if the script is run on the same process unset the password
+if [[ "$0" == "${SHELL}" ]]; then
+	unset PGPASSWORD
+fi

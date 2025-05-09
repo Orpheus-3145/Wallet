@@ -59,7 +59,10 @@ for sql_file in "${PROCS_SCRIPTS_DIR}"/*.sql; do
   fi
 done
 
-unset PGPASSWORD
+# if the script is run on the same process unset the password
+if [ $? -ne 0 ]; then
+	unset PGPASSWORD
+fi
 
 # creating table that stores csv exports
 sudo mkdir -p ${WALLET_CSV_FOLDER}
