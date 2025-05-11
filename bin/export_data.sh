@@ -3,7 +3,7 @@
 source "${WALLET_DIR}/config/wallet.env"
 source "${WALLET_DIR}/config/database.env"
 
-DATA_FOLDER="${DB_NAME}-csv-$(date +%Y%m%d_%H%M%S)"
+DATA_FOLDER="${DB_NAME}-csv-$(date +%d%m%Y_%H%M%S)"
 TMP_CSV_DATA="${WALLET_CSV_FOLDER}/${DATA_FOLDER}"
 # make tmp folder to give later ownership to #USER
 sudo -u ${MAIN_USER_DB} mkdir -p ${TMP_CSV_DATA}
