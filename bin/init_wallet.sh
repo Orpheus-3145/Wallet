@@ -65,6 +65,6 @@ if [ $? -ne 0 ]; then
 fi
 
 # creating table that stores csv exports
-sudo mkdir -p ${WALLET_CSV_FOLDER}
-sudo chmod 777 ${WALLET_CSV_FOLDER}
-sudo chown -R postgres:postgres ${WALLET_CSV_FOLDER}
+sudo mkdir -p ${WALLET_CSV_FOLDER_PG}
+sudo chmod 777 ${WALLET_CSV_FOLDER_PG}
+sudo chown -R postgres:postgres ${WALLET_CSV_FOLDER_PG}
