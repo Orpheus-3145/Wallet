@@ -1,6 +1,6 @@
 from kivy.uix.boxlayout import BoxLayout
 from DefaultWidgets import *
-from AppExceptions import *
+from Exceptions import *
 import Tools
 
 

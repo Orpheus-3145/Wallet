@@ -2,7 +2,7 @@ import psycopg2                         # info: https://www.psycopg.org/docs/usa
 import subprocess
 import os
 
-from AppExceptions import *
+from Exceptions import *
 import Tools                            # funzioni generiche di supporto
 
 

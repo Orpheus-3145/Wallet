@@ -6,6 +6,7 @@ source "../config/wallet.env"
 source "../config/database.env"
 
 CSV_DATA="${DB_NAME}-csv-$(date +%d%m%Y_%H%M%S)"
+WALLET_CSV_FOLDER_PG="/var/lib/pgsql/data_wallet/export"
 TMP_CSV_DATA="${WALLET_CSV_FOLDER_PG}/${CSV_DATA}"
 
 # make tmp folder to give later ownership to #USER

@@ -1,6 +1,8 @@
 #!/bin/bash
 
 source ../config/wallet.env
+WALLET_CSV_FOLDER_PG="/var/lib/pgsql/data_wallet/export"
+PATH_SQL_SCRIPTS="${WALLET_DIR}/sql/scripts/pgSQL"
 
 SCRIPT_SQL="${PATH_SQL_SCRIPTS}/create_tables.sql"
 psql --port="${DB_PORT}" \

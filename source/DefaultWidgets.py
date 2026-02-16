@@ -5,7 +5,7 @@ from kivy.properties import ObjectProperty
 from kivy.properties import ListProperty
 from kivy.uix.button import Button
 from kivy.uix.scrollview import ScrollView
-from AppExceptions import *
+from Exceptions import *
 
 
 class BKG(Widget):

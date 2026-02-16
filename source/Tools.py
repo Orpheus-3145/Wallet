@@ -9,7 +9,7 @@ class WrongInputSqlFormat(Exception):
 
 	def __str__(self):
 		return self.error_text
-	
+
 
 def convert_to_float(str_number):
 	"""Questa funzione riceve una stringa che rappresenta un float e, se presenti virgole, le sostituisce con i punti;
@@ -58,7 +58,7 @@ def format_sql_string_pgsql(operation, table_name="", field_select_list=[], wher
 		if join_dict and join_table and join_type in _join_types_dict:
 			fields_to_join = " AND ".join("{} = {}".format(key, value) for key, value in join_dict.items())
 			sql_string = f"{sql_string} {_join_types_dict.get(join_type)} JOIN {join_table} ON {fields_to_join}"
-		
+
 		if where_dict:
 			fields_to_filter = " AND ".join("{} = {}".format(key, value) for key, value in where_dict.items())
 			sql_string = f"{sql_string} WHERE {fields_to_filter}"
@@ -73,10 +73,10 @@ def format_sql_string_pgsql(operation, table_name="", field_select_list=[], wher
 	elif operation == 'U':
 		fields_to_update = ""
 		fields_to_filter = ""
-		
+
 		if not update_dict:
 			raise WrongInputSqlFormat("Non è stata fornita la lista dei campi da modificare")
-		
+
 		fields_to_update = ", ".join("{} = {}".format(key, value) for key, value in update_dict.items())
 		sql_string = f"UPDATE {table_name} SET {fields_to_update}"
 
@@ -92,15 +92,15 @@ def format_sql_string_pgsql(operation, table_name="", field_select_list=[], wher
 
 		if not insert_dict:
 			raise WrongInputSqlFormat("Non è stata fornita la lista dei campi da modificare oppure il tipo non è corretto, deve essere dict")
-	   
+
 		fields_to_insert = ", ".join(insert_dict.keys())  # elenco campi da inserire
 		values_to_insert = ", ".join(insert_dict.values())  # elenco campi da inserire
-		
+
 		sql_string = f"INSERT INTO {table_name} ({fields_to_insert} VALUES ({values_to_insert}))"
 
 	elif operation == 'D':
 		sql_string = f"DELETE {table_name}"
-		
+
 		if where_dict:
 			fields_to_filter = " AND ".join("{} = {}".format(key, value) for key, value in where_dict.items())
 			sql_string = f"{sql_string} WHERE {fields_to_filter}"
@@ -134,7 +134,6 @@ def str_to_list_float(string_list):
 
 
 class InputParser:
-
 	def parse_date(self, y_input: str, m_input: str, d_input: str, set_default_values=True):
 		try:
 			if set_default_values is True and not y_input.strip():
